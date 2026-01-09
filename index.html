@@ -285,6 +285,15 @@
       };
 
       const startNewGame = () => {
+        // Stop any playing audio before starting new game
+        if (ytPlayer && playerReady) {
+          try {
+            ytPlayer.stopVideo();
+          } catch (error) {
+            console.log('Error stopping video:', error);
+          }
+        }
+        
         let availableSongs = SONGS.filter(song => 
           !playedSongs.some(played => 
             played.title === song.title && played.artist === song.artist
@@ -670,6 +679,17 @@
                   <p className="text-sm text-green-600 mb-4">
                     You guessed it in {guesses.length} {guesses.length === 1 ? 'try' : 'tries'}!
                   </p>
+                  {showVideo && playerReady && (
+                    <div className="mb-4 p-3 bg-green-50 rounded-lg">
+                      <p className="text-sm text-green-700 mb-2">🎵 Audio still playing - enjoy the song!</p>
+                      <button
+                        onClick={toggleAudio}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors"
+                      >
+                        {isPlaying ? '⏸️ Pause' : '▶️ Play'}
+                      </button>
+                    </div>
+                  )}
                   <button
                     onClick={startNewGame}
                     className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors flex items-center gap-2 mx-auto"
