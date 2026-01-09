@@ -484,7 +484,7 @@
                 )}
               </div>
 
-              {audioUnlocked && !gameWon && !gameLost && (
+              {(audioUnlocked || gameWon || gameLost) && (
                 <div className="mb-4">
                   {previewUrl ? (
                     <>
@@ -503,68 +503,72 @@
                         </div>
                       ) : null}
                       
-                      <div className="w-full px-6 py-12 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white text-center">
-                        <div className="mb-4">
-                          <Music className={`w-16 h-16 mx-auto ${isPlaying ? 'animate-pulse' : ''}`} />
-                        </div>
-                        <h3 className="text-xl font-bold mb-2">Audio Hint Unlocked!</h3>
-                        <p className="text-sm opacity-90 mb-4">
-                          {!showVideo ? 'Click to reveal and play' : isPlaying ? 'Now playing...' : 'Click to play audio'}
-                        </p>
-                        <button
-                          onClick={() => {
-                            if (!showVideo) {
-                              setShowVideo(true);
-                              // Give it a moment for the player to initialize
-                              setTimeout(() => {
-                                console.log('Video unlocked, player should be initializing');
-                              }, 500);
-                            } else {
-                              toggleAudio();
-                            }
-                          }}
-                          disabled={showVideo && !playerReady}
-                          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-                            showVideo && !playerReady
-                              ? 'bg-white/50 text-purple-400 cursor-wait'
-                              : 'bg-white text-purple-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          {!showVideo ? '🔓 Unlock Audio' : !playerReady ? '⏳ Loading...' : isPlaying ? '⏸️ Pause' : '▶️ Play Audio'}
-                        </button>
-                        
-                        {showVideo && playerReady && (
-                          <div className="mt-4 px-4">
-                            <div className="flex items-center gap-3">
-                              <span className="text-sm opacity-75">🔇</span>
-                              <input
-                                type="range"
-                                min="0"
-                                max="100"
-                                value={volume}
-                                onChange={handleVolumeChange}
-                                className="flex-1 h-2 bg-white/30 rounded-lg appearance-none cursor-pointer"
-                                style={{
-                                  accentColor: 'white'
-                                }}
-                              />
-                              <span className="text-sm opacity-75">🔊</span>
-                              <span className="text-xs bg-white/20 px-2 py-1 rounded min-w-[3rem] text-center">
-                                {volume}%
-                              </span>
-                            </div>
+                      {!gameWon && !gameLost && (
+                        <div className="w-full px-6 py-12 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white text-center">
+                          <div className="mb-4">
+                            <Music className={`w-16 h-16 mx-auto ${isPlaying ? 'animate-pulse' : ''}`} />
                           </div>
-                        )}
-                      </div>
+                          <h3 className="text-xl font-bold mb-2">Audio Hint Unlocked!</h3>
+                          <p className="text-sm opacity-90 mb-4">
+                            {!showVideo ? 'Click to reveal and play' : isPlaying ? 'Now playing...' : 'Click to play audio'}
+                          </p>
+                          <button
+                            onClick={() => {
+                              if (!showVideo) {
+                                setShowVideo(true);
+                                // Give it a moment for the player to initialize
+                                setTimeout(() => {
+                                  console.log('Video unlocked, player should be initializing');
+                                }, 500);
+                              } else {
+                                toggleAudio();
+                              }
+                            }}
+                            disabled={showVideo && !playerReady}
+                            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                              showVideo && !playerReady
+                                ? 'bg-white/50 text-purple-400 cursor-wait'
+                                : 'bg-white text-purple-600 hover:bg-gray-100'
+                            }`}
+                          >
+                            {!showVideo ? '🔓 Unlock Audio' : !playerReady ? '⏳ Loading...' : isPlaying ? '⏸️ Pause' : '▶️ Play Audio'}
+                          </button>
+                          
+                          {showVideo && playerReady && (
+                            <div className="mt-4 px-4">
+                              <div className="flex items-center gap-3">
+                                <span className="text-sm opacity-75">🔇</span>
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max="100"
+                                  value={volume}
+                                  onChange={handleVolumeChange}
+                                  className="flex-1 h-2 bg-white/30 rounded-lg appearance-none cursor-pointer"
+                                  style={{
+                                    accentColor: 'white'
+                                  }}
+                                />
+                                <span className="text-sm opacity-75">🔊</span>
+                                <span className="text-xs bg-white/20 px-2 py-1 rounded min-w-[3rem] text-center">
+                                  {volume}%
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                       
-                      {foundTrackInfo && (
+                      {foundTrackInfo && !gameWon && !gameLost && (
                         <div className="text-xs text-gray-500 text-center mt-2">
                           <p className="italic">Audio hint available - listen without spoilers!</p>
                         </div>
                       )}
-                      <p className="text-xs text-gray-500 text-center mt-1">
-                        Audio only - no visual clues!
-                      </p>
+                      {!gameWon && !gameLost && (
+                        <p className="text-xs text-gray-500 text-center mt-1">
+                          Audio only - no visual clues!
+                        </p>
+                      )}
                     </>
                   ) : loadingAudio ? (
                     <div className="w-full px-6 py-4 rounded-lg bg-gray-200 text-gray-600 flex items-center justify-center gap-3">
@@ -572,13 +576,15 @@
                       Loading...
                     </div>
                   ) : (
-                    <div className="w-full px-6 py-4 rounded-lg bg-yellow-100 text-yellow-800 text-sm">
-                      <p className="font-semibold mb-2">🎵 No Preview Available</p>
-                      {searchError && (
-                        <p className="text-xs mb-2">{searchError}</p>
-                      )}
-                      <p className="text-xs mt-2 font-semibold">Keep guessing based on the artwork and hint!</p>
-                    </div>
+                    !gameWon && !gameLost && (
+                      <div className="w-full px-6 py-4 rounded-lg bg-yellow-100 text-yellow-800 text-sm">
+                        <p className="font-semibold mb-2">🎵 No Preview Available</p>
+                        {searchError && (
+                          <p className="text-xs mb-2">{searchError}</p>
+                        )}
+                        <p className="text-xs mt-2 font-semibold">Keep guessing based on the artwork and hint!</p>
+                      </div>
+                    )
                   )}
                 </div>
               )}
