@@ -147,6 +147,7 @@
       const [showVideo, setShowVideo] = useState(false);
       const [playerReady, setPlayerReady] = useState(false);
       const [ytPlayer, setYtPlayer] = useState(null);
+      const [volume, setVolume] = useState(50);
       const audioRef = useRef(null);
       const playerRef = useRef(null);
       const MAX_GUESSES = 6;
@@ -185,6 +186,8 @@
                 console.log('Player ready');
                 setPlayerReady(true);
                 setYtPlayer(event.target);
+                // Set initial volume
+                event.target.setVolume(volume);
               },
               onStateChange: (event) => {
                 // Track playing state
@@ -377,6 +380,14 @@
         }
       };
 
+      const handleVolumeChange = (e) => {
+        const newVolume = parseInt(e.target.value);
+        setVolume(newVolume);
+        if (ytPlayer && playerReady) {
+          ytPlayer.setVolume(newVolume);
+        }
+      };
+
       useEffect(() => {
         const handleClickOutside = (e) => {
           if (!e.target.closest('.autocomplete-container')) {
@@ -512,6 +523,29 @@
                         >
                           {!showVideo ? '🔓 Unlock Audio' : !playerReady ? '⏳ Loading...' : isPlaying ? '⏸️ Pause' : '▶️ Play Audio'}
                         </button>
+                        
+                        {showVideo && playerReady && (
+                          <div className="mt-4 px-4">
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm opacity-75">🔇</span>
+                              <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                value={volume}
+                                onChange={handleVolumeChange}
+                                className="flex-1 h-2 bg-white/30 rounded-lg appearance-none cursor-pointer"
+                                style={{
+                                  accentColor: 'white'
+                                }}
+                              />
+                              <span className="text-sm opacity-75">🔊</span>
+                              <span className="text-xs bg-white/20 px-2 py-1 rounded min-w-[3rem] text-center">
+                                {volume}%
+                              </span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       
                       {foundTrackInfo && (
