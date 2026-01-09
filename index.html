@@ -176,12 +176,27 @@
             playerVars: {
               controls: 1,
               modestbranding: 1,
-              rel: 0
+              rel: 0,
+              enablejsapi: 1,
+              origin: window.location.origin
             },
             events: {
               onReady: (event) => {
+                console.log('Player ready');
                 setPlayerReady(true);
                 setYtPlayer(event.target);
+              },
+              onStateChange: (event) => {
+                // Track playing state
+                if (event.data === window.YT.PlayerState.PLAYING) {
+                  setIsPlaying(true);
+                } else if (event.data === window.YT.PlayerState.PAUSED || event.data === window.YT.PlayerState.ENDED) {
+                  setIsPlaying(false);
+                }
+              },
+              onError: (event) => {
+                console.error('YouTube player error:', event);
+                setSearchError('Error loading audio. Please try refreshing the page.');
               }
             }
           });
@@ -343,14 +358,22 @@
       };
 
       const toggleAudio = () => {
-        if (!ytPlayer || !playerReady) return;
+        if (!ytPlayer || !playerReady) {
+          console.log('Player not ready yet');
+          return;
+        }
 
-        if (isPlaying) {
-          ytPlayer.pauseVideo();
-          setIsPlaying(false);
-        } else {
-          ytPlayer.playVideo();
-          setIsPlaying(true);
+        try {
+          if (isPlaying) {
+            ytPlayer.pauseVideo();
+            setIsPlaying(false);
+          } else {
+            ytPlayer.playVideo();
+            setIsPlaying(true);
+          }
+        } catch (error) {
+          console.error('Error controlling player:', error);
+          setSearchError('Error playing audio. Try clicking again.');
         }
       };
 
@@ -472,13 +495,22 @@
                           onClick={() => {
                             if (!showVideo) {
                               setShowVideo(true);
+                              // Give it a moment for the player to initialize
+                              setTimeout(() => {
+                                console.log('Video unlocked, player should be initializing');
+                              }, 500);
                             } else {
                               toggleAudio();
                             }
                           }}
-                          className="px-6 py-3 rounded-lg font-semibold transition-all bg-white text-purple-600 hover:bg-gray-100"
+                          disabled={showVideo && !playerReady}
+                          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                            showVideo && !playerReady
+                              ? 'bg-white/50 text-purple-400 cursor-wait'
+                              : 'bg-white text-purple-600 hover:bg-gray-100'
+                          }`}
                         >
-                          {!showVideo ? '🔓 Unlock Audio' : isPlaying ? '⏸️ Pause' : '▶️ Play Audio'}
+                          {!showVideo ? '🔓 Unlock Audio' : !playerReady ? '⏳ Loading...' : isPlaying ? '⏸️ Pause' : '▶️ Play Audio'}
                         </button>
                       </div>
                       
