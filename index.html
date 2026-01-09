@@ -494,6 +494,18 @@
                 {renderArtwork()}
               </div>
 
+              {gameWon && (
+                <div className="mb-4">
+                  <button
+                    onClick={startNewGame}
+                    className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors flex items-center justify-center gap-2"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Play Again
+                  </button>
+                </div>
+              )}
+
               <div className="flex items-center justify-between mb-4">
                 <div className="text-sm text-gray-600">
                   Guesses: {guesses.length}/{MAX_GUESSES}
@@ -743,13 +755,6 @@
                       <p className="text-sm text-green-700">⏳ Loading your reward...</p>
                     </div>
                   ) : null}
-                  <button
-                    onClick={startNewGame}
-                    className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors flex items-center gap-2 mx-auto"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    Play Again
-                  </button>
                 </div>
               )}
 
