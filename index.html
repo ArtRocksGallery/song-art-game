@@ -601,7 +601,10 @@
                           normalizedGuess === `${normalizedArtist} ${normalizedTitle}` ||
                           (normalizedGuess.includes(normalizedTitle) && normalizedGuess.includes(normalizedArtist));
 
-        const newGuesses = [...guesses, { text: guess, correct: isCorrect }];
+        // Check if artist was guessed correctly (but not the song)
+        const artistMatch = !isCorrect && normalizedGuess.includes(normalizedArtist);
+
+        const newGuesses = [...guesses, { text: guess, correct: isCorrect, artistMatch }];
         setGuesses(newGuesses);
 
         if (isCorrect) {
@@ -854,9 +857,40 @@
                 </div>
               )}
 
+              {/* Guess indicator boxes */}
+              <div className="flex items-center justify-center gap-2 mb-4">
+                {Array.from({ length: MAX_GUESSES }).map((_, idx) => {
+                  const guess = guesses[idx];
+                  let bgColor = 'bg-gray-200'; // neutral/unused
+                  let textColor = 'text-gray-400';
+                  
+                  if (guess) {
+                    if (guess.correct) {
+                      bgColor = 'bg-green-500';
+                      textColor = 'text-white';
+                    } else if (guess.artistMatch) {
+                      bgColor = 'bg-yellow-400';
+                      textColor = 'text-yellow-900';
+                    } else {
+                      bgColor = 'bg-red-500';
+                      textColor = 'text-white';
+                    }
+                  }
+                  
+                  return (
+                    <div
+                      key={idx}
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg ${bgColor} ${textColor} transition-colors duration-300`}
+                    >
+                      {idx + 1}
+                    </div>
+                  );
+                })}
+              </div>
+              
               <div className="flex items-center justify-between mb-4">
                 <div className="text-sm text-gray-600">
-                  Guesses: {guesses.length}/{MAX_GUESSES}
+                  {MAX_GUESSES - guesses.length} {MAX_GUESSES - guesses.length === 1 ? 'guess' : 'guesses'} remaining
                 </div>
                 {audioUnlocked && (
                   <div className="text-sm text-green-600 font-semibold">
