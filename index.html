@@ -8,6 +8,56 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- MIDI Player -->
+  <script src="https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/html-midi-player@1.5.0"></script>
+  <style>
+    /* Custom MIDI player styling */
+    midi-player {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    midi-player::part(control-panel) {
+      background: linear-gradient(to right, #7c3aed, #db2777);
+      border-radius: 8px;
+      padding: 8px;
+    }
+    midi-player::part(play-button) {
+      color: white;
+      border: none;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      transition: background 0.2s;
+    }
+    midi-player::part(play-button):hover {
+      background: rgba(255,255,255,0.3);
+    }
+    midi-player::part(time) {
+      color: white;
+      font-family: monospace;
+    }
+    midi-visualizer {
+      display: block;
+      width: 100%;
+      height: 150px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #1f2937;
+    }
+    midi-visualizer svg {
+      width: 100%;
+      height: 100%;
+    }
+    midi-visualizer svg rect.note {
+      fill: #a855f7;
+      stroke: #7c3aed;
+      stroke-width: 1;
+    }
+    midi-visualizer svg rect.note.active {
+      fill: #f472b6;
+      stroke: #db2777;
+    }
+  </style>
 </head>
 <body>
   <div id="root"></div>
@@ -61,14 +111,16 @@
       </svg>
     );
 
-    // SONGS array - update image and video paths to match your hosted files
+    // SONGS array - update paths to match your hosted files
+    // Use 'midi' for MIDI files, 'youtubeId' as fallback for songs without MIDI
     const SONGS = [
       {
         title: "Bohemian Rhapsody",
         artist: "Queen",
         image: "images/bohemian-rhapsody.jpg",
         video: "videos/bohemian-rhapsody.mp4",
-        youtubeId: "fJ9rUzIMcZQ",
+        midi: "midi/bohemian-rhapsody.mid",
+        youtubeId: "fJ9rUzIMcZQ", // fallback
         description: "Operatic rock masterpiece"
       },
       {
@@ -76,6 +128,7 @@
         artist: "Led Zeppelin",
         image: "images/stairway-to-heaven.jpg",
         video: "videos/stairway-to-heaven.mp4",
+        midi: "midi/stairway-to-heaven.mid",
         youtubeId: "QkF3oxziUI4",
         description: "Epic rock ballad with ascending progression"
       },
@@ -84,6 +137,7 @@
         artist: "Prince",
         image: "images/purple-rain.jpg",
         video: "videos/purple-rain.mp4",
+        midi: "midi/purple-rain.mid",
         youtubeId: "TvnYmWpD_T8",
         description: "Emotional power ballad"
       },
@@ -92,6 +146,7 @@
         artist: "John Lennon",
         image: "images/imagine.jpg",
         video: "videos/imagine.mp4",
+        midi: "midi/imagine.mid",
         youtubeId: "YkgkThdzX-8",
         description: "Peaceful, hopeful anthem"
       },
@@ -100,6 +155,7 @@
         artist: "Michael Jackson",
         image: "images/billie-jean.jpg",
         video: "videos/billie-jean.mp4",
+        midi: "midi/billie-jean.mid",
         youtubeId: "Zi_XLOBDo_Y",
         description: "Iconic pop with distinctive bassline"
       },
@@ -108,6 +164,7 @@
         artist: "Eagles",
         image: "images/hotel-california.jpg",
         video: "videos/hotel-california.mp4",
+        midi: "midi/hotel-california.mid",
         youtubeId: "09839DpTctU",
         description: "Classic rock with memorable guitar solo"
       },
@@ -116,6 +173,7 @@
         artist: "Guns N' Roses",
         image: "images/sweet-child-o-mine.jpg",
         video: "videos/sweet-child-o-mine.mp4",
+        midi: "midi/sweet-child-o-mine.mid",
         youtubeId: "1w7OgIMMRc4",
         description: "Hard rock anthem with iconic riff"
       },
@@ -124,6 +182,7 @@
         artist: "Nirvana",
         image: "images/smells-like-teen-spirit.jpg",
         video: "videos/smells-like-teen-spirit.mp4",
+        midi: "midi/smells-like-teen-spirit.mid",
         youtubeId: "hTWKbfoikeg",
         description: "Grunge rock defining anthem"
       }
@@ -138,23 +197,25 @@
       const [audioUnlocked, setAudioUnlocked] = useState(false);
       const [isPlaying, setIsPlaying] = useState(false);
       const [showHint, setShowHint] = useState(false);
-      const [previewUrl, setPreviewUrl] = useState(null);
-      const [loadingAudio, setLoadingAudio] = useState(false);
       const [suggestions, setSuggestions] = useState([]);
       const [showSuggestions, setShowSuggestions] = useState(false);
       const [searchError, setSearchError] = useState(null);
-      const [foundTrackInfo, setFoundTrackInfo] = useState(null);
       const [playedSongs, setPlayedSongs] = useState([]);
+      const [useMidi, setUseMidi] = useState(true);
+      const [midiError, setMidiError] = useState(false);
+      
+      // YouTube fallback states
       const [showVideo, setShowVideo] = useState(false);
       const [playerReady, setPlayerReady] = useState(false);
       const [ytPlayer, setYtPlayer] = useState(null);
       const [volume, setVolume] = useState(50);
-      const audioRef = useRef(null);
-      const playerRef = useRef(null);
+      
       const videoRef = useRef(null);
+      const midiPlayerRef = useRef(null);
       const MAX_GUESSES = 6;
       const GUESSES_BEFORE_AUDIO = 2;
 
+      // Load YouTube API as fallback
       useEffect(() => {
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
@@ -162,7 +223,7 @@
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
         window.onYouTubeIframeAPIReady = () => {
-          console.log('YouTube API Ready');
+          console.log('YouTube API Ready (fallback)');
         };
       }, []);
 
@@ -170,12 +231,13 @@
         startNewGame();
       }, []);
 
+      // Initialize YouTube player when needed (fallback)
       useEffect(() => {
-        if (showVideo && previewUrl && window.YT && !ytPlayer) {
+        if (!useMidi && showVideo && currentSong?.youtubeId && window.YT && !ytPlayer) {
           const player = new window.YT.Player('youtube-player', {
             height: '200',
             width: '100%',
-            videoId: previewUrl,
+            videoId: currentSong.youtubeId,
             playerVars: {
               controls: 1,
               modestbranding: 1,
@@ -185,13 +247,12 @@
             },
             events: {
               onReady: (event) => {
-                console.log('Player ready');
+                console.log('YouTube player ready');
                 setPlayerReady(true);
                 setYtPlayer(event.target);
                 event.target.setVolume(volume);
                 
                 if (gameWon) {
-                  console.log('Auto-playing because user won');
                   setTimeout(() => {
                     event.target.playVideo();
                     setIsPlaying(true);
@@ -212,28 +273,34 @@
             }
           });
         }
-      }, [showVideo, previewUrl, gameWon]);
+      }, [useMidi, showVideo, currentSong, gameWon]);
 
-      const fetchPreviewUrl = async (song) => {
-        setLoadingAudio(true);
-        setSearchError(null);
-        setFoundTrackInfo(null);
-        
-        if (song.youtubeId) {
-          setLoadingAudio(false);
-          setFoundTrackInfo({
-            title: song.title,
-            artist: song.artist,
-            album: null
-          });
-          setShowVideo(true);
-          return song.youtubeId;
+      // Handle MIDI player events
+      useEffect(() => {
+        if (audioUnlocked && useMidi && currentSong?.midi) {
+          // Small delay to let the DOM update
+          setTimeout(() => {
+            const midiPlayer = document.querySelector('midi-player');
+            if (midiPlayer) {
+              midiPlayerRef.current = midiPlayer;
+              
+              midiPlayer.addEventListener('load', () => {
+                console.log('MIDI loaded successfully');
+                setMidiError(false);
+              });
+              
+              midiPlayer.addEventListener('error', (e) => {
+                console.error('MIDI error, falling back to YouTube:', e);
+                setMidiError(true);
+                setUseMidi(false);
+              });
+
+              midiPlayer.addEventListener('start', () => setIsPlaying(true));
+              midiPlayer.addEventListener('stop', () => setIsPlaying(false));
+            }
+          }, 100);
         }
-        
-        setLoadingAudio(false);
-        setSearchError(`No preview configured for this song`);
-        return null;
-      };
+      }, [audioUnlocked, useMidi, currentSong]);
 
       const searchDeezerSongs = async (query) => {
         if (!query || query.length < 2) {
@@ -292,14 +359,28 @@
         setShowSuggestions(false);
       };
 
-      const startNewGame = () => {
+      const stopAllAudio = () => {
+        // Stop MIDI
+        if (midiPlayerRef.current) {
+          try {
+            midiPlayerRef.current.stop();
+          } catch (e) {
+            console.log('Error stopping MIDI:', e);
+          }
+        }
+        
+        // Stop YouTube
         if (ytPlayer && playerReady) {
           try {
             ytPlayer.stopVideo();
           } catch (error) {
-            console.log('Error stopping video:', error);
+            console.log('Error stopping YouTube:', error);
           }
         }
+      };
+
+      const startNewGame = () => {
+        stopAllAudio();
         
         let availableSongs = SONGS.filter(song => 
           !playedSongs.some(played => 
@@ -324,19 +405,15 @@
         setAudioUnlocked(false);
         setIsPlaying(false);
         setShowHint(false);
-        setPreviewUrl(null);
         setSuggestions([]);
         setShowSuggestions(false);
         setSearchError(null);
-        setFoundTrackInfo(null);
         setShowVideo(false);
         setPlayerReady(false);
         setYtPlayer(null);
-        setIsPlaying(false);
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
-        }
+        setUseMidi(true);
+        setMidiError(false);
+        midiPlayerRef.current = null;
       };
 
       const handleGuess = async () => {
@@ -349,36 +426,21 @@
         const isCorrect = normalizedGuess === normalizedTitle || 
                           normalizedGuess === `${normalizedTitle} ${normalizedArtist}` ||
                           normalizedGuess === `${normalizedArtist} ${normalizedTitle}` ||
-                          normalizedGuess.includes(normalizedTitle) && normalizedGuess.includes(normalizedArtist);
+                          (normalizedGuess.includes(normalizedTitle) && normalizedGuess.includes(normalizedArtist));
 
         const newGuesses = [...guesses, { text: guess, correct: isCorrect }];
         setGuesses(newGuesses);
 
         if (isCorrect) {
           setGameWon(true);
-          if (!audioUnlocked && currentSong) {
+          if (!audioUnlocked) {
             setAudioUnlocked(true);
-            const url = await fetchPreviewUrl(currentSong);
-            setPreviewUrl(url);
-            setTimeout(() => {
-              if (window.YT && window.YT.Player) {
-                console.log('Auto-playing song after correct guess');
-              }
-            }, 2000);
           }
         } else if (newGuesses.length >= MAX_GUESSES) {
           setGameLost(true);
           setAudioUnlocked(true);
-          if (!previewUrl && currentSong) {
-            const url = await fetchPreviewUrl(currentSong);
-            setPreviewUrl(url);
-          }
         } else if (newGuesses.length >= GUESSES_BEFORE_AUDIO) {
           setAudioUnlocked(true);
-          if (!previewUrl && currentSong) {
-            const url = await fetchPreviewUrl(currentSong);
-            setPreviewUrl(url);
-          }
         }
 
         setGuess('');
@@ -386,9 +448,9 @@
         setShowSuggestions(false);
       };
 
-      const toggleAudio = () => {
+      const toggleYouTubeAudio = () => {
         if (!ytPlayer || !playerReady) {
-          console.log('Player not ready yet');
+          console.log('YouTube player not ready yet');
           return;
         }
 
@@ -401,7 +463,7 @@
             setIsPlaying(true);
           }
         } catch (error) {
-          console.error('Error controlling player:', error);
+          console.error('Error controlling YouTube player:', error);
           setSearchError('Error playing audio. Try clicking again.');
         }
       };
@@ -454,6 +516,98 @@
         );
       };
 
+      // Render MIDI player with visualizer
+      const renderMidiPlayer = () => {
+        if (!currentSong?.midi) return null;
+        
+        const midiId = `midi-viz-${Date.now()}`;
+        
+        return (
+          <div className="w-full">
+            <midi-visualizer 
+              type="piano-roll" 
+              id={midiId}
+              src={currentSong.midi}
+            ></midi-visualizer>
+            <midi-player
+              src={currentSong.midi}
+              sound-font
+              visualizer={`#${midiId}`}
+            ></midi-player>
+          </div>
+        );
+      };
+
+      // Render YouTube fallback player
+      const renderYouTubePlayer = () => {
+        return (
+          <>
+            {showVideo ? (
+              <div className="relative bg-gray-900 rounded-lg overflow-hidden" style={{ height: '0px' }}>
+                <div
+                  id="youtube-player"
+                  style={{ 
+                    position: 'absolute',
+                    top: '-9999px',
+                    left: '-9999px',
+                    width: '100%',
+                    height: '200px'
+                  }}
+                ></div>
+              </div>
+            ) : null}
+            
+            <div className="w-full px-6 py-6 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white text-center">
+              <div className="mb-3">
+                <Music className={`w-12 h-12 mx-auto ${isPlaying ? 'animate-pulse' : ''}`} />
+              </div>
+              <h3 className="text-lg font-bold mb-2">Audio Hint (YouTube)</h3>
+              <p className="text-sm opacity-90 mb-3">
+                {!showVideo ? 'Click to load audio' : isPlaying ? 'Now playing...' : 'Click to play'}
+              </p>
+              <button
+                onClick={() => {
+                  if (!showVideo) {
+                    setShowVideo(true);
+                  } else {
+                    toggleYouTubeAudio();
+                  }
+                }}
+                disabled={showVideo && !playerReady}
+                className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                  showVideo && !playerReady
+                    ? 'bg-white/50 text-purple-400 cursor-wait'
+                    : 'bg-white text-purple-600 hover:bg-gray-100'
+                }`}
+              >
+                {!showVideo ? '🔓 Load Audio' : !playerReady ? '⏳ Loading...' : isPlaying ? '⏸️ Pause' : '▶️ Play'}
+              </button>
+              
+              {showVideo && playerReady && (
+                <div className="mt-4 px-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm opacity-75">🔇</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={volume}
+                      onChange={handleVolumeChange}
+                      className="flex-1 h-2 bg-white/30 rounded-lg appearance-none cursor-pointer"
+                      style={{ accentColor: 'white' }}
+                    />
+                    <span className="text-sm opacity-75">🔊</span>
+                    <span className="text-xs bg-white/20 px-2 py-1 rounded min-w-[3rem] text-center">
+                      {volume}%
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        );
+      };
+
       return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4">
           <div className="max-w-2xl mx-auto">
@@ -494,102 +648,25 @@
                 )}
               </div>
 
-              {/* Hidden YouTube player for audio */}
-              {(audioUnlocked || gameWon || gameLost) && (
+              {/* Audio player section */}
+              {(audioUnlocked || gameWon || gameLost) && !gameWon && !gameLost && (
                 <div className="mb-4">
-                  {previewUrl ? (
-                    <>
-                      {showVideo ? (
-                        <div className="relative bg-gray-900 rounded-lg overflow-hidden" style={{ height: '0px' }}>
-                          <div
-                            id="youtube-player"
-                            style={{ 
-                              position: 'absolute',
-                              top: '-9999px',
-                              left: '-9999px',
-                              width: '100%',
-                              height: '200px'
-                            }}
-                          ></div>
-                        </div>
-                      ) : null}
-                      
-                      {!gameWon && !gameLost && (
-                        <div className="w-full px-6 py-6 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white text-center">
-                          <div className="mb-3">
-                            <Music className={`w-12 h-12 mx-auto ${isPlaying ? 'animate-pulse' : ''}`} />
-                          </div>
-                          <h3 className="text-lg font-bold mb-2">Audio Hint Unlocked!</h3>
-                          <p className="text-sm opacity-90 mb-3">
-                            {!showVideo ? 'Click to reveal and play' : isPlaying ? 'Now playing...' : 'Click to play audio'}
-                          </p>
-                          <button
-                            onClick={() => {
-                              if (!showVideo) {
-                                setShowVideo(true);
-                                setTimeout(() => {
-                                  console.log('Video unlocked, player should be initializing');
-                                }, 500);
-                              } else {
-                                toggleAudio();
-                              }
-                            }}
-                            disabled={showVideo && !playerReady}
-                            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-                              showVideo && !playerReady
-                                ? 'bg-white/50 text-purple-400 cursor-wait'
-                                : 'bg-white text-purple-600 hover:bg-gray-100'
-                            }`}
-                          >
-                            {!showVideo ? '🔓 Unlock Audio' : !playerReady ? '⏳ Loading...' : isPlaying ? '⏸️ Pause' : '▶️ Play Audio'}
-                          </button>
-                          
-                          {showVideo && playerReady && (
-                            <div className="mt-4 px-4">
-                              <div className="flex items-center gap-3">
-                                <span className="text-sm opacity-75">🔇</span>
-                                <input
-                                  type="range"
-                                  min="0"
-                                  max="100"
-                                  value={volume}
-                                  onChange={handleVolumeChange}
-                                  className="flex-1 h-2 bg-white/30 rounded-lg appearance-none cursor-pointer"
-                                  style={{
-                                    accentColor: 'white'
-                                  }}
-                                />
-                                <span className="text-sm opacity-75">🔊</span>
-                                <span className="text-xs bg-white/20 px-2 py-1 rounded min-w-[3rem] text-center">
-                                  {volume}%
-                                </span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      
-                      {foundTrackInfo && !gameWon && !gameLost && (
-                        <div className="text-xs text-gray-500 text-center mt-2">
-                          <p className="italic">Audio hint available - listen without spoilers!</p>
-                        </div>
-                      )}
-                    </>
-                  ) : loadingAudio ? (
-                    <div className="w-full px-6 py-4 rounded-lg bg-gray-200 text-gray-600 flex items-center justify-center gap-3">
-                      <Music className="w-6 h-6 animate-pulse" />
-                      Loading...
+                  {useMidi && currentSong?.midi && !midiError ? (
+                    // MIDI Player with visualizer
+                    <div className="rounded-lg overflow-hidden">
+                      {renderMidiPlayer()}
+                      <p className="text-xs text-gray-500 text-center mt-2">
+                        🎹 MIDI playback with piano-roll visualizer
+                      </p>
                     </div>
+                  ) : currentSong?.youtubeId ? (
+                    // YouTube fallback
+                    renderYouTubePlayer()
                   ) : (
-                    !gameWon && !gameLost && (
-                      <div className="w-full px-6 py-4 rounded-lg bg-yellow-100 text-yellow-800 text-sm">
-                        <p className="font-semibold mb-2">🎵 No Preview Available</p>
-                        {searchError && (
-                          <p className="text-xs mb-2">{searchError}</p>
-                        )}
-                        <p className="text-xs mt-2 font-semibold">Keep guessing based on the visual hints!</p>
-                      </div>
-                    )
+                    <div className="w-full px-6 py-4 rounded-lg bg-yellow-100 text-yellow-800 text-sm">
+                      <p className="font-semibold mb-2">🎵 No Audio Available</p>
+                      <p className="text-xs">Keep guessing based on the visual hints!</p>
+                    </div>
                   )}
                 </div>
               )}
@@ -690,43 +767,16 @@
                   <p className="text-sm text-green-600 mb-4">
                     You guessed it in {guesses.length} {guesses.length === 1 ? 'try' : 'tries'}!
                   </p>
-                  {showVideo && playerReady ? (
-                    <div className="mb-4 p-3 bg-green-50 rounded-lg">
-                      <p className="text-sm text-green-700 mb-2">
-                        {isPlaying ? '🎵 Enjoy the song!' : '🎵 Audio loaded'}
-                      </p>
-                      <button
-                        onClick={toggleAudio}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors"
-                      >
-                        {isPlaying ? '⏸️ Pause' : '▶️ Play'}
-                      </button>
-                      <div className="mt-3 px-4">
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm">🔇</span>
-                          <input
-                            type="range"
-                            min="0"
-                            max="100"
-                            value={volume}
-                            onChange={handleVolumeChange}
-                            className="flex-1 h-2 bg-green-200 rounded-lg appearance-none cursor-pointer"
-                            style={{
-                              accentColor: '#16a34a'
-                            }}
-                          />
-                          <span className="text-sm">🔊</span>
-                          <span className="text-xs bg-green-200 px-2 py-1 rounded min-w-[3rem] text-center">
-                            {volume}%
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ) : showVideo && !playerReady ? (
-                    <div className="mb-4 p-3 bg-green-50 rounded-lg">
-                      <p className="text-sm text-green-700">⏳ Loading your reward...</p>
-                    </div>
-                  ) : null}
+                  
+                  {/* Winner audio player */}
+                  <div className="mt-4 bg-green-50 rounded-lg p-4">
+                    <p className="text-sm text-green-700 mb-3">🎵 Enjoy the song!</p>
+                    {useMidi && currentSong?.midi && !midiError ? (
+                      renderMidiPlayer()
+                    ) : currentSong?.youtubeId ? (
+                      renderYouTubePlayer()
+                    ) : null}
+                  </div>
                 </div>
               )}
 
