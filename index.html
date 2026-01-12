@@ -353,8 +353,8 @@
       useEffect(() => {
         let isCancelled = false;
         
-        // Trigger when audio is unlocked OR when game is won (for early wins)
-        if ((audioUnlocked || gameWon) && useMidi && currentSong?.midi && preloadedMidi) {
+        // Trigger when audio is unlocked OR when game is won/lost
+        if ((audioUnlocked || gameWon || gameLost) && useMidi && currentSong?.midi && preloadedMidi) {
           // Small delay to let the DOM update
           const timeoutId = setTimeout(async () => {
             if (isCancelled) return;
@@ -431,7 +431,7 @@
             clearTimeout(timeoutId);
           };
         }
-      }, [audioUnlocked, gameWon, useMidi, currentSong, preloadedMidi]);
+      }, [audioUnlocked, gameWon, gameLost, useMidi, currentSong, preloadedMidi]);
 
       const searchDeezerSongs = async (query) => {
         if (!query || query.length < 2) {
@@ -900,8 +900,8 @@
                 )}
               </div>
 
-              {/* Audio player section - keep showing if it was already unlocked during gameplay */}
-              {audioUnlocked && guesses.length >= GUESSES_BEFORE_AUDIO && !gameLost && (
+              {/* Audio player section - show during gameplay after 2 wrong guesses, keep showing if game continues */}
+              {audioUnlocked && guesses.length >= GUESSES_BEFORE_AUDIO && !gameLost && !(gameWon && guesses.length === GUESSES_BEFORE_AUDIO) && (
                 <div className="mb-4">
                   {useMidi && currentSong?.midi && !midiError ? (
                     // MIDI Player
@@ -1045,6 +1045,17 @@
                   <p className="text-red-700 mb-4">
                     The song was "{currentSong.title}" by {currentSong.artist}
                   </p>
+                  
+                  {/* Game over audio player */}
+                  <div className="mt-4 bg-red-50 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-red-700 mb-3">🎵 Here's the song:</p>
+                    {useMidi && currentSong?.midi && !midiError ? (
+                      renderMidiPlayer()
+                    ) : currentSong?.youtubeId ? (
+                      renderYouTubePlayer()
+                    ) : null}
+                  </div>
+                  
                   <button
                     onClick={startNewGame}
                     className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition-colors flex items-center gap-2 mx-auto"
