@@ -899,8 +899,8 @@
                 )}
               </div>
 
-              {/* Audio player section */}
-              {(audioUnlocked || gameWon || gameLost) && !gameWon && !gameLost && (
+              {/* Audio player section - keep showing if it was already unlocked during gameplay */}
+              {audioUnlocked && (guesses.length > GUESSES_BEFORE_AUDIO || (gameWon && guesses.length > GUESSES_BEFORE_AUDIO)) && (
                 <div className="mb-4">
                   {useMidi && currentSong?.midi && !midiError ? (
                     // MIDI Player
@@ -1023,15 +1023,17 @@
                     You guessed it in {guesses.length} {guesses.length === 1 ? 'try' : 'tries'}!
                   </p>
                   
-                  {/* Winner audio player */}
-                  <div className="mt-4 bg-green-50 rounded-lg p-4">
-                    <p className="text-sm text-green-700 mb-3">🎵 Enjoy the song!</p>
-                    {useMidi && currentSong?.midi && !midiError ? (
-                      renderMidiPlayer()
-                    ) : currentSong?.youtubeId ? (
-                      renderYouTubePlayer()
-                    ) : null}
-                  </div>
+                  {/* Winner audio player - only show if user won BEFORE audio was unlocked */}
+                  {guesses.length <= GUESSES_BEFORE_AUDIO && (
+                    <div className="mt-4 bg-green-50 rounded-lg p-4">
+                      <p className="text-sm text-green-700 mb-3">🎵 Enjoy the song!</p>
+                      {useMidi && currentSong?.midi && !midiError ? (
+                        renderMidiPlayer()
+                      ) : currentSong?.youtubeId ? (
+                        renderYouTubePlayer()
+                      ) : null}
+                    </div>
+                  )}
                 </div>
               )}
 
