@@ -490,14 +490,27 @@
       };
 
       const stopAllAudio = () => {
-        // Stop MIDI player
+        // Stop MIDI player and remove it from DOM to kill all sounds
         if (midiPlayerRef.current) {
           try {
             midiPlayerRef.current.stop();
+            // Remove the element to force stop all audio
+            midiPlayerRef.current.remove();
+            midiPlayerRef.current = null;
           } catch (e) {
             console.log('Error stopping MIDI player:', e);
           }
         }
+        
+        // Also remove any orphaned midi-player elements
+        document.querySelectorAll('midi-player').forEach(player => {
+          try {
+            player.stop();
+            player.remove();
+          } catch (e) {
+            console.log('Error removing midi-player:', e);
+          }
+        });
         
         // Force stop all Tone.js audio
         if (window.Tone) {
@@ -506,15 +519,14 @@
             Tone.Transport.stop();
             Tone.Transport.cancel();
             
-            // Mute and unmute to cut off any lingering sounds
-            const currentVolume = Tone.Destination.volume.value;
+            // Mute immediately to cut off any lingering sounds
             Tone.Destination.volume.value = -Infinity;
             
             // Restore volume after a brief moment
             setTimeout(() => {
               const dB = (midiVolume / 100) * 40 - 40;
               Tone.Destination.volume.value = dB;
-            }, 100);
+            }, 150);
           } catch (e) {
             console.log('Error stopping Tone.js:', e);
           }
