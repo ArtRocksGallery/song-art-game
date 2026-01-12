@@ -982,8 +982,8 @@
                 )}
               </div>
 
-              {/* Audio player section - show during gameplay after 2 wrong guesses, keep showing through win/loss */}
-              {audioUnlocked && guesses.length >= GUESSES_BEFORE_AUDIO && !(gameWon && guesses.length === GUESSES_BEFORE_AUDIO) && (
+              {/* Audio player section - show during gameplay after 2 wrong guesses, hide on win/loss */}
+              {audioUnlocked && guesses.length >= GUESSES_BEFORE_AUDIO && !gameWon && !gameLost && (
                 <div className="mb-4">
                   {useMidi && currentSong?.midi && !midiError ? (
                     // MIDI Player
