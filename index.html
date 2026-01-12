@@ -353,14 +353,21 @@
       useEffect(() => {
         if (audioUnlocked && useMidi && currentSong?.midi && preloadedMidi) {
           // Small delay to let the DOM update
-          setTimeout(() => {
+          setTimeout(async () => {
             const midiPlayer = document.querySelector('midi-player');
             if (midiPlayer) {
               midiPlayerRef.current = midiPlayer;
               
-              midiPlayer.addEventListener('load', () => {
+              midiPlayer.addEventListener('load', async () => {
                 console.log('MIDI loaded successfully');
                 setMidiError(false);
+                
+                // Ensure audio context is running before playing
+                if (window.Tone && Tone.context.state !== 'running') {
+                  await Tone.start();
+                  console.log('Audio context started from MIDI player');
+                }
+                
                 // Autoplay when loaded
                 midiPlayer.start();
               });
@@ -498,6 +505,12 @@
 
       const handleGuess = async () => {
         if (!guess.trim() || gameWon || gameLost) return;
+
+        // Start audio context on first user interaction
+        if (window.Tone && Tone.context.state !== 'running') {
+          await Tone.start();
+          console.log('Audio context started');
+        }
 
         const normalizedGuess = guess.toLowerCase().trim();
         const normalizedTitle = currentSong.title.toLowerCase();
