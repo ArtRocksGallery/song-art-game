@@ -93,6 +93,7 @@
 
     // SONGS array - update paths to match your hosted files
     // Use 'midi' for MIDI files, 'youtubeId' as fallback for songs without MIDI
+    // 'youtubeTimestamp' is seconds into the video to start on win (optional, defaults to 0)
     const SONGS = [
       {
         title: "Bohemian Rhapsody",
@@ -100,7 +101,8 @@
         image: "images/bohemian-rhapsody.jpg",
         video: "videos/bohemian-rhapsody.mp4",
         midi: "midi/bohemian-rhapsody.mid",
-        youtubeId: "fJ9rUzIMcZQ", // fallback
+        youtubeId: "fJ9rUzIMcZQ",
+        youtubeTimestamp: 0,
         description: "Operatic rock masterpiece"
       },
       {
@@ -110,6 +112,7 @@
         video: "videos/stairway-to-heaven.mp4",
         midi: "midi/stairway-to-heaven.mid",
         youtubeId: "QkF3oxziUI4",
+        youtubeTimestamp: 0,
         description: "Epic rock ballad with ascending progression"
       },
       {
@@ -119,6 +122,7 @@
         video: "videos/purple-rain.mp4",
         midi: "midi/purple-rain.mid",
         youtubeId: "TvnYmWpD_T8",
+        youtubeTimestamp: 116,
         description: "Emotional power ballad"
       },
       {
@@ -128,6 +132,7 @@
         video: "videos/imagine.mp4",
         midi: "midi/imagine.mid",
         youtubeId: "YkgkThdzX-8",
+        youtubeTimestamp: 40,
         description: "Peaceful, hopeful anthem"
       },
       {
@@ -137,6 +142,7 @@
         video: "videos/billie-jean.mp4",
         midi: "midi/billie-jean.mid",
         youtubeId: "Zi_XLOBDo_Y",
+        youtubeTimestamp: 87,
         description: "Iconic pop with distinctive bassline"
       },
       {
@@ -145,7 +151,8 @@
         image: "images/hotel-california.jpg",
         video: "videos/hotel-california.mp4",
         midi: "midi/hotel-california.mid",
-        youtubeId: "09839DpTctU",
+        youtubeId: "dLl4PZtxia8",
+        youtubeTimestamp: 104,
         description: "Classic rock with memorable guitar solo"
       },
       {
@@ -155,6 +162,7 @@
         video: "videos/sweet-child-o-mine.mp4",
         midi: "midi/sweet-child-o-mine.mid",
         youtubeId: "1w7OgIMMRc4",
+        youtubeTimestamp: 0,
         description: "Hard rock anthem with iconic riff"
       },
       {
@@ -164,6 +172,7 @@
         video: "videos/smells-like-teen-spirit.mp4",
         midi: "midi/smells-like-teen-spirit.mid",
         youtubeId: "hTWKbfoikeg",
+        youtubeTimestamp: 58,
         description: "Grunge rock defining anthem"
       }
     ];
@@ -623,11 +632,13 @@
 
         if (isCorrect) {
           setGameWon(true);
+          stopAllAudio(); // Stop MIDI so YouTube can play
           if (!audioUnlocked) {
             setAudioUnlocked(true);
           }
         } else if (newGuesses.length >= MAX_GUESSES) {
           setGameLost(true);
+          stopAllAudio(); // Stop MIDI so YouTube can play
           setAudioUnlocked(true);
         } else if (newGuesses.length >= GUESSES_BEFORE_AUDIO) {
           setAudioUnlocked(true);
@@ -677,9 +688,24 @@
         return () => document.removeEventListener('mousedown', handleClickOutside);
       }, []);
 
-      // Render the visual hint (static image or video based on guess count)
+      // Render the visual hint (static image, video, or YouTube embed on win/loss)
       const renderVisualHint = () => {
         if (!currentSong) return null;
+
+        // On win or loss, show YouTube embed with timestamp
+        if ((gameWon || gameLost) && currentSong.youtubeId) {
+          const timestamp = currentSong.youtubeTimestamp || 0;
+          return (
+            <iframe
+              className="w-full h-full"
+              src={`https://www.youtube.com/embed/${currentSong.youtubeId}?autoplay=1&start=${timestamp}`}
+              title={`${currentSong.title} by ${currentSong.artist}`}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          );
+        }
 
         // After GUESSES_BEFORE_AUDIO failed guesses, show video
         if (guesses.length >= GUESSES_BEFORE_AUDIO && !gameWon) {
