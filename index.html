@@ -598,14 +598,24 @@
         const normalizedGuess = guess.toLowerCase().trim();
         const normalizedTitle = currentSong.title.toLowerCase();
         const normalizedArtist = currentSong.artist.toLowerCase();
+        
+        // Split artist name into words for flexible matching
+        const artistWords = normalizedArtist.split(/\s+/).filter(w => w.length > 2);
+        
+        // Check if guess contains the artist (flexible - matches if most artist words are present)
+        const guessContainsArtist = artistWords.length > 0 && 
+          artistWords.filter(word => normalizedGuess.includes(word)).length >= Math.ceil(artistWords.length * 0.5);
+        
+        // Also check for exact artist match or artist as substring
+        const artistInGuess = normalizedGuess.includes(normalizedArtist) || guessContainsArtist;
 
         const isCorrect = normalizedGuess === normalizedTitle || 
                           normalizedGuess === `${normalizedTitle} ${normalizedArtist}` ||
                           normalizedGuess === `${normalizedArtist} ${normalizedTitle}` ||
-                          (normalizedGuess.includes(normalizedTitle) && normalizedGuess.includes(normalizedArtist));
+                          (normalizedGuess.includes(normalizedTitle) && artistInGuess);
 
         // Check if artist was guessed correctly (but not the song)
-        const artistMatch = !isCorrect && normalizedGuess.includes(normalizedArtist);
+        const artistMatch = !isCorrect && artistInGuess;
 
         const newGuesses = [...guesses, { text: guess, correct: isCorrect, artistMatch }];
         setGuesses(newGuesses);
