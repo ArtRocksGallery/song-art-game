@@ -309,9 +309,9 @@
         }
       }, [useMidi, showVideo, currentSong, gameWon]);
 
-      // Handle MIDI player events
+      // Handle MIDI player events and autoplay
       useEffect(() => {
-        if (audioUnlocked && useMidi && currentSong?.midi) {
+        if (audioUnlocked && useMidi && currentSong?.midi && preloadedMidi) {
           // Small delay to let the DOM update
           setTimeout(() => {
             const midiPlayer = document.querySelector('midi-player');
@@ -321,6 +321,8 @@
               midiPlayer.addEventListener('load', () => {
                 console.log('MIDI loaded successfully');
                 setMidiError(false);
+                // Autoplay when loaded
+                midiPlayer.start();
               });
               
               midiPlayer.addEventListener('error', (e) => {
@@ -334,7 +336,7 @@
             }
           }, 100);
         }
-      }, [audioUnlocked, useMidi, currentSong]);
+      }, [audioUnlocked, useMidi, currentSong, preloadedMidi]);
 
       const searchDeezerSongs = async (query) => {
         if (!query || query.length < 2) {
