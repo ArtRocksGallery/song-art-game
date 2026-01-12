@@ -521,6 +521,8 @@
         if (!currentSong?.midi) return null;
         
         const midiId = `midi-viz-${Date.now()}`;
+        // Explicit SoundFont URL from Google Storage
+        const soundFontUrl = "https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus";
         
         return (
           <div className="w-full">
@@ -531,7 +533,7 @@
             ></midi-visualizer>
             <midi-player
               src={currentSong.midi}
-              sound-font
+              sound-font={soundFontUrl}
               visualizer={`#${midiId}`}
             ></midi-player>
           </div>
