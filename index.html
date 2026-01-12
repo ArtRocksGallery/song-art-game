@@ -61,70 +61,71 @@
       </svg>
     );
 
+    // SONGS array - update image and video paths to match your hosted files
     const SONGS = [
       {
         title: "Bohemian Rhapsody",
         artist: "Queen",
-        colors: ["#8B4513", "#FFD700", "#FF0000", "#000000"],
-        shapes: ["circle", "triangle", "square"],
-        description: "Operatic rock masterpiece",
-        youtubeId: "fJ9rUzIMcZQ"
+        image: "images/bohemian-rhapsody.png",
+        video: "videos/bohemian-rhapsody.mp4",
+        youtubeId: "fJ9rUzIMcZQ",
+        description: "Operatic rock masterpiece"
       },
       {
         title: "Stairway to Heaven",
         artist: "Led Zeppelin",
-        colors: ["#87CEEB", "#FFFFFF", "#FFD700", "#C0C0C0"],
-        shapes: ["triangle", "rectangle", "circle"],
-        description: "Epic rock ballad with ascending progression",
-        youtubeId: "QkF3oxziUI4"
+        image: "images/stairway-to-heaven.png",
+        video: "videos/stairway-to-heaven.mp4",
+        youtubeId: "QkF3oxziUI4",
+        description: "Epic rock ballad with ascending progression"
       },
       {
         title: "Purple Rain",
         artist: "Prince",
-        colors: ["#800080", "#4B0082", "#191970", "#9370DB"],
-        shapes: ["circle", "wave", "rectangle"],
-        description: "Emotional power ballad",
-        youtubeId: "TvnYmWpD_T8"
+        image: "images/purple-rain.png",
+        video: "videos/purple-rain.mp4",
+        youtubeId: "TvnYmWpD_T8",
+        description: "Emotional power ballad"
       },
       {
         title: "Imagine",
         artist: "John Lennon",
-        colors: ["#FFFFFF", "#87CEEB", "#F0E68C", "#98FB98"],
-        shapes: ["circle", "square", "rectangle"],
-        description: "Peaceful, hopeful anthem",
-        youtubeId: "YkgkThdzX-8"
+        image: "images/imagine.png",
+        video: "videos/imagine.mp4",
+        youtubeId: "YkgkThdzX-8",
+        description: "Peaceful, hopeful anthem"
       },
       {
         title: "Billie Jean",
         artist: "Michael Jackson",
-        colors: ["#000000", "#FFFFFF", "#FF0000", "#C0C0C0"],
-        shapes: ["square", "circle", "rectangle"],
-        description: "Iconic pop with distinctive bassline",
-        youtubeId: "Zi_XLOBDo_Y"
+        image: "images/billie-jean.png",
+        video: "videos/billie-jean.mp4",
+        youtubeId: "Zi_XLOBDo_Y",
+        description: "Iconic pop with distinctive bassline"
       },
       {
         title: "Hotel California",
         artist: "Eagles",
-        colors: ["#FF8C00", "#8B4513", "#FFD700", "#654321"],
-        shapes: ["rectangle", "circle", "triangle"],
-        description: "Classic rock with memorable guitar solo",
-        youtubeId: "09839DpTctU"
+        image: "images/hotel-california.png",
+        video: "videos/hotel-california.mp4",
+        youtubeId: "09839DpTctU",
+        description: "Classic rock with memorable guitar solo"
       },
       {
         title: "Sweet Child O' Mine",
         artist: "Guns N' Roses",
-        colors: ["#FF0000", "#000000", "#FFD700", "#C0C0C0"],
-        shapes: ["triangle", "square", "circle"],
-        description: "Hard rock anthem with iconic riff",
-        youtubeId: "1w7OgIMMRc4"
+        image: "images/sweet-child-o-mine.png",
+        video: "videos/sweet-child-o-mine.mp4",
+        youtubeId: "1w7OgIMMRc4",
+        description: "Hard rock anthem with iconic riff"
       },
       {
         title: "Smells Like Teen Spirit",
         artist: "Nirvana",
-        colors: ["#808080", "#000000", "#FFFFFF", "#4B0082"],
-        shapes: ["square", "rectangle", "circle"],
-        description: "Grunge rock defining anthem",
-        youtubeId: "hTWKbfoikeg"
+        image: "images/smells-like-teen-spirit.png",
+        video: "videos/smells-like-teen-spirit.mp4",
+        youtubeId: "hTWKbfoikeg",
+        description: "Grunge rock defining anthem"
       }
     ];
 
@@ -150,6 +151,7 @@
       const [volume, setVolume] = useState(50);
       const audioRef = useRef(null);
       const playerRef = useRef(null);
+      const videoRef = useRef(null);
       const MAX_GUESSES = 6;
       const GUESSES_BEFORE_AUDIO = 2;
 
@@ -186,10 +188,8 @@
                 console.log('Player ready');
                 setPlayerReady(true);
                 setYtPlayer(event.target);
-                // Set initial volume
                 event.target.setVolume(volume);
                 
-                // Auto-play if user just won (guessed before audio unlocked)
                 if (gameWon) {
                   console.log('Auto-playing because user won');
                   setTimeout(() => {
@@ -199,7 +199,6 @@
                 }
               },
               onStateChange: (event) => {
-                // Track playing state
                 if (event.data === window.YT.PlayerState.PLAYING) {
                   setIsPlaying(true);
                 } else if (event.data === window.YT.PlayerState.PAUSED || event.data === window.YT.PlayerState.ENDED) {
@@ -294,7 +293,6 @@
       };
 
       const startNewGame = () => {
-        // Stop any playing audio before starting new game
         if (ytPlayer && playerReady) {
           try {
             ytPlayer.stopVideo();
@@ -358,12 +356,10 @@
 
         if (isCorrect) {
           setGameWon(true);
-          // If they guessed correctly before audio was unlocked, unlock and auto-play it now
           if (!audioUnlocked && currentSong) {
             setAudioUnlocked(true);
             const url = await fetchPreviewUrl(currentSong);
             setPreviewUrl(url);
-            // Auto-play will happen after player initializes
             setTimeout(() => {
               if (window.YT && window.YT.Player) {
                 console.log('Auto-playing song after correct guess');
@@ -429,52 +425,32 @@
         return () => document.removeEventListener('mousedown', handleClickOutside);
       }, []);
 
-      const renderArtwork = () => {
+      // Render the visual hint (static image or video based on guess count)
+      const renderVisualHint = () => {
         if (!currentSong) return null;
 
+        // After GUESSES_BEFORE_AUDIO failed guesses, show video
+        if (guesses.length >= GUESSES_BEFORE_AUDIO && !gameWon) {
+          return (
+            <video
+              ref={videoRef}
+              src={currentSong.video}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+            />
+          );
+        }
+
+        // Otherwise show static image
         return (
-          <svg width="100%" height="100%" viewBox="0 0 400 400">
-            <defs>
-              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style={{ stopColor: currentSong.colors[0], stopOpacity: 1 }} />
-                <stop offset="100%" style={{ stopColor: currentSong.colors[1], stopOpacity: 1 }} />
-              </linearGradient>
-              <radialGradient id="grad2">
-                <stop offset="0%" style={{ stopColor: currentSong.colors[2], stopOpacity: 0.8 }} />
-                <stop offset="100%" style={{ stopColor: currentSong.colors[3], stopOpacity: 0.9 }} />
-              </radialGradient>
-            </defs>
-            
-            <rect width="400" height="400" fill="url(#grad1)" />
-            
-            {currentSong.shapes.includes('circle') && (
-              <>
-                <circle cx="200" cy="200" r="80" fill="url(#grad2)" opacity="0.7" />
-                <circle cx="280" cy="120" r="50" fill={currentSong.colors[2]} opacity="0.5" />
-              </>
-            )}
-            
-            {currentSong.shapes.includes('triangle') && (
-              <polygon points="200,80 320,320 80,320" fill={currentSong.colors[3]} opacity="0.6" />
-            )}
-            
-            {currentSong.shapes.includes('square') && (
-              <>
-                <rect x="100" y="100" width="80" height="80" fill={currentSong.colors[1]} opacity="0.6" transform="rotate(15 140 140)" />
-                <rect x="220" y="220" width="100" height="100" fill={currentSong.colors[0]} opacity="0.5" transform="rotate(-20 270 270)" />
-              </>
-            )}
-            
-            {currentSong.shapes.includes('rectangle') && (
-              <>
-                <rect x="50" y="180" width="300" height="40" fill={currentSong.colors[2]} opacity="0.5" />
-                <rect x="180" y="50" width="40" height="300" fill={currentSong.colors[3]} opacity="0.4" />
-              </>
-            )}
-            
-            <circle cx="100" cy="300" r="40" fill={currentSong.colors[0]} opacity="0.6" />
-            <circle cx="320" cy="280" r="30" fill={currentSong.colors[1]} opacity="0.5" />
-          </svg>
+          <img
+            src={currentSong.image}
+            alt="Song hint"
+            className="w-full h-full object-cover"
+          />
         );
       };
 
@@ -486,12 +462,13 @@
                 <Music className="w-10 h-10 text-yellow-400" />
                 <h1 className="text-4xl font-bold text-white">Song Art</h1>
               </div>
-              <p className="text-purple-200">Guess the song from its abstract artwork</p>
+              <p className="text-purple-200">Guess the song from its visual hints</p>
             </div>
 
             <div className="bg-white rounded-lg shadow-2xl p-6 mb-6">
+              {/* Visual hint area - image or video */}
               <div className="aspect-square bg-gray-100 rounded-lg mb-4 overflow-hidden">
-                {renderArtwork()}
+                {renderVisualHint()}
               </div>
 
               {gameWon && (
@@ -512,11 +489,12 @@
                 </div>
                 {audioUnlocked && (
                   <div className="text-sm text-green-600 font-semibold">
-                    🎵 Audio Unlocked!
+                    🎵 Audio + Video Unlocked!
                   </div>
                 )}
               </div>
 
+              {/* Hidden YouTube player for audio */}
               {(audioUnlocked || gameWon || gameLost) && (
                 <div className="mb-4">
                   {previewUrl ? (
@@ -537,19 +515,18 @@
                       ) : null}
                       
                       {!gameWon && !gameLost && (
-                        <div className="w-full px-6 py-12 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white text-center">
-                          <div className="mb-4">
-                            <Music className={`w-16 h-16 mx-auto ${isPlaying ? 'animate-pulse' : ''}`} />
+                        <div className="w-full px-6 py-6 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white text-center">
+                          <div className="mb-3">
+                            <Music className={`w-12 h-12 mx-auto ${isPlaying ? 'animate-pulse' : ''}`} />
                           </div>
-                          <h3 className="text-xl font-bold mb-2">Audio Hint Unlocked!</h3>
-                          <p className="text-sm opacity-90 mb-4">
+                          <h3 className="text-lg font-bold mb-2">Audio Hint Unlocked!</h3>
+                          <p className="text-sm opacity-90 mb-3">
                             {!showVideo ? 'Click to reveal and play' : isPlaying ? 'Now playing...' : 'Click to play audio'}
                           </p>
                           <button
                             onClick={() => {
                               if (!showVideo) {
                                 setShowVideo(true);
-                                // Give it a moment for the player to initialize
                                 setTimeout(() => {
                                   console.log('Video unlocked, player should be initializing');
                                 }, 500);
@@ -597,11 +574,6 @@
                           <p className="italic">Audio hint available - listen without spoilers!</p>
                         </div>
                       )}
-                      {!gameWon && !gameLost && (
-                        <p className="text-xs text-gray-500 text-center mt-1">
-                          Audio only - no visual clues!
-                        </p>
-                      )}
                     </>
                   ) : loadingAudio ? (
                     <div className="w-full px-6 py-4 rounded-lg bg-gray-200 text-gray-600 flex items-center justify-center gap-3">
@@ -615,7 +587,7 @@
                         {searchError && (
                           <p className="text-xs mb-2">{searchError}</p>
                         )}
-                        <p className="text-xs mt-2 font-semibold">Keep guessing based on the artwork and hint!</p>
+                        <p className="text-xs mt-2 font-semibold">Keep guessing based on the visual hints!</p>
                       </div>
                     )
                   )}
@@ -672,7 +644,7 @@
                     className="w-full px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 transition-colors flex items-center justify-center gap-2"
                   >
                     <Lightbulb className="w-4 h-4" />
-                    {showHint ? 'Hide' : 'Show'} Hint
+                    {showHint ? 'Hide' : 'Show'} Text Hint
                   </button>
 
                   {showHint && currentSong && (
@@ -777,8 +749,8 @@
             </div>
 
             <div className="text-center text-purple-200 text-sm space-y-1">
-              <p>After {GUESSES_BEFORE_AUDIO} guesses, unlock an audio hint!</p>
-              <p className="text-xs">Listen to the music without seeing the title</p>
+              <p>After {GUESSES_BEFORE_AUDIO} guesses, unlock video + audio hints!</p>
+              <p className="text-xs">Visual and audio clues to help you guess</p>
               {playedSongs.length > 0 && (
                 <p className="text-xs mt-2">
                   Songs played: {playedSongs.length}/{SONGS.length}
