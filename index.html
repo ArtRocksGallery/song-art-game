@@ -353,7 +353,8 @@
       useEffect(() => {
         let isCancelled = false;
         
-        if (audioUnlocked && useMidi && currentSong?.midi && preloadedMidi) {
+        // Trigger when audio is unlocked OR when game is won (for early wins)
+        if ((audioUnlocked || gameWon) && useMidi && currentSong?.midi && preloadedMidi) {
           // Small delay to let the DOM update
           const timeoutId = setTimeout(async () => {
             if (isCancelled) return;
@@ -430,7 +431,7 @@
             clearTimeout(timeoutId);
           };
         }
-      }, [audioUnlocked, useMidi, currentSong, preloadedMidi]);
+      }, [audioUnlocked, gameWon, useMidi, currentSong, preloadedMidi]);
 
       const searchDeezerSongs = async (query) => {
         if (!query || query.length < 2) {
@@ -900,7 +901,7 @@
               </div>
 
               {/* Audio player section - keep showing if it was already unlocked during gameplay */}
-              {audioUnlocked && (guesses.length > GUESSES_BEFORE_AUDIO || (gameWon && guesses.length > GUESSES_BEFORE_AUDIO)) && (
+              {audioUnlocked && guesses.length >= GUESSES_BEFORE_AUDIO && !gameLost && (
                 <div className="mb-4">
                   {useMidi && currentSong?.midi && !midiError ? (
                     // MIDI Player
