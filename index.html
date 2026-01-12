@@ -351,14 +351,20 @@
 
       // Handle MIDI player events and autoplay
       useEffect(() => {
+        let isCancelled = false;
+        
         if (audioUnlocked && useMidi && currentSong?.midi && preloadedMidi) {
           // Small delay to let the DOM update
-          setTimeout(async () => {
+          const timeoutId = setTimeout(async () => {
+            if (isCancelled) return;
+            
             const midiPlayer = document.querySelector('midi-player');
-            if (midiPlayer) {
+            if (midiPlayer && !isCancelled) {
               midiPlayerRef.current = midiPlayer;
               
-              midiPlayer.addEventListener('load', async () => {
+              const handleLoad = async () => {
+                if (isCancelled) return;
+                
                 console.log('MIDI loaded successfully');
                 setMidiError(false);
                 
@@ -367,6 +373,8 @@
                   await Tone.start();
                   console.log('Audio context started from MIDI player');
                 }
+                
+                if (isCancelled) return;
                 
                 // Find first note time from the noteSequence and seek to it
                 try {
@@ -386,20 +394,41 @@
                   console.log('Could not detect first note time:', e);
                 }
                 
+                if (isCancelled) return;
+                
                 // Autoplay when loaded
                 midiPlayer.start();
-              });
+              };
               
-              midiPlayer.addEventListener('error', (e) => {
+              const handleError = (e) => {
+                if (isCancelled) return;
                 console.error('MIDI error, falling back to YouTube:', e);
                 setMidiError(true);
                 setUseMidi(false);
-              });
-
-              midiPlayer.addEventListener('start', () => setIsPlaying(true));
-              midiPlayer.addEventListener('stop', () => setIsPlaying(false));
+              };
+              
+              const handleStart = () => {
+                if (isCancelled) return;
+                setIsPlaying(true);
+              };
+              
+              const handleStop = () => {
+                if (isCancelled) return;
+                setIsPlaying(false);
+              };
+              
+              midiPlayer.addEventListener('load', handleLoad);
+              midiPlayer.addEventListener('error', handleError);
+              midiPlayer.addEventListener('start', handleStart);
+              midiPlayer.addEventListener('stop', handleStop);
             }
           }, 100);
+          
+          // Cleanup function
+          return () => {
+            isCancelled = true;
+            clearTimeout(timeoutId);
+          };
         }
       }, [audioUnlocked, useMidi, currentSong, preloadedMidi]);
 
