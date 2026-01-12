@@ -203,6 +203,8 @@
       const [playedSongs, setPlayedSongs] = useState([]);
       const [useMidi, setUseMidi] = useState(true);
       const [midiError, setMidiError] = useState(false);
+      const [preloadedMidi, setPreloadedMidi] = useState(null);
+      const [midiLoading, setMidiLoading] = useState(false);
       
       // YouTube fallback states
       const [showVideo, setShowVideo] = useState(false);
@@ -230,6 +232,38 @@
       useEffect(() => {
         startNewGame();
       }, []);
+
+      // Preload MIDI file when song changes
+      const preloadMidiFile = async (song) => {
+        if (!song?.midi) {
+          setPreloadedMidi(null);
+          return;
+        }
+        
+        setMidiLoading(true);
+        try {
+          const response = await fetch(song.midi);
+          if (!response.ok) {
+            throw new Error('Failed to fetch MIDI');
+          }
+          const arrayBuffer = await response.arrayBuffer();
+          const base64 = btoa(
+            new Uint8Array(arrayBuffer)
+              .reduce((data, byte) => data + String.fromCharCode(byte), '')
+          );
+          const dataUrl = `data:audio/midi;base64,${base64}`;
+          setPreloadedMidi(dataUrl);
+          setMidiError(false);
+          console.log('MIDI preloaded successfully');
+        } catch (error) {
+          console.error('Error preloading MIDI:', error);
+          setPreloadedMidi(null);
+          setMidiError(true);
+          setUseMidi(false);
+        } finally {
+          setMidiLoading(false);
+        }
+      };
 
       // Initialize YouTube player when needed (fallback)
       useEffect(() => {
@@ -413,7 +447,11 @@
         setYtPlayer(null);
         setUseMidi(true);
         setMidiError(false);
+        setPreloadedMidi(null);
         midiPlayerRef.current = null;
+        
+        // Preload MIDI file in background
+        preloadMidiFile(randomSong);
       };
 
       const handleGuess = async () => {
@@ -520,6 +558,8 @@
       const renderMidiPlayer = () => {
         if (!currentSong?.midi) return null;
         
+        // Use preloaded data URL if available, otherwise fall back to file path
+        const midiSrc = preloadedMidi || currentSong.midi;
         const midiId = `midi-viz-${Date.now()}`;
         // Explicit SoundFont URL from Google Storage
         const soundFontUrl = "https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus";
@@ -529,10 +569,10 @@
             <midi-visualizer 
               type="piano-roll" 
               id={midiId}
-              src={currentSong.midi}
+              src={midiSrc}
             ></midi-visualizer>
             <midi-player
-              src={currentSong.midi}
+              src={midiSrc}
               sound-font={soundFontUrl}
               visualizer={`#${midiId}`}
             ></midi-player>
@@ -656,7 +696,14 @@
                   {useMidi && currentSong?.midi && !midiError ? (
                     // MIDI Player with visualizer
                     <div className="rounded-lg overflow-hidden">
-                      {renderMidiPlayer()}
+                      {midiLoading ? (
+                        <div className="w-full px-6 py-8 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white text-center">
+                          <Music className="w-12 h-12 mx-auto mb-3 animate-pulse" />
+                          <p className="text-sm">Loading audio...</p>
+                        </div>
+                      ) : (
+                        renderMidiPlayer()
+                      )}
                       <p className="text-xs text-gray-500 text-center mt-2">
                         🎹 MIDI playback with piano-roll visualizer
                       </p>
