@@ -358,9 +358,6 @@
             if (midiPlayer) {
               midiPlayerRef.current = midiPlayer;
               
-              // Set initial volume (0-1 scale)
-              midiPlayer.volume = midiVolume / 100;
-              
               midiPlayer.addEventListener('load', () => {
                 console.log('MIDI loaded successfully');
                 setMidiError(false);
@@ -599,15 +596,31 @@
         );
       };
 
-      // Handle MIDI volume changes
+      // Handle MIDI volume changes using Tone.js master volume
       const handleMidiVolumeChange = (e) => {
         const newVolume = parseInt(e.target.value);
         setMidiVolume(newVolume);
-        if (midiPlayerRef.current) {
-          // Volume is 0-1 for the player
-          midiPlayerRef.current.volume = newVolume / 100;
+        
+        // Tone.js volume is in decibels, convert percentage to dB
+        // 0% = -Infinity (mute), 50% = -12dB, 100% = 0dB
+        if (window.Tone) {
+          if (newVolume === 0) {
+            Tone.Destination.volume.value = -Infinity;
+          } else {
+            // Convert 0-100 to roughly -40dB to 0dB range
+            const dB = (newVolume / 100) * 40 - 40;
+            Tone.Destination.volume.value = dB;
+          }
         }
       };
+      
+      // Set initial volume on load
+      useEffect(() => {
+        if (window.Tone) {
+          const dB = (midiVolume / 100) * 40 - 40;
+          Tone.Destination.volume.value = dB;
+        }
+      }, []);
 
       // Render MIDI player without visualizer, with volume control
       const renderMidiPlayer = () => {
