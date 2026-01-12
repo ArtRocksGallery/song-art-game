@@ -18,7 +18,7 @@
       margin-bottom: 10px;
     }
     midi-player::part(control-panel) {
-      background: linear-gradient(to right, #7c3aed, #db2777);
+      background: rgba(255,255,255,0.2);
       border-radius: 8px;
       padding: 8px;
     }
@@ -35,27 +35,6 @@
     midi-player::part(time) {
       color: white;
       font-family: monospace;
-    }
-    midi-visualizer {
-      display: block;
-      width: 100%;
-      height: 150px;
-      border-radius: 8px;
-      overflow: hidden;
-      background: #1f2937;
-    }
-    midi-visualizer svg {
-      width: 100%;
-      height: 100%;
-    }
-    midi-visualizer svg rect.note {
-      fill: #a855f7;
-      stroke: #7c3aed;
-      stroke-width: 1;
-    }
-    midi-visualizer svg rect.note.active {
-      fill: #f472b6;
-      stroke: #db2777;
     }
   </style>
 </head>
@@ -215,6 +194,7 @@
       const videoRef = useRef(null);
       const midiPlayerRef = useRef(null);
       const [soundFontReady, setSoundFontReady] = useState(false);
+      const [midiVolume, setMidiVolume] = useState(50);
       const MAX_GUESSES = 6;
       const GUESSES_BEFORE_AUDIO = 2;
       
@@ -377,6 +357,9 @@
             const midiPlayer = document.querySelector('midi-player');
             if (midiPlayer) {
               midiPlayerRef.current = midiPlayer;
+              
+              // Set initial volume (0-1 scale)
+              midiPlayer.volume = midiVolume / 100;
               
               midiPlayer.addEventListener('load', () => {
                 console.log('MIDI loaded successfully');
@@ -616,26 +599,52 @@
         );
       };
 
-      // Render MIDI player with visualizer
+      // Handle MIDI volume changes
+      const handleMidiVolumeChange = (e) => {
+        const newVolume = parseInt(e.target.value);
+        setMidiVolume(newVolume);
+        if (midiPlayerRef.current) {
+          // Volume is 0-1 for the player
+          midiPlayerRef.current.volume = newVolume / 100;
+        }
+      };
+
+      // Render MIDI player without visualizer, with volume control
       const renderMidiPlayer = () => {
         if (!currentSong?.midi) return null;
         
         // Use preloaded data URL if available, otherwise fall back to file path
         const midiSrc = preloadedMidi || currentSong.midi;
-        const midiId = `midi-viz-${Date.now()}`;
         
         return (
           <div className="w-full">
-            <midi-visualizer 
-              type="piano-roll" 
-              id={midiId}
-              src={midiSrc}
-            ></midi-visualizer>
-            <midi-player
-              src={midiSrc}
-              sound-font={SOUNDFONT_URL}
-              visualizer={`#${midiId}`}
-            ></midi-player>
+            <div className="w-full px-6 py-6 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white">
+              <div className="flex justify-center mb-3">
+                <Music className={`w-12 h-12 ${isPlaying ? 'animate-pulse' : ''}`} />
+              </div>
+              <midi-player
+                src={midiSrc}
+                sound-font={SOUNDFONT_URL}
+              ></midi-player>
+              <div className="mt-4 px-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm opacity-75">🔇</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={midiVolume}
+                    onChange={handleMidiVolumeChange}
+                    className="flex-1 h-2 bg-white/30 rounded-lg appearance-none cursor-pointer"
+                    style={{ accentColor: 'white' }}
+                  />
+                  <span className="text-sm opacity-75">🔊</span>
+                  <span className="text-xs bg-white/20 px-2 py-1 rounded min-w-[3rem] text-center">
+                    {midiVolume}%
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         );
       };
@@ -754,7 +763,7 @@
               {(audioUnlocked || gameWon || gameLost) && !gameWon && !gameLost && (
                 <div className="mb-4">
                   {useMidi && currentSong?.midi && !midiError ? (
-                    // MIDI Player with visualizer
+                    // MIDI Player
                     <div className="rounded-lg overflow-hidden">
                       {midiLoading ? (
                         <div className="w-full px-6 py-8 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white text-center">
@@ -764,9 +773,6 @@
                       ) : (
                         renderMidiPlayer()
                       )}
-                      <p className="text-xs text-gray-500 text-center mt-2">
-                        🎹 MIDI playback with piano-roll visualizer
-                      </p>
                     </div>
                   ) : currentSong?.youtubeId ? (
                     // YouTube fallback
