@@ -214,55 +214,67 @@
       
       const videoRef = useRef(null);
       const midiPlayerRef = useRef(null);
-      const soundFontLoadedRef = useRef(false);
+      const [soundFontReady, setSoundFontReady] = useState(false);
       const MAX_GUESSES = 6;
       const GUESSES_BEFORE_AUDIO = 2;
       
       // SoundFont URL - loaded once at page load
       const SOUNDFONT_URL = "https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus";
 
-      // Preload SoundFont once at page load
+      // Preload SoundFont by loading all MIDI files at startup
       useEffect(() => {
-        const preloadSoundFont = async () => {
-          if (soundFontLoadedRef.current) return;
+        const preloadAllMidi = async () => {
+          console.log('Preloading all MIDI files and SoundFont samples...');
           
-          console.log('Preloading SoundFont...');
-          try {
-            // Preload the soundfont.json
-            const soundfontResponse = await fetch(`${SOUNDFONT_URL}/soundfont.json`);
-            if (!soundfontResponse.ok) throw new Error('Failed to load soundfont.json');
-            const soundfontData = await soundfontResponse.json();
-            
-            // Preload common instruments (piano is most common in MIDI files)
-            const commonInstruments = ['acoustic_grand_piano', 'electric_guitar_clean', 'acoustic_guitar_nylon', 'string_ensemble_1', 'synth_drum'];
-            
-            for (const instrument of commonInstruments) {
+          // Create a hidden midi-player to preload the SoundFont
+          const preloadContainer = document.createElement('div');
+          preloadContainer.style.display = 'none';
+          preloadContainer.id = 'midi-preloader';
+          document.body.appendChild(preloadContainer);
+          
+          // Load each MIDI file to cache its required instruments
+          for (const song of SONGS) {
+            if (song.midi) {
               try {
-                const instrumentResponse = await fetch(`${SOUNDFONT_URL}/${instrument}/instrument.json`);
-                if (instrumentResponse.ok) {
-                  const instrumentData = await instrumentResponse.json();
-                  // Preload a few sample MP3s for each instrument (middle range, common velocity)
-                  const pitches = [60, 64, 67, 72]; // C4, E4, G4, C5
-                  const velocity = 79;
+                // Fetch and convert to base64
+                const response = await fetch(song.midi);
+                if (response.ok) {
+                  const arrayBuffer = await response.arrayBuffer();
+                  const base64 = btoa(
+                    new Uint8Array(arrayBuffer)
+                      .reduce((data, byte) => data + String.fromCharCode(byte), '')
+                  );
+                  const dataUrl = `data:audio/midi;base64,${base64}`;
                   
-                  await Promise.all(pitches.map(pitch => 
-                    fetch(`${SOUNDFONT_URL}/${instrument}/p${pitch}_v${velocity}.mp3`)
-                      .catch(e => console.log(`Sample not found: ${instrument} p${pitch}`))
-                  ));
+                  // Create a temporary player to load this MIDI's instruments
+                  const tempPlayer = document.createElement('midi-player');
+                  tempPlayer.setAttribute('sound-font', SOUNDFONT_URL);
+                  tempPlayer.setAttribute('src', dataUrl);
+                  preloadContainer.appendChild(tempPlayer);
+                  
+                  // Wait for it to load
+                  await new Promise((resolve) => {
+                    tempPlayer.addEventListener('load', resolve);
+                    tempPlayer.addEventListener('error', resolve);
+                    // Timeout fallback
+                    setTimeout(resolve, 5000);
+                  });
+                  
+                  console.log(`Preloaded: ${song.title}`);
                 }
               } catch (e) {
-                console.log(`Instrument not available: ${instrument}`);
+                console.log(`Failed to preload: ${song.title}`, e);
               }
             }
-            
-            soundFontLoadedRef.current = true;
-            console.log('SoundFont preloaded successfully');
-          } catch (error) {
-            console.error('Error preloading SoundFont:', error);
           }
+          
+          // Clean up preloader container
+          document.body.removeChild(preloadContainer);
+          setSoundFontReady(true);
+          console.log('All MIDI files and SoundFont samples preloaded!');
         };
         
-        preloadSoundFont();
+        preloadAllMidi();
       }, []);
 
       // Load YouTube API as fallback
