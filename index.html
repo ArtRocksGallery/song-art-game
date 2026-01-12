@@ -368,6 +368,24 @@
                   console.log('Audio context started from MIDI player');
                 }
                 
+                // Find first note time from the noteSequence and seek to it
+                try {
+                  const noteSequence = midiPlayer.noteSequence;
+                  if (noteSequence && noteSequence.notes && noteSequence.notes.length > 0) {
+                    // Find the earliest note start time
+                    const firstNoteTime = Math.min(...noteSequence.notes.map(n => n.startTime));
+                    
+                    // If there's significant silence at the start (more than 0.5 seconds), seek past it
+                    if (firstNoteTime > 0.5) {
+                      const seekTime = Math.max(0, firstNoteTime - 0.2); // Start 0.2s before first note
+                      console.log(`Seeking to ${seekTime}s (first note at ${firstNoteTime}s)`);
+                      midiPlayer.currentTime = seekTime;
+                    }
+                  }
+                } catch (e) {
+                  console.log('Could not detect first note time:', e);
+                }
+                
                 // Autoplay when loaded
                 midiPlayer.start();
               });
