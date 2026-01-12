@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Art Rocks - Guess the Song Based On The Art</title>
+  <title>Song Art - Guess the Song Game</title>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -214,8 +214,56 @@
       
       const videoRef = useRef(null);
       const midiPlayerRef = useRef(null);
+      const soundFontLoadedRef = useRef(false);
       const MAX_GUESSES = 6;
       const GUESSES_BEFORE_AUDIO = 2;
+      
+      // SoundFont URL - loaded once at page load
+      const SOUNDFONT_URL = "https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus";
+
+      // Preload SoundFont once at page load
+      useEffect(() => {
+        const preloadSoundFont = async () => {
+          if (soundFontLoadedRef.current) return;
+          
+          console.log('Preloading SoundFont...');
+          try {
+            // Preload the soundfont.json
+            const soundfontResponse = await fetch(`${SOUNDFONT_URL}/soundfont.json`);
+            if (!soundfontResponse.ok) throw new Error('Failed to load soundfont.json');
+            const soundfontData = await soundfontResponse.json();
+            
+            // Preload common instruments (piano is most common in MIDI files)
+            const commonInstruments = ['acoustic_grand_piano', 'electric_guitar_clean', 'acoustic_guitar_nylon', 'string_ensemble_1', 'synth_drum'];
+            
+            for (const instrument of commonInstruments) {
+              try {
+                const instrumentResponse = await fetch(`${SOUNDFONT_URL}/${instrument}/instrument.json`);
+                if (instrumentResponse.ok) {
+                  const instrumentData = await instrumentResponse.json();
+                  // Preload a few sample MP3s for each instrument (middle range, common velocity)
+                  const pitches = [60, 64, 67, 72]; // C4, E4, G4, C5
+                  const velocity = 79;
+                  
+                  await Promise.all(pitches.map(pitch => 
+                    fetch(`${SOUNDFONT_URL}/${instrument}/p${pitch}_v${velocity}.mp3`)
+                      .catch(e => console.log(`Sample not found: ${instrument} p${pitch}`))
+                  ));
+                }
+              } catch (e) {
+                console.log(`Instrument not available: ${instrument}`);
+              }
+            }
+            
+            soundFontLoadedRef.current = true;
+            console.log('SoundFont preloaded successfully');
+          } catch (error) {
+            console.error('Error preloading SoundFont:', error);
+          }
+        };
+        
+        preloadSoundFont();
+      }, []);
 
       // Load YouTube API as fallback
       useEffect(() => {
@@ -563,8 +611,6 @@
         // Use preloaded data URL if available, otherwise fall back to file path
         const midiSrc = preloadedMidi || currentSong.midi;
         const midiId = `midi-viz-${Date.now()}`;
-        // Explicit SoundFont URL from Google Storage
-        const soundFontUrl = "https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus";
         
         return (
           <div className="w-full">
@@ -575,7 +621,7 @@
             ></midi-visualizer>
             <midi-player
               src={midiSrc}
-              sound-font={soundFontUrl}
+              sound-font={SOUNDFONT_URL}
               visualizer={`#${midiId}`}
             ></midi-player>
           </div>
