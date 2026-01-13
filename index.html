@@ -1156,13 +1156,15 @@
                     </button>
                   </div>
 
-                  <button
-                    onClick={() => setShowHint(!showHint)}
-                    className="w-full px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Lightbulb className="w-4 h-4" />
-                    {showHint ? 'Hide' : 'Show'} Text Hint
-                  </button>
+                  {guesses.length >= 1 && (
+                    <button
+                      onClick={() => setShowHint(!showHint)}
+                      className="w-full px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Lightbulb className="w-4 h-4" />
+                      {showHint ? 'Hide' : 'Show'} Text Hint
+                    </button>
+                  )}
 
                   {showHint && currentSong && (
                     <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-gray-700">
