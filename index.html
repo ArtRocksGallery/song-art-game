@@ -94,6 +94,7 @@
     // SONGS array - update paths to match your hosted files
     // Use 'midi' for MIDI files, 'youtubeId' as fallback for songs without MIDI
     // 'youtubeTimestamp' is seconds into the video to start on win (optional, defaults to 0)
+    // 'difficulty' can be 'Easy', 'Medium', or 'Hard'
     const SONGS = [
       {
         title: "Rooster",
@@ -103,6 +104,7 @@
         midi: "midi/rooster.mid",
         youtubeId: "ZUqBglpHTO0",
         youtubeTimestamp: 121,
+        difficulty: "Medium",
         description: "x"
       },
       {
@@ -113,6 +115,7 @@
         midi: "midi/pink-houses.mid",
         youtubeId: "qOfkpu6749w",
         youtubeTimestamp: 57,
+        difficulty: "Medium",
         description: "x"
       },
       {
@@ -123,6 +126,7 @@
         midi: "midi/purple-rain.mid",
         youtubeId: "TvnYmWpD_T8",
         youtubeTimestamp: 116,
+        difficulty: "Medium",
         description: "Emotional power ballad"
       },
       {
@@ -133,6 +137,7 @@
         midi: "midi/dancing-queen.mid",
         youtubeId: "xFrGuyw1V8s",
         youtubeTimestamp: 0,
+        difficulty: "Medium",
         description: "x"
       },
       {
@@ -143,6 +148,7 @@
         midi: "midi/old-town-road.mid",
         youtubeId: "r7qovpFAGrQ",
         youtubeTimestamp: 0,
+        difficulty: "Medium",
         description: "x"
       },
       {
@@ -153,6 +159,7 @@
         midi: "midi/itsy-bitsy.mid",
         youtubeId: "ICkWjdQuK7Q",
         youtubeTimestamp: 22,
+        difficulty: "Medium",
         description: "x"
       },
       {
@@ -163,6 +170,7 @@
         midi: "midi/ymca.mid",
         youtubeId: "CS9OO0S5w2k",
         youtubeTimestamp: 0,
+        difficulty: "Medium",
         description: "x"
       },
       {
@@ -173,6 +181,7 @@
         midi: "midi/who-let-the-dogs-out.mid",
         youtubeId: "ojULkWEUsPs",
         youtubeTimestamp: 17,
+        difficulty: "Medium",
         description: "x"
       }
     ];
@@ -215,6 +224,9 @@
       const imageContainerRef = useRef(null);
       const MAGNIFIER_SIZE = 150;
       const ZOOM_LEVEL = 10;
+      
+      // State for viewing previous guess hints (null = current, 0-5 = viewing that guess's hint)
+      const [viewingGuessIndex, setViewingGuessIndex] = useState(null);
       
       // SoundFont URL - loaded once at page load
       const SOUNDFONT_URL = "https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus";
@@ -598,6 +610,7 @@
         setUseMidi(true);
         setMidiError(false);
         setPreloadedMidi(null);
+        setViewingGuessIndex(null);
         midiPlayerRef.current = null;
         
         // Preload MIDI file in background
@@ -613,9 +626,18 @@
           console.log('Audio context started');
         }
 
-        const normalizedGuess = guess.toLowerCase().trim();
-        const normalizedTitle = currentSong.title.toLowerCase();
-        const normalizedArtist = currentSong.artist.toLowerCase();
+        // Helper function to normalize strings for comparison
+        // Removes punctuation, extra spaces, and converts to lowercase
+        const normalizeForComparison = (str) => {
+          return str.toLowerCase()
+            .replace(/[^a-z0-9\s]/g, '') // Remove punctuation and special characters
+            .replace(/\s+/g, ' ')         // Collapse multiple spaces
+            .trim();
+        };
+
+        const normalizedGuess = normalizeForComparison(guess);
+        const normalizedTitle = normalizeForComparison(currentSong.title);
+        const normalizedArtist = normalizeForComparison(currentSong.artist);
         
         // Split artist name into words for flexible matching
         const artistWords = normalizedArtist.split(/\s+/).filter(w => w.length > 2);
@@ -655,6 +677,7 @@
         setGuess('');
         setSuggestions([]);
         setShowSuggestions(false);
+        setViewingGuessIndex(null); // Reset to current view
       };
 
       const toggleYouTubeAudio = () => {
@@ -732,8 +755,12 @@
           );
         }
 
-        // After GUESSES_BEFORE_AUDIO failed guesses, show video
-        if (guesses.length >= GUESSES_BEFORE_AUDIO && !gameWon) {
+        // Determine which hint to show based on viewingGuessIndex or current guess count
+        // viewingGuessIndex is the index being viewed (0-based), null means current
+        const effectiveGuessCount = viewingGuessIndex !== null ? viewingGuessIndex : guesses.length;
+        
+        // Show video if viewing a guess >= GUESSES_BEFORE_AUDIO, otherwise show image
+        if (effectiveGuessCount >= GUESSES_BEFORE_AUDIO) {
           return (
             <video
               ref={videoRef}
@@ -929,6 +956,19 @@
             </div>
 
             <div className="bg-white rounded-lg shadow-2xl p-6 mb-6">
+              {/* Difficulty badge */}
+              {currentSong && !gameWon && !gameLost && (
+                <div className="flex justify-center mb-3">
+                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                    currentSong.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
+                    currentSong.difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
+                    'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {currentSong.difficulty || 'Medium'}
+                  </span>
+                </div>
+              )}
+              
               {/* Visual hint area - image or video */}
               <div className="aspect-square bg-gray-100 rounded-lg mb-4 overflow-hidden">
                 {renderVisualHint()}
@@ -952,6 +992,8 @@
                   const guess = guesses[idx];
                   let bgColor = 'bg-gray-200'; // neutral/unused
                   let textColor = 'text-gray-400';
+                  const isClickable = idx < guesses.length && !gameWon && !gameLost;
+                  const isViewing = viewingGuessIndex === idx;
                   
                   if (guess) {
                     if (guess.correct) {
@@ -969,13 +1011,36 @@
                   return (
                     <div
                       key={idx}
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg ${bgColor} ${textColor} transition-colors duration-300`}
+                      onClick={() => {
+                        if (isClickable) {
+                          // Toggle: if already viewing this index, go back to current
+                          setViewingGuessIndex(isViewing ? null : idx);
+                        }
+                      }}
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg ${bgColor} ${textColor} transition-all duration-300 ${
+                        isClickable ? 'cursor-pointer hover:scale-110 hover:ring-2 hover:ring-purple-400' : ''
+                      } ${isViewing ? 'ring-4 ring-purple-600 scale-110' : ''}`}
                     >
                       {idx + 1}
                     </div>
                   );
                 })}
               </div>
+              
+              {/* Indicator when viewing a previous hint */}
+              {viewingGuessIndex !== null && !gameWon && !gameLost && (
+                <div className="text-center mb-3">
+                  <span className="text-sm text-purple-600 bg-purple-100 px-3 py-1 rounded-full">
+                    Viewing hint from guess {viewingGuessIndex + 1} 
+                    <button 
+                      onClick={() => setViewingGuessIndex(null)}
+                      className="ml-2 text-purple-800 font-bold hover:text-purple-900"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                </div>
+              )}
 
               {gameWon && (
                 <div className="mb-4 p-4 sm:p-6 bg-green-100 border-2 border-green-500 rounded-lg text-center">
