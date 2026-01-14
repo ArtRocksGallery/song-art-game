@@ -145,7 +145,7 @@
         video: "videos/purple-rain.mp4",
         midi: "midi/purple-rain.mid",
         youtubeId: "TvnYmWpD_T8",
-        youtubeTimestamp: 115,
+        youtubeTimestamp: 116,
         difficulty: "Medium",
         genre: "Pop Rock",
         year: 1984,
@@ -1101,6 +1101,27 @@
                   </span>
                 </div>
               )}
+
+              {/* Progressive hints - Genre on guess 4, Year on guess 5, Artist on guess 6 */}
+              {!gameWon && !gameLost && currentSong && guesses.length >= 3 && (
+                <div className="mb-3 flex flex-wrap gap-2 justify-center">
+                  {guesses.length >= 3 && currentSong.genre && (
+                    <div className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-sm">
+                      <span className="font-semibold">Genre:</span> {currentSong.genre}
+                    </div>
+                  )}
+                  {guesses.length >= 4 && currentSong.year && (
+                    <div className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm">
+                      <span className="font-semibold">Year:</span> {currentSong.year}
+                    </div>
+                  )}
+                  {guesses.length >= 5 && currentSong.artist && (
+                    <div className="px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg text-sm">
+                      <span className="font-semibold">Artist:</span> {currentSong.artist}
+                    </div>
+                  )}
+                </div>
+              )}
               
               {/* Visual hint area - image or video */}
               <div className="aspect-square bg-gray-100 rounded-lg mb-4 overflow-hidden">
@@ -1232,22 +1253,6 @@
                   </div>
                 )}
               </div>
-
-              {/* Progressive hints - Genre on guess 4, Year on guess 5 */}
-              {!gameWon && !gameLost && currentSong && (guesses.length >= 3 || guesses.length >= 4) && (
-                <div className="mb-4 flex flex-wrap gap-2 justify-center">
-                  {guesses.length >= 3 && currentSong.genre && (
-                    <div className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-sm">
-                      <span className="font-semibold">Genre:</span> {currentSong.genre}
-                    </div>
-                  )}
-                  {guesses.length >= 4 && currentSong.year && (
-                    <div className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm">
-                      <span className="font-semibold">Year:</span> {currentSong.year}
-                    </div>
-                  )}
-                </div>
-              )}
 
               {/* Audio player section - show during gameplay after 2 wrong guesses, hide on win/loss */}
               {audioUnlocked && guesses.length >= GUESSES_BEFORE_AUDIO && !gameWon && !gameLost && (
