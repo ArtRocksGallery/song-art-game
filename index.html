@@ -675,6 +675,7 @@
               ...prevStats.songStats,
               [songKey]: {
                 completed: true,
+                failed: false,
                 bestScore: prevStats.songStats[songKey]?.bestScore 
                   ? Math.min(prevStats.songStats[songKey].bestScore, numGuesses)
                   : numGuesses,
@@ -702,6 +703,7 @@
               [songKey]: {
                 ...prevStats.songStats[songKey],
                 completed: prevStats.songStats[songKey]?.completed || false,
+                failed: prevStats.songStats[songKey]?.completed ? prevStats.songStats[songKey]?.failed : true,
                 attempts: (prevStats.songStats[songKey]?.attempts || 0) + 1
               }
             }
@@ -1164,22 +1166,44 @@
                 </div>
                 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {SONGS.map((song, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => startSpecificSong(song)}
-                      className="p-4 bg-gray-50 hover:bg-purple-50 border-2 border-gray-200 hover:border-purple-400 rounded-lg transition-all text-center"
-                    >
-                      <p className="font-bold text-2xl text-gray-800 mb-2">#{idx + 1}</p>
-                      <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                        song.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
-                        song.difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
-                        'bg-yellow-100 text-yellow-700'
-                      }`}>
-                        {song.difficulty || 'Medium'}
-                      </span>
-                    </button>
-                  ))}
+                  {SONGS.map((song, idx) => {
+                    const songKey = `${song.title} - ${song.artist}`;
+                    const songStat = stats.songStats[songKey];
+                    const completed = songStat?.completed;
+                    const failed = songStat?.failed && !completed;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => startSpecificSong(song)}
+                        className={`p-4 hover:bg-purple-50 border-2 hover:border-purple-400 rounded-lg transition-all text-center ${
+                          completed ? 'bg-green-50 border-green-300' : failed ? 'bg-red-50 border-red-300' : 'bg-gray-50 border-gray-200'
+                        }`}
+                      >
+                        <p className={`font-bold text-2xl mb-2 ${
+                          completed ? 'text-green-700' : failed ? 'text-red-700' : 'text-gray-800'
+                        }`}>#{idx + 1}</p>
+                        <div className="flex flex-wrap gap-1 justify-center">
+                          <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                            song.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
+                            song.difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
+                            'bg-yellow-100 text-yellow-700'
+                          }`}>
+                            {song.difficulty || 'Medium'}
+                          </span>
+                          {completed && (
+                            <span className="px-2 py-0.5 rounded text-xs font-semibold bg-green-200 text-green-800">
+                              ✓ Won
+                            </span>
+                          )}
+                          {failed && (
+                            <span className="px-2 py-0.5 rounded text-xs font-semibold bg-red-200 text-red-800">
+                              ✗ Failed
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -1232,7 +1256,7 @@
                   <div className="space-y-2">
                     {[1, 2, 3, 4, 5, 6].map(num => {
                       const count = stats.winDistribution[num] || 0;
-                      const maxCount = Math.max(...Object.values(stats.winDistribution), 1);
+                      const maxCount = Math.max(...Object.values(stats.winDistribution), stats.gamesLost || 0, 1);
                       const percentage = (count / maxCount) * 100;
                       return (
                         <div key={num} className="flex items-center gap-2">
@@ -1248,6 +1272,18 @@
                         </div>
                       );
                     })}
+                    {/* Failed bar */}
+                    <div className="flex items-center gap-2">
+                      <span className="w-4 text-sm font-semibold text-red-600">✗</span>
+                      <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
+                        <div 
+                          className="h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-end pr-2 transition-all duration-500"
+                          style={{ width: `${Math.max((stats.gamesLost / Math.max(...Object.values(stats.winDistribution), stats.gamesLost || 0, 1)) * 100, stats.gamesLost > 0 ? 10 : 0)}%` }}
+                        >
+                          {stats.gamesLost > 0 && <span className="text-xs text-white font-bold">{stats.gamesLost}</span>}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
@@ -1261,19 +1297,23 @@
                       const songKey = `${song.title} - ${song.artist}`;
                       const songStat = stats.songStats[songKey];
                       const completed = songStat?.completed;
+                      const failed = songStat?.failed && !completed;
                       const bestScore = songStat?.bestScore;
                       return (
                         <div 
                           key={idx}
                           className={`p-2 rounded-lg text-center ${
-                            completed ? 'bg-green-100' : 'bg-gray-100'
+                            completed ? 'bg-green-100' : failed ? 'bg-red-100' : 'bg-gray-100'
                           }`}
                         >
-                          <p className={`font-bold ${completed ? 'text-green-700' : 'text-gray-400'}`}>
+                          <p className={`font-bold ${completed ? 'text-green-700' : failed ? 'text-red-700' : 'text-gray-400'}`}>
                             #{idx + 1}
                           </p>
                           {completed && (
-                            <p className="text-xs text-green-600">Best: {bestScore}</p>
+                            <p className="text-xs text-green-600">Guessed In: {bestScore}</p>
+                          )}
+                          {failed && (
+                            <p className="text-xs text-red-600">Failed</p>
                           )}
                         </div>
                       );
