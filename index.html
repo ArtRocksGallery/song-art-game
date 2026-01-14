@@ -901,15 +901,12 @@
         
         return (
           <div className="w-full">
-            <div className="w-full px-2 sm:px-6 py-3 sm:py-6 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white">
-              <div className="flex justify-center mb-2 sm:mb-3">
-                <Music className={`w-8 h-8 sm:w-12 sm:h-12 ${isPlaying ? 'animate-pulse' : ''}`} />
-              </div>
+            <div className="w-full px-2 sm:px-4 py-2 sm:py-3 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white">
               <midi-player
                 src={midiSrc}
                 sound-font={SOUNDFONT_URL}
               ></midi-player>
-              <div className="mt-2 sm:mt-4">
+              <div className="mt-2">
                 <div className="flex items-center gap-1.5 sm:gap-3">
                   <span className="text-xs opacity-75">🔇</span>
                   <input
