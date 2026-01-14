@@ -1125,20 +1125,20 @@
 
               {/* Progressive hints - Genre on guess 4, Year on guess 5, Artist on guess 6 */}
               {!gameWon && !gameLost && currentSong && guesses.length >= 3 && (
-                <div className="mb-4 flex flex-wrap gap-2 justify-center">
+                <div className="mb-4 flex flex-wrap gap-3 justify-center">
                   {guesses.length >= 3 && currentSong.genre && (
-                    <div className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-sm">
-                      <span className="font-semibold">Genre:</span> {currentSong.genre}
+                    <div className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-base font-bold">
+                      Genre: {currentSong.genre}
                     </div>
                   )}
                   {guesses.length >= 4 && currentSong.year && (
-                    <div className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm">
-                      <span className="font-semibold">Year:</span> {currentSong.year}
+                    <div className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-base font-bold">
+                      Year: {currentSong.year}
                     </div>
                   )}
                   {guesses.length >= 5 && currentSong.artist && (
-                    <div className="px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg text-sm">
-                      <span className="font-semibold">Artist:</span> {currentSong.artist}
+                    <div className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-base font-bold">
+                      Artist: {currentSong.artist}
                     </div>
                   )}
                 </div>
