@@ -593,8 +593,14 @@
       const handleInputChange = (e) => {
         const value = e.target.value;
         setGuess(value);
-        setShowSuggestions(true);
-        searchSongs(value);
+        // Only show autocomplete after the first guess has been made
+        if (guesses.length > 0) {
+          setShowSuggestions(true);
+          searchSongs(value);
+        } else {
+          setShowSuggestions(false);
+          setSuggestions([]);
+        }
       };
 
       const selectSuggestion = (suggestion) => {
