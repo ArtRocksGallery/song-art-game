@@ -818,17 +818,25 @@
         const newGuesses = [...guesses, { text: guess, correct: isCorrect, artistMatch }];
         setGuesses(newGuesses);
 
+        // Check if this song has already been played (for stats purposes)
+        const songKey = `${currentSong.title} - ${currentSong.artist}`;
+        const alreadyPlayed = stats.songStats[songKey]?.completed || stats.songStats[songKey]?.failed;
+
         if (isCorrect) {
           setGameWon(true);
           stopAllAudio(); // Stop MIDI so YouTube can play
-          recordWin(currentSong, newGuesses.length);
+          if (!alreadyPlayed) {
+            recordWin(currentSong, newGuesses.length);
+          }
           if (!audioUnlocked) {
             setAudioUnlocked(true);
           }
         } else if (newGuesses.length >= MAX_GUESSES) {
           setGameLost(true);
           stopAllAudio(); // Stop MIDI so YouTube can play
-          recordLoss(currentSong);
+          if (!alreadyPlayed) {
+            recordLoss(currentSong);
+          }
           setAudioUnlocked(true);
         } else if (newGuesses.length >= GUESSES_BEFORE_AUDIO) {
           setAudioUnlocked(true);
