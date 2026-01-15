@@ -1525,19 +1525,20 @@
               )}
 
               {/* Progressive hints - Genre on guess 4, Year on guess 5, Artist on guess 6 */}
-              {!gameWon && !gameLost && currentSong && guesses.length >= 3 && (
+              {/* Also show after game completion if they were unlocked */}
+              {currentSong && (guesses.length >= 3 || gameWon || gameLost) && (
                 <div className="mb-4 flex flex-wrap gap-3 justify-center">
-                  {guesses.length >= 3 && currentSong.genre && (
+                  {(guesses.length >= 3 || gameWon || gameLost) && currentSong.genre && (
                     <div className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-base font-bold">
                       Genre: {currentSong.genre}
                     </div>
                   )}
-                  {guesses.length >= 4 && currentSong.year && (
+                  {(guesses.length >= 4 || gameWon || gameLost) && currentSong.year && (
                     <div className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-base font-bold">
                       Year: {currentSong.year}
                     </div>
                   )}
-                  {guesses.length >= 5 && currentSong.artist && (
+                  {(guesses.length >= 5 || gameWon || gameLost) && currentSong.artist && (
                     <div className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-base font-bold">
                       Artist: {currentSong.artist}
                     </div>
@@ -1615,12 +1616,29 @@
                     const grade = getGrade(guesses.length);
                     const colors = getGradeColors(grade);
                     return (
-                      <div className={`inline-block px-6 py-3 rounded-xl ${colors.bg} border-2 ${colors.border}`}>
+                      <div className={`inline-block px-6 py-3 rounded-xl ${colors.bg} border-2 ${colors.border} mb-4`}>
                         <p className="text-sm font-semibold text-gray-600 mb-1">Grade</p>
                         <p className={`text-4xl font-black ${colors.text}`}>{grade}</p>
                       </div>
                     );
                   })()}
+                  
+                  <div className="flex gap-2 justify-center">
+                    <button
+                      onClick={startNewGame}
+                      className="flex-1 max-w-[150px] px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors flex items-center justify-center gap-2"
+                    >
+                      <ArrowRight className="w-4 h-4" />
+                      Next Game
+                    </button>
+                    <button
+                      onClick={() => setGameMode('archive')}
+                      className="flex-1 max-w-[150px] px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Archive className="w-4 h-4" />
+                      Archive
+                    </button>
+                  </div>
                 </div>
               )}
 
