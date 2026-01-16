@@ -1310,7 +1310,7 @@
         return (
           <div 
             ref={imageContainerRef}
-            className="relative w-full h-full cursor-none"
+            className="relative w-full h-full cursor-crosshair"
             onMouseEnter={() => setShowMagnifier(true)}
             onMouseLeave={() => setShowMagnifier(false)}
             onMouseMove={(e) => {
@@ -1330,11 +1330,11 @@
                 style={{
                   width: MAGNIFIER_SIZE,
                   height: MAGNIFIER_SIZE,
-                  left: magnifierPos.x + 20,
-                  top: magnifierPos.y - MAGNIFIER_SIZE - 20,
+                  left: magnifierPos.x - MAGNIFIER_SIZE / 2,
+                  top: magnifierPos.y - MAGNIFIER_SIZE / 2,
                   backgroundImage: `url(${currentSong.image})`,
-                  backgroundSize: `${ZOOM_LEVEL * 100}%`,
-                  backgroundPosition: `${magnifierBg.x}% ${magnifierBg.y}%`,
+                  backgroundSize: `${imageContainerRef.current?.offsetWidth * ZOOM_LEVEL}px ${imageContainerRef.current?.offsetHeight * ZOOM_LEVEL}px`,
+                  backgroundPosition: `${-magnifierPos.x * ZOOM_LEVEL + MAGNIFIER_SIZE / 2}px ${-magnifierPos.y * ZOOM_LEVEL + MAGNIFIER_SIZE / 2}px`,
                   backgroundRepeat: 'no-repeat',
                 }}
               />
