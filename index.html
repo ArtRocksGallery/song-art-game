@@ -133,6 +133,8 @@
         difficulty: "Easy",
         genre: "Grunge",
         year: 1992,
+        keyLyric1: "Ain't found a way to kill me yet",
+        keyLyric2: "Here they come to snuff the [...]",
         description: "A gritty, haunting song about a soldier’s survival and trauma during the Vietnam War, inspired by the guitarist’s father."
       },
       {
@@ -146,6 +148,8 @@
         difficulty: "Medium",
         genre: "Heartland Rock",
         year: 1983,
+        keyLyric1: "Ain't that America? Home of the free, yeah",
+        keyLyric2: "Little [...] for you and me",
         description: "A commentary on the American Dream that contrasts patriotic imagery with everyday economic and social struggles."
       },
       {
@@ -159,6 +163,8 @@
         difficulty: "Medium",
         genre: "Pop Rock",
         year: 1984,
+        keyLyric1: "I never meant to cause you any sorrow",
+        keyLyric2: "I only want to see you laughing in the [...]",
         description: "An emotional power ballad about love, loss, and reconciliation, blending personal regret with spiritual overtones."
       },
       {
@@ -172,6 +178,8 @@
         difficulty: "Easy",
         genre: "Disco Pop",
         year: 1976,
+        keyLyric1: "Friday night and the lights are low",
+        keyLyric2: "Young and sweet, only seventeen",
         description: "A joyful celebration of freedom and youthful escape found on the dance floor."
       },
       {
@@ -185,6 +193,8 @@
         difficulty: "Easy",
         genre: "Country Rap",
         year: 2019,
+		keyLyric1: "Yeah, I'm gonna take my horse to the [...]",
+        keyLyric2: "I'm gonna ride 'til I can't no more",
         description: "A genre-blending anthem about independence and persistence that fuses country imagery with hip-hop swagger."
       },
       {
@@ -1722,7 +1732,7 @@
                 {renderVisualHint()}
               </div>
 
-              {/* Progressive hints - Genre on guess 4, Year on guess 5, Artist on guess 6 */}
+              {/* Progressive hints - Genre (3), Lyric 1 (4), Year + Lyric 2 (5), Artist (6) */}
               {/* Also show after game completion if they were unlocked */}
               {currentSong && (guesses.length >= 3 || gameWon || gameLost) && (
                 <div className="mb-4 flex flex-wrap gap-3 justify-center">
@@ -1731,12 +1741,22 @@
                       Genre: {currentSong.genre}
                     </div>
                   )}
-                  {(guesses.length >= 4 || gameWon || gameLost) && currentSong.year && (
+                  {(guesses.length >= 4 || gameWon || gameLost) && currentSong.keyLyric1 && (
+                    <div className="px-4 py-2 bg-pink-100 text-pink-700 rounded-lg text-base font-bold italic">
+                      "{currentSong.keyLyric1}"
+                    </div>
+                  )}
+                  {(guesses.length >= 5 || gameWon || gameLost) && currentSong.year && (
                     <div className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-base font-bold">
                       Year: {currentSong.year}
                     </div>
                   )}
-                  {(guesses.length >= 5 || gameWon || gameLost) && currentSong.artist && (
+                  {(guesses.length >= 5 || gameWon || gameLost) && currentSong.keyLyric2 && (
+                    <div className="px-4 py-2 bg-pink-100 text-pink-700 rounded-lg text-base font-bold italic">
+                      "{currentSong.keyLyric2}"
+                    </div>
+                  )}
+                  {(guesses.length >= 6 || gameWon || gameLost) && currentSong.artist && (
                     <div className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-base font-bold">
                       Artist: {currentSong.artist}
                     </div>
