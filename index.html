@@ -1732,11 +1732,11 @@
                 {renderVisualHint()}
               </div>
 
-              {/* Progressive hints - Genre (3), Lyric 1 (4), Year + Lyric 2 (5), Artist (6) */}
+              {/* Progressive hints - Genre + Lyric 1 (4), Year + Lyric 2 (5), Artist (6) */}
               {/* Also show after game completion if they were unlocked */}
-              {currentSong && (guesses.length >= 3 || gameWon || gameLost) && (
+              {currentSong && (guesses.length >= 4 || gameWon || gameLost) && (
                 <div className="mb-4 flex flex-wrap gap-3 justify-center">
-                  {(guesses.length >= 3 || gameWon || gameLost) && currentSong.genre && (
+                  {(guesses.length >= 4 || gameWon || gameLost) && currentSong.genre && (
                     <div className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-base font-bold">
                       Genre: {currentSong.genre}
                     </div>
