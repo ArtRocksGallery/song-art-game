@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Song Art - Guess the Song Game</title>
+  <title>Song Inspired Art - Guess the Song Game</title>
   <link rel="icon" href="data:,">
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -117,6 +117,21 @@
       </svg>
     );
 
+    const Video = ({ className }) => (
+      <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="23 7 16 12 23 17 23 7"></polygon>
+        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+      </svg>
+    );
+
+    const Image = ({ className }) => (
+      <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+        <polyline points="21 15 16 10 5 21"></polyline>
+      </svg>
+    );
+
     // SONGS array - update paths to match your hosted files
     // Use 'midi' for MIDI files, 'youtubeId' as fallback for songs without MIDI
     // 'youtubeTimestamp' is seconds into the video to start on win (optional, defaults to 0)
@@ -133,6 +148,8 @@
         difficulty: "Easy",
         genre: "Grunge",
         year: 1992,
+        keyLyric1: "Ain't found a way to kill me yet",
+        keyLyric2: "Here they come to snuff the [...]",
         description: "A gritty, haunting song about a soldier’s survival and trauma during the Vietnam War, inspired by the guitarist’s father."
       },
       {
@@ -146,6 +163,8 @@
         difficulty: "Medium",
         genre: "Heartland Rock",
         year: 1983,
+        keyLyric1: "Ain't that America? Home of the free, yeah",
+        keyLyric2: "Little [...] for you and me",
         description: "A commentary on the American Dream that contrasts patriotic imagery with everyday economic and social struggles."
       },
       {
@@ -159,6 +178,8 @@
         difficulty: "Medium",
         genre: "Pop Rock",
         year: 1984,
+        keyLyric1: "I never meant to cause you any sorrow",
+        keyLyric2: "I only want to see you laughing in the [...]",
         description: "An emotional power ballad about love, loss, and reconciliation, blending personal regret with spiritual overtones."
       },
       {
@@ -172,6 +193,8 @@
         difficulty: "Easy",
         genre: "Disco Pop",
         year: 1976,
+        keyLyric1: "Friday night and the lights are low",
+        keyLyric2: "Young and sweet, only seventeen",
         description: "A joyful celebration of freedom and youthful escape found on the dance floor."
       },
       {
@@ -185,6 +208,8 @@
         difficulty: "Easy",
         genre: "Country Rap",
         year: 2019,
+		keyLyric1: "Yeah, I'm gonna take my horse to the [...]",
+        keyLyric2: "I'm gonna ride 'til I can't no more",
         description: "A genre-blending anthem about independence and persistence that fuses country imagery with hip-hop swagger."
       },
       {
@@ -306,15 +331,15 @@
       },
 	  {
         title: "Mustang Sally",
-        artist: "Buddy Guy",
+        artist: "Wilson Pickett",
         image: "images/mustang-sally.jpg",
         video: "videos/mustang-sally.mp4",
         midi: "midi/mustang-sally.mid",
-        youtubeId: "eAyFynJXe4g",
-        youtubeTimestamp: 0,
+        youtubeId: "OLSgNhce4VY",
+        youtubeTimestamp: 9,
         difficulty: "Medium",
-        genre: "Rythm and Blues",
-        year: 1991,
+        genre: "Rhythm and Blues",
+        year: 1966,
         description: ""
       },
 	  {
@@ -465,9 +490,9 @@
         case 1: return 'A+';
         case 2: return 'A';
         case 3: return 'B';
-        case 4: return 'C';
-        case 5: return 'D';
-        case 6: return 'E';
+        case 4: return 'B-';
+        case 5: return 'C';
+        case 6: return 'D';
         default: return 'F';
       }
     };
@@ -475,12 +500,12 @@
     // Get grade color classes
     const getGradeColors = (grade) => {
       switch (grade) {
-        case 'A+': return { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-500' };
+        case 'A+': return { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-500' };
         case 'A': return { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-500' };
         case 'B': return { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-500' };
+        case 'B-': return { bg: 'bg-sky-100', text: 'text-sky-700', border: 'border-sky-500' };
         case 'C': return { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-500' };
         case 'D': return { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-500' };
-        case 'E': return { bg: 'bg-red-100', text: 'text-red-600', border: 'border-red-400' };
         case 'F': return { bg: 'bg-red-200', text: 'text-red-800', border: 'border-red-600' };
         default: return { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-500' };
       }
@@ -488,8 +513,8 @@
 
     // Calculate average grade from stats
     const calculateAverageGrade = (stats) => {
-      const gradeValues = { 'A+': 7, 'A': 6, 'B': 5, 'C': 4, 'D': 3, 'E': 2, 'F': 1 };
-      const valueToGrade = { 7: 'A+', 6: 'A', 5: 'B', 4: 'C', 3: 'D', 2: 'E', 1: 'F' };
+      const gradeValues = { 'A+': 7, 'A': 6, 'B': 5, 'B-': 4, 'C': 3, 'D': 2, 'F': 1 };
+      const valueToGrade = { 7: 'A+', 6: 'A', 5: 'B', 4: 'B-', 3: 'C', 2: 'D', 1: 'F' };
       
       let totalValue = 0;
       let count = 0;
@@ -588,6 +613,7 @@
       
       // YouTube fallback states
       const [showVideo, setShowVideo] = useState(false);
+      const [showPictureOverVideo, setShowPictureOverVideo] = useState(false);
       const [playerReady, setPlayerReady] = useState(false);
       const [ytPlayer, setYtPlayer] = useState(null);
       const [volume, setVolume] = useState(50);
@@ -604,11 +630,8 @@
       const [magnifierPos, setMagnifierPos] = useState({ x: 0, y: 0 });
       const [magnifierBg, setMagnifierBg] = useState({ x: 0, y: 0 });
       const imageContainerRef = useRef(null);
-      const MAGNIFIER_SIZE = 180;
-      const ZOOM_LEVEL = 14;
-      
-      // State for viewing previous guess hints (null = current, 0-5 = viewing that guess's hint)
-      const [viewingGuessIndex, setViewingGuessIndex] = useState(null);
+      const MAGNIFIER_SIZE = 360;
+      const ZOOM_LEVEL = 4;
       
       // SoundFont URL - loaded once at page load
       const SOUNDFONT_URL = "https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus";
@@ -860,11 +883,33 @@
           if (response.ok) {
             const data = await response.json();
             if (data.results && data.results.length > 0) {
-              const tracks = data.results.map(track => ({
+              let tracks = data.results.map(track => ({
                 title: track.trackName,
                 artist: track.artistName,
                 fullText: `${track.trackName} - ${track.artistName}`
               }));
+              
+              // Prioritize the correct artist if user typed matching title
+              if (currentSong) {
+                const queryLower = query.toLowerCase();
+                const currentTitleLower = currentSong.title.toLowerCase();
+                const currentArtistLower = currentSong.artist.toLowerCase();
+                
+                // If query matches or is close to the current song title, boost correct artist
+                if (currentTitleLower.includes(queryLower) || queryLower.includes(currentTitleLower)) {
+                  tracks.sort((a, b) => {
+                    const aIsCorrectArtist = a.artist.toLowerCase().includes(currentArtistLower) || 
+                                             currentArtistLower.includes(a.artist.toLowerCase());
+                    const bIsCorrectArtist = b.artist.toLowerCase().includes(currentArtistLower) || 
+                                             currentArtistLower.includes(b.artist.toLowerCase());
+                    
+                    if (aIsCorrectArtist && !bIsCorrectArtist) return -1;
+                    if (!aIsCorrectArtist && bIsCorrectArtist) return 1;
+                    return 0;
+                  });
+                }
+              }
+              
               setSuggestions(tracks);
             } else {
               searchLocalSongs(query);
@@ -1068,7 +1113,7 @@
         setUseMidi(true);
         setMidiError(false);
         setPreloadedMidi(null);
-        setViewingGuessIndex(null);
+        setShowPictureOverVideo(false);
         midiPlayerRef.current = null;
         
         // Preload MIDI file in background
@@ -1223,41 +1268,51 @@
         if ((gameWon || gameLost) && currentSong.youtubeId) {
           const timestamp = currentSong.youtubeTimestamp || 0;
           return (
-            <iframe
-              className="w-full h-full"
-              src={`https://www.youtube.com/embed/${currentSong.youtubeId}?autoplay=1&start=${timestamp}`}
-              title={`${currentSong.title} by ${currentSong.artist}`}
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <iframe
+                className="absolute top-0 left-0 w-full h-full"
+                src={`https://www.youtube.com/embed/${currentSong.youtubeId}?autoplay=1&start=${timestamp}`}
+                title={`${currentSong.title} by ${currentSong.artist}`}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
           );
         }
 
-        // Determine which hint to show based on viewingGuessIndex or current guess count
-        // viewingGuessIndex is the index being viewed (0-based), null means current
-        const effectiveGuessCount = viewingGuessIndex !== null ? viewingGuessIndex : guesses.length;
+        // Determine which hint to show based on guess count and toggle
+        const shouldShowVideo = guesses.length >= GUESSES_BEFORE_AUDIO && !showPictureOverVideo;
         
-        // Show video if viewing a guess >= GUESSES_BEFORE_AUDIO, otherwise show image
-        if (effectiveGuessCount >= GUESSES_BEFORE_AUDIO) {
+        // Show video if we have enough guesses and not toggled to picture
+        if (shouldShowVideo) {
           return (
-            <video
-              ref={videoRef}
-              src={currentSong.video}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-            />
+            <div className="relative w-full">
+              <video
+                ref={videoRef}
+                src={currentSong.video}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-auto object-contain"
+              />
+              <button
+                onClick={() => setShowPictureOverVideo(true)}
+                className="absolute bottom-3 right-3 px-3 py-2 bg-black/60 hover:bg-black/80 text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
+              >
+                <Image className="w-4 h-4" />
+                Show Picture
+              </button>
+            </div>
           );
         }
 
-        // Otherwise show static image with magnifier
+        // Show static image with magnifier (and toggle button if video is available)
         return (
           <div 
             ref={imageContainerRef}
-            className="relative w-full h-full cursor-none"
+            className="relative w-full cursor-crosshair"
             onMouseEnter={() => setShowMagnifier(true)}
             onMouseLeave={() => setShowMagnifier(false)}
             onMouseMove={(e) => {
@@ -1268,7 +1323,7 @@
             <img
               src={currentSong.image}
               alt="Song hint"
-              className="w-full h-full object-cover"
+              className="w-full h-auto object-contain"
               draggable="false"
             />
             {showMagnifier && (
@@ -1280,11 +1335,20 @@
                   left: magnifierPos.x - MAGNIFIER_SIZE / 2,
                   top: magnifierPos.y - MAGNIFIER_SIZE / 2,
                   backgroundImage: `url(${currentSong.image})`,
-                  backgroundSize: `${ZOOM_LEVEL * 100}%`,
-                  backgroundPosition: `${magnifierBg.x}% ${magnifierBg.y}%`,
+                  backgroundSize: `${imageContainerRef.current?.offsetWidth * ZOOM_LEVEL}px ${imageContainerRef.current?.offsetHeight * ZOOM_LEVEL}px`,
+                  backgroundPosition: `${-magnifierPos.x * ZOOM_LEVEL + MAGNIFIER_SIZE / 2}px ${-magnifierPos.y * ZOOM_LEVEL + MAGNIFIER_SIZE / 2}px`,
                   backgroundRepeat: 'no-repeat',
                 }}
               />
+            )}
+            {guesses.length >= GUESSES_BEFORE_AUDIO && showPictureOverVideo && (
+              <button
+                onClick={() => setShowPictureOverVideo(false)}
+                className="absolute bottom-3 right-3 px-3 py-2 bg-black/60 hover:bg-black/80 text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2 pointer-events-auto"
+              >
+                <Video className="w-4 h-4" />
+                Show Video
+              </button>
             )}
           </div>
         );
@@ -1429,7 +1493,7 @@
             <div className="text-center mb-8 pt-6">
               <div className="flex items-center justify-center gap-3 mb-2">
                 <Music className="w-10 h-10 text-yellow-400" />
-                <h1 className="text-4xl font-bold text-white">Song Art</h1>
+                <h1 className="text-4xl font-bold text-white">Song Inspired Art</h1>
               </div>
               <p className="text-purple-200">Guess the song from its visual hints</p>
             </div>
@@ -1696,27 +1760,50 @@
               )}
               
               {/* Visual hint area - image or video */}
-              <div className="aspect-square bg-gray-100 rounded-lg mb-4 overflow-hidden">
+              <div className="bg-gray-100 rounded-lg mb-4 overflow-hidden">
                 {renderVisualHint()}
               </div>
 
-              {/* Progressive hints - Genre on guess 4, Year on guess 5, Artist on guess 6 */}
+              {/* Progressive hints - Genre + Lyric 1 (4), Year + Lyric 2 (5), Artist (6) */}
               {/* Also show after game completion if they were unlocked */}
               {currentSong && (guesses.length >= 3 || gameWon || gameLost) && (
-                <div className="mb-4 flex flex-wrap gap-3 justify-center">
-                  {(guesses.length >= 3 || gameWon || gameLost) && currentSong.genre && (
-                    <div className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-base font-bold">
-                      Genre: {currentSong.genre}
+                <div className="mb-4 flex flex-col gap-2 items-center">
+                  {/* Row 1: Genre + Lyric 1 */}
+                  {(guesses.length >= 3 || gameWon || gameLost) && (currentSong.genre || currentSong.keyLyric1) && (
+                    <div className="flex flex-wrap gap-3 justify-center">
+                      {currentSong.genre && (
+                        <div className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-base font-bold">
+                          Genre: {currentSong.genre}
+                        </div>
+                      )}
+                      {currentSong.keyLyric1 && (
+                        <div className="px-4 py-2 bg-pink-100 text-pink-700 rounded-lg text-base font-bold italic">
+                          "{currentSong.keyLyric1}"
+                        </div>
+                      )}
                     </div>
                   )}
-                  {(guesses.length >= 4 || gameWon || gameLost) && currentSong.year && (
-                    <div className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-base font-bold">
-                      Year: {currentSong.year}
+                  {/* Row 2: Year + Lyric 2 */}
+                  {(guesses.length >= 4 || gameWon || gameLost) && (currentSong.year || currentSong.keyLyric2) && (
+                    <div className="flex flex-wrap gap-3 justify-center">
+                      {currentSong.year && (
+                        <div className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-base font-bold">
+                          Year: {currentSong.year}
+                        </div>
+                      )}
+                      {currentSong.keyLyric2 && (
+                        <div className="px-4 py-2 bg-pink-100 text-pink-700 rounded-lg text-base font-bold italic">
+                          "{currentSong.keyLyric2}"
+                        </div>
+                      )}
                     </div>
                   )}
+                  {/* Row 3: Artist */}
                   {(guesses.length >= 5 || gameWon || gameLost) && currentSong.artist && (
-                    <div className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-base font-bold">
-                      Artist: {currentSong.artist}
+                    <div className="flex justify-center">
+                      <div className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-base font-bold">
+                        Artist: {currentSong.artist}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1728,8 +1815,7 @@
                   const guess = guesses[idx];
                   let bgColor = 'bg-gray-200'; // neutral/unused
                   let textColor = 'text-gray-400';
-                  const isClickable = idx < guesses.length && !gameWon && !gameLost;
-                  const isViewing = viewingGuessIndex === idx;
+                  const isCurrentGuess = idx === guesses.length && !gameWon && !gameLost;
                   
                   if (guess) {
                     if (guess.correct) {
@@ -1747,36 +1833,15 @@
                   return (
                     <div
                       key={idx}
-                      onClick={() => {
-                        if (isClickable) {
-                          // Toggle: if already viewing this index, go back to current
-                          setViewingGuessIndex(isViewing ? null : idx);
-                        }
-                      }}
                       className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg ${bgColor} ${textColor} transition-all duration-300 ${
-                        isClickable ? 'cursor-pointer hover:scale-110 hover:ring-2 hover:ring-purple-400' : ''
-                      } ${isViewing ? 'ring-4 ring-purple-600 scale-110' : ''}`}
+                        isCurrentGuess ? 'ring-4 ring-purple-600 scale-110' : ''
+                      }`}
                     >
                       {idx + 1}
                     </div>
                   );
                 })}
               </div>
-              
-              {/* Indicator when viewing a previous hint */}
-              {viewingGuessIndex !== null && !gameWon && !gameLost && (
-                <div className="text-center mb-3">
-                  <span className="text-sm text-purple-600 bg-purple-100 px-3 py-1 rounded-full">
-                    Viewing hint from guess {viewingGuessIndex + 1} 
-                    <button 
-                      onClick={() => setViewingGuessIndex(null)}
-                      className="ml-2 text-purple-800 font-bold hover:text-purple-900"
-                    >
-                      ✕
-                    </button>
-                  </span>
-                </div>
-              )}
 
               {gameWon && (
                 <div className="mb-4 p-4 sm:p-6 bg-green-100 border-2 border-green-500 rounded-lg text-center">
