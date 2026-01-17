@@ -1744,7 +1744,7 @@
               </div>
               
               {/* Game number and Difficulty badge */}
-              {currentSong && !gameWon && !gameLost && (
+              {currentSong && (
                 <div className="flex justify-center gap-3 mb-3">
                   <span className="px-4 py-2 rounded-lg text-base font-bold bg-gray-100 text-gray-700">
                     Game #{SONGS.findIndex(s => s.title === currentSong.title && s.artist === currentSong.artist) + 1}
