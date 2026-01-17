@@ -1268,14 +1268,16 @@
         if ((gameWon || gameLost) && currentSong.youtubeId) {
           const timestamp = currentSong.youtubeTimestamp || 0;
           return (
-            <iframe
-              className="w-full h-full"
-              src={`https://www.youtube.com/embed/${currentSong.youtubeId}?autoplay=1&start=${timestamp}`}
-              title={`${currentSong.title} by ${currentSong.artist}`}
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <iframe
+                className="absolute top-0 left-0 w-full h-full"
+                src={`https://www.youtube.com/embed/${currentSong.youtubeId}?autoplay=1&start=${timestamp}`}
+                title={`${currentSong.title} by ${currentSong.artist}`}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
           );
         }
 
