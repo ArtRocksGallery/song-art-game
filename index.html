@@ -1285,7 +1285,7 @@
         // Show video if we have enough guesses and not toggled to picture
         if (shouldShowVideo) {
           return (
-            <div className="relative w-full h-full">
+            <div className="relative w-full">
               <video
                 ref={videoRef}
                 src={currentSong.video}
@@ -1293,7 +1293,7 @@
                 loop
                 muted
                 playsInline
-                className="w-full h-full object-cover"
+                className="w-full h-auto object-contain"
               />
               <button
                 onClick={() => setShowPictureOverVideo(true)}
@@ -1310,7 +1310,7 @@
         return (
           <div 
             ref={imageContainerRef}
-            className="relative w-full h-full cursor-crosshair"
+            className="relative w-full cursor-crosshair"
             onMouseEnter={() => setShowMagnifier(true)}
             onMouseLeave={() => setShowMagnifier(false)}
             onMouseMove={(e) => {
@@ -1321,7 +1321,7 @@
             <img
               src={currentSong.image}
               alt="Song hint"
-              className="w-full h-full object-cover"
+              className="w-full h-auto object-contain"
               draggable="false"
             />
             {showMagnifier && (
@@ -1758,7 +1758,7 @@
               )}
               
               {/* Visual hint area - image or video */}
-              <div className="aspect-square bg-gray-100 rounded-lg mb-4 overflow-hidden">
+              <div className="bg-gray-100 rounded-lg mb-4 overflow-hidden">
                 {renderVisualHint()}
               </div>
 
