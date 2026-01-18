@@ -1209,6 +1209,38 @@
         setViewingGuessIndex(null); // Reset to current view
       };
 
+      const handleSkip = async () => {
+        if (gameWon || gameLost) return;
+
+        // Start audio context on first user interaction
+        if (window.Tone && Tone.context.state !== 'running') {
+          await Tone.start();
+          console.log('Audio context started');
+        }
+
+        const newGuesses = [...guesses, { text: '(Skipped)', correct: false, artistMatch: false, skipped: true }];
+        setGuesses(newGuesses);
+
+        // Check if this song has already been played (for stats purposes)
+        const songKey = `${currentSong.title} - ${currentSong.artist}`;
+        const alreadyPlayed = stats.songStats[songKey]?.completed || stats.songStats[songKey]?.failed;
+
+        if (newGuesses.length >= MAX_GUESSES) {
+          setGameLost(true);
+          stopAllAudio(); // Stop MIDI so YouTube can play
+          if (!alreadyPlayed) {
+            recordLoss(currentSong);
+          }
+          setAudioUnlocked(true);
+        } else if (newGuesses.length >= GUESSES_BEFORE_AUDIO) {
+          setAudioUnlocked(true);
+        }
+
+        setGuess('');
+        setSuggestions([]);
+        setShowSuggestions(false);
+      };
+
       const toggleYouTubeAudio = () => {
         if (!ytPlayer || !playerReady) {
           console.log('YouTube player not ready yet');
@@ -2000,6 +2032,12 @@
                       )}
                     </div>
                     <button
+                      onClick={handleSkip}
+                      className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors"
+                    >
+                      Skip
+                    </button>
+                    <button
                       onClick={() => {
                         handleGuess();
                         setShowSuggestions(false);
@@ -2013,7 +2051,7 @@
                   {guesses.length >= 1 && (
                     <button
                       onClick={() => setShowHint(!showHint)}
-                      className="w-full px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 transition-colors flex items-center justify-center gap-2"
+                      className="w-full px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 transition-colors flex items-center justify-center gap-2 font-bold"
                     >
                       <Lightbulb className="w-4 h-4" />
                       {showHint ? 'Hide' : 'Show'} Text Hint
@@ -2021,7 +2059,7 @@
                   )}
 
                   {showHint && currentSong && (
-                    <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-gray-700">
+                    <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-gray-700 font-bold">
                       {currentSong.description}
                     </div>
                   )}
