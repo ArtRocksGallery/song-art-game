@@ -633,6 +633,11 @@
       const MAGNIFIER_SIZE = 360;
       const ZOOM_LEVEL = 4;
       
+      // Check if device is touch/mobile (magnifier only shows on desktop)
+      const isTouchDevice = () => {
+        return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      };
+      
       // SoundFont URL - loaded once at page load
       const SOUNDFONT_URL = "https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus";
 
@@ -1309,15 +1314,18 @@
         }
 
         // Show static image with magnifier (and toggle button if video is available)
+        const isTouch = isTouchDevice();
         return (
           <div 
             ref={imageContainerRef}
-            className="relative w-full cursor-crosshair"
-            onMouseEnter={() => setShowMagnifier(true)}
-            onMouseLeave={() => setShowMagnifier(false)}
+            className={`relative w-full ${!isTouch ? 'cursor-crosshair' : ''}`}
+            onMouseEnter={() => !isTouch && setShowMagnifier(true)}
+            onMouseLeave={() => !isTouch && setShowMagnifier(false)}
             onMouseMove={(e) => {
-              if (!showMagnifier) setShowMagnifier(true);
-              handleMouseMove(e);
+              if (!isTouch) {
+                if (!showMagnifier) setShowMagnifier(true);
+                handleMouseMove(e);
+              }
             }}
           >
             <img
@@ -1326,7 +1334,7 @@
               className="w-full h-auto object-contain"
               draggable="false"
             />
-            {showMagnifier && (
+            {showMagnifier && !isTouch && (
               <div
                 className="absolute pointer-events-none border-4 border-white shadow-lg rounded-full"
                 style={{
