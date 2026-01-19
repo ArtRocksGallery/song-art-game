@@ -1999,8 +1999,8 @@
 
               {!gameWon && !gameLost && (
                 <>
-                  <div className="flex gap-2 mb-4 autocomplete-container relative">
-                    <div className="flex-1 relative">
+                  <div className="mb-4 autocomplete-container relative">
+                    <div className="relative">
                       <input
                         type="text"
                         value={guess}
@@ -2031,9 +2031,11 @@
                         </div>
                       )}
                     </div>
+                  </div>
+                  <div className="flex gap-2 mb-4">
                     <button
                       onClick={handleSkip}
-                      className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors"
+                      className="flex-1 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors"
                     >
                       Skip
                     </button>
@@ -2042,7 +2044,7 @@
                         handleGuess();
                         setShowSuggestions(false);
                       }}
-                      className="px-12 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors"
+                      className="flex-1 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors"
                     >
                       Guess
                     </button>
