@@ -454,7 +454,7 @@
         midi: "midi/10th-avenue-freeze-out.mid",
         youtubeId: "LOkQsVJV8ts",
         youtubeTimestamp: 51,
-        difficulty: "Hard",
+        difficulty: "Medium",
         genre: "x",
         year: 1975,
         description: "x"
@@ -623,7 +623,7 @@
         midi: "midi/who-are-you.mid",
         youtubeId: "PNbBDrceCy8",
         youtubeTimestamp: 22,
-        difficulty: "Medium",
+        difficulty: "Easy",
         genre: "x",
         year: 1978,
         description: "x"
@@ -631,9 +631,9 @@
 	  {
         title: "Wild Thing",
         artist: "The Troggs",
-        image: "images/who-are-you.jpg",
-        video: "videos/who-are-you.mp4",
-        midi: "midi/who-are-you.mid",
+        image: "images/wild-thing.jpg",
+        video: "videos/wild-thing.mp4",
+        midi: "midi/wild-thing.mid",
         youtubeId: "gSWInYFVksg",
         youtubeTimestamp: 0,
         difficulty: "Easy",
@@ -649,7 +649,7 @@
         midi: "midi/wish-you-were-here.mid",
         youtubeId: "K6qj09OHvjw",
         youtubeTimestamp: 17,
-        difficulty: "Medium",
+        difficulty: "Very Hard",
         genre: "x",
         year: 1972,
         description: "x"
@@ -661,7 +661,7 @@
         video: "videos/witchy-woman.mp4",
         midi: "midi/witchy-woman.mid",
         youtubeId: "clqsYJfQ6GQ",
-        youtubeTimestamp: 48,
+        youtubeTimestamp: 49,
         difficulty: "Medium",
         genre: "x",
         year: 1972,
@@ -675,7 +675,7 @@
         midi: "midi/wooly-bully.mid",
         youtubeId: "qCoUmMDiEhs",
         youtubeTimestamp: 48,
-        difficulty: "Hard",
+        difficulty: "Very Hard",
         genre: "x",
         year: 1965,
         description: "x"
@@ -700,7 +700,7 @@
         video: "videos/yellow-submarine.mp4",
         midi: "midi/yellow-submarine.mid",
         youtubeId: "m2uTFF_3MaA",
-        youtubeTimestamp: 0,
+        youtubeTimestamp: 37,
         difficulty: "Easy",
         genre: "x",
         year: 1968,
@@ -1410,6 +1410,34 @@
             .trim();
         };
 
+        // Levenshtein distance for fuzzy matching
+        const levenshteinDistance = (str1, str2) => {
+          const m = str1.length;
+          const n = str2.length;
+          const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+          
+          for (let i = 0; i <= m; i++) dp[i][0] = i;
+          for (let j = 0; j <= n; j++) dp[0][j] = j;
+          
+          for (let i = 1; i <= m; i++) {
+            for (let j = 1; j <= n; j++) {
+              if (str1[i - 1] === str2[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1];
+              } else {
+                dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+              }
+            }
+          }
+          return dp[m][n];
+        };
+
+        // Check if two strings are similar enough (allow ~1 error per 10 characters, minimum 2)
+        const isSimilarEnough = (str1, str2) => {
+          const distance = levenshteinDistance(str1, str2);
+          const maxAllowedDistance = Math.max(2, Math.floor(Math.max(str1.length, str2.length) / 10));
+          return distance <= maxAllowedDistance;
+        };
+
         const normalizedGuess = normalizeForComparison(guess);
         const normalizedTitle = normalizeForComparison(currentSong.title);
         const normalizedArtist = normalizeForComparison(currentSong.artist);
@@ -1424,10 +1452,19 @@
         // Also check for exact artist match or artist as substring
         const artistInGuess = normalizedGuess.includes(normalizedArtist) || guessContainsArtist;
 
-        const isCorrect = normalizedGuess === normalizedTitle || 
-                          normalizedGuess === `${normalizedTitle} ${normalizedArtist}` ||
-                          normalizedGuess === `${normalizedArtist} ${normalizedTitle}` ||
-                          (normalizedGuess.includes(normalizedTitle) && artistInGuess);
+        // Check for exact or fuzzy title match
+        const titleMatches = normalizedGuess === normalizedTitle || 
+                            isSimilarEnough(normalizedGuess, normalizedTitle);
+        
+        const titleWithArtistMatches = normalizedGuess === `${normalizedTitle} ${normalizedArtist}` ||
+                                       normalizedGuess === `${normalizedArtist} ${normalizedTitle}` ||
+                                       isSimilarEnough(normalizedGuess, `${normalizedTitle} ${normalizedArtist}`) ||
+                                       isSimilarEnough(normalizedGuess, `${normalizedArtist} ${normalizedTitle}`);
+
+        const isCorrect = titleMatches || 
+                          titleWithArtistMatches ||
+                          (normalizedGuess.includes(normalizedTitle) && artistInGuess) ||
+                          (isSimilarEnough(normalizedGuess, normalizedTitle) && artistInGuess);
 
         // Check if artist was guessed correctly (but not the song)
         const artistMatch = !isCorrect && artistInGuess;
@@ -1565,7 +1602,7 @@
         if ((gameWon || gameLost) && currentSong.youtubeId) {
           const timestamp = currentSong.youtubeTimestamp || 0;
           return (
-            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+            <div className="relative w-full" style={{ paddingBottom: '100%' }}>
               <iframe
                 className="absolute top-0 left-0 w-full h-full"
                 src={`https://www.youtube.com/embed/${currentSong.youtubeId}?autoplay=1&start=${timestamp}`}
@@ -1876,7 +1913,8 @@
                         <div className="flex flex-wrap gap-1 justify-center">
                           <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
                             song.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
-                            song.difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
+                            song.difficulty === 'Very Hard' ? 'bg-red-100 text-red-700' :
+                            song.difficulty === 'Hard' ? 'bg-orange-100 text-orange-700' :
                             'bg-yellow-100 text-yellow-700'
                           }`}>
                             {song.difficulty || 'Medium'}
@@ -2051,7 +2089,8 @@
                   </span>
                   <span className={`px-4 py-2 rounded-lg text-base font-bold ${
                     currentSong.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
-                    currentSong.difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
+                    currentSong.difficulty === 'Very Hard' ? 'bg-red-100 text-red-700' :
+                    currentSong.difficulty === 'Hard' ? 'bg-orange-100 text-orange-700' :
                     'bg-yellow-100 text-yellow-700'
                   }`}>
                     {currentSong.difficulty || 'Medium'}
