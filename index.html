@@ -871,6 +871,13 @@
       const [preloadedMidi, setPreloadedMidi] = useState(null);
       const [midiLoading, setMidiLoading] = useState(false);
       
+      // iTunes preview states
+      const [itunesPreviewUrl, setItunesPreviewUrl] = useState(null);
+      const [itunesLoading, setItunesLoading] = useState(false);
+      const [itunesError, setItunesError] = useState(false);
+      const [itunesVolume, setItunesVolume] = useState(80);
+      const itunesAudioRef = useRef(null);
+      
       // YouTube fallback states
       const [showVideo, setShowVideo] = useState(false);
       const [showPictureOverVideo, setShowPictureOverVideo] = useState(false);
@@ -1002,6 +1009,71 @@
           setUseMidi(false);
         } finally {
           setMidiLoading(false);
+        }
+      };
+
+      // Fetch iTunes preview URL for a song
+      const fetchItunesPreview = async (song) => {
+        if (!song) {
+          setItunesPreviewUrl(null);
+          return;
+        }
+        
+        setItunesLoading(true);
+        setItunesError(false);
+        
+        try {
+          // Search iTunes for the song
+          const searchQuery = encodeURIComponent(`${song.title} ${song.artist}`);
+          const response = await fetch(
+            `https://itunes.apple.com/search?term=${searchQuery}&media=music&entity=song&limit=5`
+          );
+          
+          if (!response.ok) {
+            throw new Error('iTunes API request failed');
+          }
+          
+          const data = await response.json();
+          
+          if (data.results && data.results.length > 0) {
+            // Try to find the best match
+            const songTitleLower = song.title.toLowerCase();
+            const songArtistLower = song.artist.toLowerCase();
+            
+            // Look for exact or close match
+            let bestMatch = data.results.find(track => {
+              const trackTitle = track.trackName.toLowerCase();
+              const trackArtist = track.artistName.toLowerCase();
+              return trackTitle.includes(songTitleLower) && trackArtist.includes(songArtistLower);
+            });
+            
+            // If no exact match, try partial title match with artist
+            if (!bestMatch) {
+              bestMatch = data.results.find(track => {
+                const trackArtist = track.artistName.toLowerCase();
+                return trackArtist.includes(songArtistLower);
+              });
+            }
+            
+            // Fall back to first result if no better match
+            const match = bestMatch || data.results[0];
+            
+            if (match.previewUrl) {
+              console.log(`iTunes preview found: ${match.trackName} by ${match.artistName}`);
+              setItunesPreviewUrl(match.previewUrl);
+            } else {
+              console.log('No preview URL in iTunes result');
+              setItunesError(true);
+            }
+          } else {
+            console.log('No iTunes results found');
+            setItunesError(true);
+          }
+        } catch (error) {
+          console.error('Error fetching iTunes preview:', error);
+          setItunesError(true);
+        } finally {
+          setItunesLoading(false);
         }
       };
 
@@ -1221,6 +1293,16 @@
       };
 
       const stopAllAudio = () => {
+        // Stop iTunes audio
+        if (itunesAudioRef.current) {
+          try {
+            itunesAudioRef.current.pause();
+            itunesAudioRef.current.currentTime = 0;
+          } catch (e) {
+            console.log('Error stopping iTunes audio:', e);
+          }
+        }
+        
         // Stop MIDI player and remove it from DOM to kill all sounds
         if (midiPlayerRef.current) {
           try {
@@ -1381,8 +1463,15 @@
         setShowPictureOverVideo(false);
         midiPlayerRef.current = null;
         
+        // Reset iTunes state
+        setItunesPreviewUrl(null);
+        setItunesError(false);
+        
         // Preload MIDI file in background
         preloadMidiFile(song);
+        
+        // Fetch iTunes preview in background
+        fetchItunesPreview(song);
       };
 
       // Go back to menu
@@ -1748,6 +1837,74 @@
                     {midiVolume}%
                   </span>
                 </div>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // Render iTunes preview player
+      const renderItunesPlayer = () => {
+        const handleItunesVolumeChange = (e) => {
+          const newVolume = parseInt(e.target.value);
+          setItunesVolume(newVolume);
+          if (itunesAudioRef.current) {
+            itunesAudioRef.current.volume = newVolume / 100;
+          }
+        };
+        
+        const toggleItunesPlayback = () => {
+          if (!itunesAudioRef.current) return;
+          
+          if (isPlaying) {
+            itunesAudioRef.current.pause();
+            setIsPlaying(false);
+          } else {
+            itunesAudioRef.current.play();
+            setIsPlaying(true);
+          }
+        };
+        
+        return (
+          <div className="w-full px-4 sm:px-6 py-4 sm:py-6 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 text-white text-center">
+            <audio
+              ref={itunesAudioRef}
+              src={itunesPreviewUrl}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              onEnded={() => setIsPlaying(false)}
+              preload="auto"
+            />
+            <div className="mb-3">
+              <Music className={`w-12 h-12 mx-auto ${isPlaying ? 'animate-pulse' : ''}`} />
+            </div>
+            <h3 className="text-lg font-bold mb-2">Audio Hint (30s Preview)</h3>
+            <p className="text-sm opacity-90 mb-3">
+              {isPlaying ? 'Now playing...' : 'Click to play preview'}
+            </p>
+            <button
+              onClick={toggleItunesPlayback}
+              className="px-6 py-3 rounded-lg font-semibold transition-all bg-white text-green-600 hover:bg-gray-100"
+            >
+              {isPlaying ? '⏸️ Pause' : '▶️ Play'}
+            </button>
+            
+            <div className="mt-4 px-4">
+              <div className="flex items-center gap-3">
+                <span className="text-sm opacity-75">🔇</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={itunesVolume}
+                  onChange={handleItunesVolumeChange}
+                  className="flex-1 h-2 bg-white/30 rounded-lg appearance-none cursor-pointer"
+                  style={{ accentColor: 'white' }}
+                />
+                <span className="text-sm opacity-75">🔊</span>
+                <span className="text-xs bg-white/20 px-2 py-1 rounded min-w-[3rem] text-center">
+                  {itunesVolume}%
+                </span>
               </div>
             </div>
           </div>
@@ -2273,7 +2430,7 @@
               {audioUnlocked && guesses.length >= GUESSES_BEFORE_AUDIO && !gameWon && !gameLost && (
                 <div className="mb-4">
                   {useMidi && currentSong?.midi && !midiError ? (
-                    // MIDI Player
+                    // MIDI Player (primary)
                     <div className="rounded-lg overflow-hidden">
                       {midiLoading ? (
                         <div className="w-full px-6 py-8 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white text-center">
@@ -2284,8 +2441,18 @@
                         renderMidiPlayer()
                       )}
                     </div>
+                  ) : itunesPreviewUrl && !itunesError ? (
+                    // iTunes Preview (secondary fallback)
+                    itunesLoading ? (
+                      <div className="w-full px-6 py-8 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 text-white text-center">
+                        <Music className="w-12 h-12 mx-auto mb-3 animate-pulse" />
+                        <p className="text-sm">Loading audio preview...</p>
+                      </div>
+                    ) : (
+                      renderItunesPlayer()
+                    )
                   ) : currentSong?.youtubeId ? (
-                    // YouTube fallback
+                    // YouTube fallback (tertiary)
                     renderYouTubePlayer()
                   ) : (
                     <div className="w-full px-6 py-4 rounded-lg bg-yellow-100 text-yellow-800 text-sm">
