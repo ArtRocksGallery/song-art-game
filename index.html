@@ -875,7 +875,7 @@
       const [itunesPreviewUrl, setItunesPreviewUrl] = useState(null);
       const [itunesLoading, setItunesLoading] = useState(false);
       const [itunesError, setItunesError] = useState(false);
-      const [itunesVolume, setItunesVolume] = useState(80);
+      const [itunesVolume, setItunesVolume] = useState(50);
       const itunesAudioRef = useRef(null);
       
       // YouTube fallback states
@@ -1845,6 +1845,9 @@
 
       // Render iTunes preview player
       const renderItunesPlayer = () => {
+        const PREVIEW_DURATION = 15; // seconds before fade out
+        const FADE_DURATION = 2; // seconds for fade out
+        
         const handleItunesVolumeChange = (e) => {
           const newVolume = parseInt(e.target.value);
           setItunesVolume(newVolume);
@@ -1860,8 +1863,40 @@
             itunesAudioRef.current.pause();
             setIsPlaying(false);
           } else {
+            // Reset volume to current slider value when starting
+            itunesAudioRef.current.volume = itunesVolume / 100;
             itunesAudioRef.current.play();
             setIsPlaying(true);
+            
+            // Set up auto-stop with fade out
+            const startTime = itunesAudioRef.current.currentTime;
+            const targetVolume = itunesVolume / 100;
+            
+            const checkTime = setInterval(() => {
+              if (!itunesAudioRef.current || itunesAudioRef.current.paused) {
+                clearInterval(checkTime);
+                return;
+              }
+              
+              const elapsed = itunesAudioRef.current.currentTime - startTime;
+              
+              // Start fading when we hit the preview duration
+              if (elapsed >= PREVIEW_DURATION) {
+                const fadeElapsed = elapsed - PREVIEW_DURATION;
+                const fadeProgress = Math.min(fadeElapsed / FADE_DURATION, 1);
+                const newVol = targetVolume * (1 - fadeProgress);
+                itunesAudioRef.current.volume = Math.max(0, newVol);
+                
+                // Stop when fade is complete
+                if (fadeProgress >= 1) {
+                  itunesAudioRef.current.pause();
+                  itunesAudioRef.current.currentTime = 0;
+                  itunesAudioRef.current.volume = targetVolume; // Reset volume for next play
+                  setIsPlaying(false);
+                  clearInterval(checkTime);
+                }
+              }
+            }, 50);
           }
         };
         
@@ -1870,6 +1905,11 @@
             <audio
               ref={itunesAudioRef}
               src={itunesPreviewUrl}
+              onLoadedData={() => {
+                if (itunesAudioRef.current) {
+                  itunesAudioRef.current.volume = itunesVolume / 100;
+                }
+              }}
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
               onEnded={() => setIsPlaying(false)}
@@ -1878,7 +1918,7 @@
             <div className="mb-3">
               <Music className={`w-12 h-12 mx-auto ${isPlaying ? 'animate-pulse' : ''}`} />
             </div>
-            <h3 className="text-lg font-bold mb-2">Audio Hint (30s Preview)</h3>
+            <h3 className="text-lg font-bold mb-2">Audio Hint ({PREVIEW_DURATION}s Preview)</h3>
             <p className="text-sm opacity-90 mb-3">
               {isPlaying ? 'Now playing...' : 'Click to play preview'}
             </p>
