@@ -9,37 +9,8 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- MIDI Player -->
-  <script src="https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/html-midi-player@1.5.0"></script>
   <!-- Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-  <style>
-    /* Custom MIDI player styling */
-    midi-player {
-      display: block;
-      width: 100%;
-      margin-bottom: 10px;
-    }
-    midi-player::part(control-panel) {
-      background: rgba(255,255,255,0.2);
-      border-radius: 8px;
-      padding: 8px;
-    }
-    midi-player::part(play-button) {
-      color: white;
-      border: none;
-      background: rgba(255,255,255,0.2);
-      border-radius: 50%;
-      transition: background 0.2s;
-    }
-    midi-player::part(play-button):hover {
-      background: rgba(255,255,255,0.3);
-    }
-    midi-player::part(time) {
-      color: white;
-      font-family: monospace;
-    }
-  </style>
 </head>
 <body>
   <div id="root"></div>
@@ -133,7 +104,7 @@
     );
 
     // SONGS array - update paths to match your hosted files
-    // Use 'midi' for MIDI files, 'youtubeId' as fallback for songs without MIDI
+    // 'youtubeId' is used as fallback if iTunes preview is unavailable
     // 'youtubeTimestamp' is seconds into the video to start on win (optional, defaults to 0)
     // 'difficulty' can be 'Easy', 'Medium', or 'Hard'
     const SONGS = [
@@ -273,7 +244,7 @@
         youtubeId: "g5JqPxmYhlo",
         youtubeTimestamp: 52,
         difficulty: "Medium",
-        genre: "",
+        genre: "Soft Rock",
         year: 1973,
         description: "A feel-good soft rock classic about carefree nighttime celebrations and the universal joy of dancing under the stars."
       },
@@ -364,7 +335,7 @@
         youtubeId: "bESGLojNYSo",
         youtubeTimestamp: 0,
         difficulty: "Easy",
-        genre: "",
+        genre: "Electropop",
         year: 2008,
         description: "An electropop hit about hiding emotions and bluffing in love, featuring an iconic synth hook and unforgettable chorus."
       },
@@ -454,10 +425,10 @@
         midi: "midi/10th-avenue-freeze-out.mid",
         youtubeId: "LOkQsVJV8ts",
         youtubeTimestamp: 51,
-        difficulty: "Hard",
-        genre: "x",
+        difficulty: "Medium",
+        genre: "Heartland Rock",
         year: 1975,
-        description: "x"
+        description: "A jubilant horn-driven anthem about early struggles and the formation of a legendary band, celebrating musical brotherhood."
       },
 	  {
         title: "A Bar Song (Tipsy)",
@@ -468,9 +439,9 @@
         youtubeId: "t7bQwwqW-Hc",
         youtubeTimestamp: 56,
         difficulty: "Medium",
-        genre: "x",
+        genre: "Country Pop",
         year: 2024,
-        description: "x"
+        description: "A laid-back country-infused hit about finding solace at the bar, blending modern production with classic drinking song themes."
       },
 	  {
         title: "Have a Cigar",
@@ -481,9 +452,9 @@
         youtubeId: "Eq8ZiZ9xiLw",
         youtubeTimestamp: 0,
         difficulty: "Hard",
-        genre: "x",
+        genre: "Progressive Rock",
         year: 1975,
-        description: "x"
+        description: "A biting satire of the music industry sung by a sycophantic record executive, featuring searing guitar and cynical lyrics about exploitation."
       },
 	  {
         title: "Long Cool Woman (In a Black Dress)",
@@ -494,9 +465,9 @@
         youtubeId: "g8XiNKsKyVk",
         youtubeTimestamp: 14,
         difficulty: "Hard",
-        genre: "x",
+        genre: "Rock",
         year: 1971,
-        description: "x"
+        description: "A swampy, Creedence-influenced rocker about an undercover FBI agent who falls for a mysterious woman during a raid on a bootleg joint."
       },
 	  {
         title: "Long Tall Sally",
@@ -507,9 +478,9 @@
         youtubeId: "E68N5E1d0_M",
         youtubeTimestamp: 15,
         difficulty: "Hard",
-        genre: "x",
+        genre: "Rock and Roll",
         year: 1957,
-        description: "x"
+        description: "A frenetic early rock and roll classic with explosive vocals, telling of a woman who's built for speed and having fun."
       },
 	  {
         title: "The Long and Winding Road",
@@ -520,9 +491,9 @@
         youtubeId: "fR4HjTH_fTM",
         youtubeTimestamp: 0,
         difficulty: "Medium",
-        genre: "x",
+        genre: "Ballad",
         year: 1970,
-        description: "x"
+        description: "A melancholic piano ballad about longing and lost love, written as the band was dissolving, with orchestral arrangements added later."
       },
 	  {
         title: "These Boots Are Made For Walkin'",
@@ -533,9 +504,9 @@
         youtubeId: "GM1kzbAgo_E",
         youtubeTimestamp: 6,
         difficulty: "Medium",
-        genre: "x",
+        genre: "Pop",
         year: 1966,
-        description: "x"
+        description: "A sassy declaration of female empowerment with a walking bass line, warning a cheating lover that she's ready to leave him behind."
       },
 	  {
         title: "Three Cool Cats",
@@ -546,9 +517,9 @@
         youtubeId: "2nOrAJTu3R4",
         youtubeTimestamp: 0,
         difficulty: "Very Hard",
-        genre: "x",
+        genre: "Rock and Roll",
         year: 1962,
-        description: "x"
+        description: "A playful doo-wop tune about three hip guys hanging on a corner who get outsmarted by three sharp chicks, originally by The Coasters."
       },
 	  {
         title: "Three Little Birds",
@@ -559,9 +530,9 @@
         youtubeId: "HNBCVM4KbUM",
         youtubeTimestamp: 0,
         difficulty: "Medium",
-        genre: "x",
+        genre: "Reggae",
         year: 1977,
-        description: "x"
+        description: "A gentle reggae anthem of reassurance with its iconic chorus promising that every thing will be alright, inspired by birds outside the singer's home."
       },
 	  {
         title: "Tie a Yellow Ribbon Round the Ole Oak Tree",
@@ -572,9 +543,9 @@
         youtubeId: "PxG9XFqHSFw",
         youtubeTimestamp: 39,
         difficulty: "Hard",
-        genre: "x",
-        year: 1977,
-        description: "x"
+        genre: "Pop",
+        year: 1973,
+        description: "A sentimental story-song about a man returning from prison, hoping a yellow ribbon will signal his lover still wants him back home."
       },
 	  {
         title: "Twist And Shout",
@@ -585,9 +556,9 @@
         youtubeId: "2RicaUqd9Hg",
         youtubeTimestamp: 0,
         difficulty: "Medium",
-        genre: "x",
+        genre: "Rock and Roll",
         year: 1963,
-        description: "x"
+        description: "A high-energy dance track with raw, shredded vocals recorded in one take at the end of a marathon session, becoming a live staple."
       },
 	  {
         title: "Up On The Roof",
@@ -598,22 +569,22 @@
         youtubeId: "R1lwPQhN9gI",
         youtubeTimestamp: 40,
         difficulty: "Very Hard",
-        genre: "x",
+        genre: "Soft Rock",
         year: 1979,
-        description: "x"
+        description: "A gentle cover of the Drifters classic about finding peace and escape from urban troubles on a city rooftop, delivered with warm acoustic intimacy."
       },
 	  {
         title: "Up, Up and Away",
         artist: "The 5th Dimension",
-        image: "images/up-on-the-roof.jpg",
-        video: "videos/up-on-the-roof.mp4",
-        midi: "midi/up-on-the-roof.mid",
+        image: "images/up-up-and-away.jpg",
+        video: "videos/up-up-and-away.mp4",
+        midi: "midi/up-up-away.mid",
         youtubeId: "UKkNlwpajNk",
         youtubeTimestamp: 31,
         difficulty: "Very Hard",
-        genre: "x",
+        genre: "Sunshine Pop",
         year: 1967,
-        description: "x"
+        description: "A dreamy, orchestral pop song about floating away in a beautiful balloon, capturing the optimistic spirit of 1960s California pop."
       },
 	  {
         title: "Who Are You",
@@ -623,23 +594,23 @@
         midi: "midi/who-are-you.mid",
         youtubeId: "PNbBDrceCy8",
         youtubeTimestamp: 22,
-        difficulty: "Medium",
-        genre: "x",
+        difficulty: "Easy",
+        genre: "Rock",
         year: 1978,
-        description: "x"
+        description: "A powerful rock track born from a drunken encounter, featuring driving synthesizers and an explosive chorus that became the CSI theme song."
       },
 	  {
         title: "Wild Thing",
         artist: "The Troggs",
-        image: "images/who-are-you.jpg",
-        video: "videos/who-are-you.mp4",
-        midi: "midi/who-are-you.mid",
+        image: "images/wild-thing.jpg",
+        video: "videos/wild-thing.mp4",
+        midi: "midi/wild-thing.mid",
         youtubeId: "gSWInYFVksg",
         youtubeTimestamp: 0,
         difficulty: "Easy",
-        genre: "x",
+        genre: "Garage Rock",
         year: 1966,
-        description: "x"
+        description: "A primal three-chord anthem of raw desire with a memorable ocarina solo, becoming one of the most recognized riffs in rock history."
       },
 	  {
         title: "Wish You Were Here",
@@ -649,10 +620,10 @@
         midi: "midi/wish-you-were-here.mid",
         youtubeId: "K6qj09OHvjw",
         youtubeTimestamp: 17,
-        difficulty: "Medium",
-        genre: "x",
-        year: 1972,
-        description: "x"
+        difficulty: "Very Hard",
+        genre: "Progressive Rock",
+        year: 1975,
+        description: "A poignant acoustic tribute to former bandmate Syd Barrett, reflecting on absence, the music industry, and the loss of innocence."
       },
 	  {
         title: "Witchy Woman",
@@ -661,11 +632,11 @@
         video: "videos/witchy-woman.mp4",
         midi: "midi/witchy-woman.mid",
         youtubeId: "clqsYJfQ6GQ",
-        youtubeTimestamp: 48,
+        youtubeTimestamp: 49,
         difficulty: "Medium",
-        genre: "x",
+        genre: "Rock",
         year: 1972,
-        description: "x"
+        description: "A dark, mysterious track about a seductive enchantress, featuring hypnotic guitar and haunting harmonies that launched the band's career."
       },
 	  {
         title: "Wooly Bully",
@@ -675,10 +646,10 @@
         midi: "midi/wooly-bully.mid",
         youtubeId: "qCoUmMDiEhs",
         youtubeTimestamp: 48,
-        difficulty: "Hard",
-        genre: "x",
+        difficulty: "Very Hard",
+        genre: "Rock and Roll",
         year: 1965,
-        description: "x"
+        description: "A nonsensical party song with a Tex-Mex flavor, featuring playful gibberish lyrics and an irresistible groove that made it a dance floor staple."
       },
 	  {
         title: "The Yellow Rose of Texas",
@@ -689,9 +660,9 @@
         youtubeId: "KKyGAV1L7f0",
         youtubeTimestamp: 16,
         difficulty: "Very Hard",
-        genre: "x",
+        genre: "Country",
         year: 1968,
-        description: "x"
+        description: "A spirited rendition of the classic Texas folk song about a soldier pining for his sweetheart back home, rooted in Civil War-era tradition."
       },
 	  {
         title: "Yellow Submarine",
@@ -700,11 +671,11 @@
         video: "videos/yellow-submarine.mp4",
         midi: "midi/yellow-submarine.mid",
         youtubeId: "m2uTFF_3MaA",
-        youtubeTimestamp: 0,
+        youtubeTimestamp: 37,
         difficulty: "Easy",
-        genre: "x",
-        year: 1968,
-        description: "x"
+        genre: "Children's Pop",
+        year: 1966,
+        description: "A whimsical sing-along about life aboard a colorful submarine, written as a children's song and filled with playful sound effects."
       },
     ];
 
@@ -719,10 +690,16 @@
       songStats: {} // { "songTitle - artist": { completed: true, bestScore: 3, attempts: 2 } }
     };
 
+    // Stats localStorage key - change version to reset all users' stats
+    const STATS_KEY = 'songArtStats_v2';
+    
+    // Game state localStorage key - persists current game to prevent reload exploit
+    const GAME_STATE_KEY = 'songArtGameState_v1';
+
     // Load stats from localStorage
     const loadStats = () => {
       try {
-        const saved = localStorage.getItem('songArtStats');
+        const saved = localStorage.getItem(STATS_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
           // Merge with defaults to handle any missing fields
@@ -737,9 +714,40 @@
     // Save stats to localStorage
     const saveStats = (stats) => {
       try {
-        localStorage.setItem('songArtStats', JSON.stringify(stats));
+        localStorage.setItem(STATS_KEY, JSON.stringify(stats));
       } catch (e) {
         console.error('Error saving stats:', e);
+      }
+    };
+    
+    // Load game state from localStorage
+    const loadGameState = () => {
+      try {
+        const saved = localStorage.getItem(GAME_STATE_KEY);
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      } catch (e) {
+        console.error('Error loading game state:', e);
+      }
+      return null;
+    };
+    
+    // Save game state to localStorage
+    const saveGameState = (state) => {
+      try {
+        localStorage.setItem(GAME_STATE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.error('Error saving game state:', e);
+      }
+    };
+    
+    // Clear game state from localStorage (when game completes)
+    const clearGameState = () => {
+      try {
+        localStorage.removeItem(GAME_STATE_KEY);
+      } catch (e) {
+        console.error('Error clearing game state:', e);
       }
     };
 
@@ -866,10 +874,13 @@
       const [showSuggestions, setShowSuggestions] = useState(false);
       const [searchError, setSearchError] = useState(null);
       const [playedSongs, setPlayedSongs] = useState([]);
-      const [useMidi, setUseMidi] = useState(true);
-      const [midiError, setMidiError] = useState(false);
-      const [preloadedMidi, setPreloadedMidi] = useState(null);
-      const [midiLoading, setMidiLoading] = useState(false);
+      
+      // iTunes preview states
+      const [itunesPreviewUrl, setItunesPreviewUrl] = useState(null);
+      const [itunesLoading, setItunesLoading] = useState(false);
+      const [itunesError, setItunesError] = useState(false);
+      const [itunesVolume, setItunesVolume] = useState(50);
+      const itunesAudioRef = useRef(null);
       
       // YouTube fallback states
       const [showVideo, setShowVideo] = useState(false);
@@ -879,11 +890,9 @@
       const [volume, setVolume] = useState(50);
       
       const videoRef = useRef(null);
-      const midiPlayerRef = useRef(null);
-      const [soundFontReady, setSoundFontReady] = useState(false);
-      const [midiVolume, setMidiVolume] = useState(80);
       const MAX_GUESSES = 6;
-      const GUESSES_BEFORE_AUDIO = 2;
+      const GUESSES_BEFORE_VIDEO = 1;
+      const GUESSES_BEFORE_AUDIO = 5;
       
       // Magnifier state
       const [showMagnifier, setShowMagnifier] = useState(false);
@@ -897,64 +906,31 @@
       const isTouchDevice = () => {
         return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       };
-      
-      // SoundFont URL - loaded once at page load
-      const SOUNDFONT_URL = "https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus";
 
-      // Preload SoundFont by loading all MIDI files at startup
+      // Check for saved game state on load (prevent reload exploit)
       useEffect(() => {
-        const preloadAllMidi = async () => {
-          console.log('Preloading all MIDI files and SoundFont samples...');
+        const savedState = loadGameState();
+        if (savedState && savedState.songTitle && savedState.songArtist) {
+          // Find the song in SONGS array
+          const song = SONGS.find(s => 
+            s.title === savedState.songTitle && s.artist === savedState.songArtist
+          );
           
-          // Create a hidden midi-player to preload the SoundFont
-          const preloadContainer = document.createElement('div');
-          preloadContainer.style.display = 'none';
-          preloadContainer.id = 'midi-preloader';
-          document.body.appendChild(preloadContainer);
-          
-          // Load each MIDI file to cache its required instruments
-          for (const song of SONGS) {
-            if (song.midi) {
-              try {
-                // Fetch and convert to base64
-                const response = await fetch(song.midi);
-                if (response.ok) {
-                  const arrayBuffer = await response.arrayBuffer();
-                  const base64 = btoa(
-                    new Uint8Array(arrayBuffer)
-                      .reduce((data, byte) => data + String.fromCharCode(byte), '')
-                  );
-                  const dataUrl = `data:audio/midi;base64,${base64}`;
-                  
-                  // Create a temporary player to load this MIDI's instruments
-                  const tempPlayer = document.createElement('midi-player');
-                  tempPlayer.setAttribute('sound-font', SOUNDFONT_URL);
-                  tempPlayer.setAttribute('src', dataUrl);
-                  preloadContainer.appendChild(tempPlayer);
-                  
-                  // Wait for it to load
-                  await new Promise((resolve) => {
-                    tempPlayer.addEventListener('load', resolve);
-                    tempPlayer.addEventListener('error', resolve);
-                    // Timeout fallback
-                    setTimeout(resolve, 5000);
-                  });
-                  
-                  console.log(`Preloaded: ${song.title}`);
-                }
-              } catch (e) {
-                console.log(`Failed to preload: ${song.title}`, e);
-              }
+          if (song) {
+            console.log('Restoring saved game state:', savedState.songTitle);
+            setCurrentSong(song);
+            setGuesses(savedState.guesses || []);
+            setGameMode('play');
+            
+            // Restore audio unlocked state based on guess count
+            if (savedState.guesses && savedState.guesses.length >= GUESSES_BEFORE_AUDIO) {
+              setAudioUnlocked(true);
             }
+            
+            // Fetch iTunes preview for restored song
+            fetchItunesPreview(song);
           }
-          
-          // Clean up preloader container
-          document.body.removeChild(preloadContainer);
-          setSoundFontReady(true);
-          console.log('All MIDI files and SoundFont samples preloaded!');
-        };
-        
-        preloadAllMidi();
+        }
       }, []);
 
       // Load YouTube API as fallback
@@ -969,45 +945,82 @@
         };
       }, []);
 
-      useEffect(() => {
-        startNewGame();
-      }, []);
-
-      // Preload MIDI file when song changes
-      const preloadMidiFile = async (song) => {
-        if (!song?.midi) {
-          setPreloadedMidi(null);
+      // Fetch iTunes preview URL for a song
+      const fetchItunesPreview = async (song) => {
+        if (!song) {
+          setItunesPreviewUrl(null);
           return;
         }
         
-        setMidiLoading(true);
+        setItunesLoading(true);
+        setItunesError(false);
+        
         try {
-          const response = await fetch(song.midi);
-          if (!response.ok) {
-            throw new Error('Failed to fetch MIDI');
-          }
-          const arrayBuffer = await response.arrayBuffer();
-          const base64 = btoa(
-            new Uint8Array(arrayBuffer)
-              .reduce((data, byte) => data + String.fromCharCode(byte), '')
+          // Search iTunes for the song
+          const searchQuery = encodeURIComponent(`${song.title} ${song.artist}`);
+          const response = await fetch(
+            `https://itunes.apple.com/search?term=${searchQuery}&media=music&entity=song&limit=10`
           );
-          const dataUrl = `data:audio/midi;base64,${base64}`;
-          setPreloadedMidi(dataUrl);
-          setMidiError(false);
-          console.log('MIDI preloaded successfully');
+          
+          if (!response.ok) {
+            throw new Error('iTunes API request failed');
+          }
+          
+          const data = await response.json();
+          
+          if (data.results && data.results.length > 0) {
+            // Try to find the best match - MUST match artist
+            const songTitleLower = song.title.toLowerCase();
+            const songArtistLower = song.artist.toLowerCase();
+            
+            // Helper to check if artists match (handles variations like "John Mellencamp" vs "John Cougar Mellencamp")
+            const artistMatches = (trackArtist) => {
+              const trackArtistLower = trackArtist.toLowerCase();
+              // Check if either contains the other, or if they share significant words
+              if (trackArtistLower.includes(songArtistLower) || songArtistLower.includes(trackArtistLower)) {
+                return true;
+              }
+              // Check for shared significant words (at least 2 chars, not common words)
+              const commonWords = ['the', 'and', 'of', 'a', 'an'];
+              const songWords = songArtistLower.split(/\s+/).filter(w => w.length > 2 && !commonWords.includes(w));
+              const trackWords = trackArtistLower.split(/\s+/).filter(w => w.length > 2 && !commonWords.includes(w));
+              return songWords.some(sw => trackWords.some(tw => tw.includes(sw) || sw.includes(tw)));
+            };
+            
+            // Look for title AND artist match
+            let bestMatch = data.results.find(track => {
+              const trackTitle = track.trackName.toLowerCase();
+              return trackTitle.includes(songTitleLower) && artistMatches(track.artistName);
+            });
+            
+            // If no title match, try just artist match
+            if (!bestMatch) {
+              bestMatch = data.results.find(track => artistMatches(track.artistName));
+            }
+            
+            // Only use the match if we found one with correct artist - don't fall back to wrong artist
+            if (bestMatch && bestMatch.previewUrl) {
+              console.log(`iTunes preview found: ${bestMatch.trackName} by ${bestMatch.artistName}`);
+              setItunesPreviewUrl(bestMatch.previewUrl);
+            } else {
+              console.log('No matching iTunes result found for correct artist');
+              setItunesError(true);
+            }
+          } else {
+            console.log('No iTunes results found');
+            setItunesError(true);
+          }
         } catch (error) {
-          console.error('Error preloading MIDI:', error);
-          setPreloadedMidi(null);
-          setMidiError(true);
-          setUseMidi(false);
+          console.error('Error fetching iTunes preview:', error);
+          setItunesError(true);
         } finally {
-          setMidiLoading(false);
+          setItunesLoading(false);
         }
       };
 
       // Initialize YouTube player when needed (fallback)
       useEffect(() => {
-        if (!useMidi && showVideo && currentSong?.youtubeId && window.YT && !ytPlayer) {
+        if (showVideo && currentSong?.youtubeId && window.YT && !ytPlayer && itunesError) {
           const player = new window.YT.Player('youtube-player', {
             height: '200',
             width: '100%',
@@ -1047,91 +1060,7 @@
             }
           });
         }
-      }, [useMidi, showVideo, currentSong, gameWon]);
-
-      // Handle MIDI player events and autoplay
-      useEffect(() => {
-        let isCancelled = false;
-        
-        // Trigger when audio is unlocked OR when game is won/lost
-        if ((audioUnlocked || gameWon || gameLost) && useMidi && currentSong?.midi && preloadedMidi) {
-          // Small delay to let the DOM update
-          const timeoutId = setTimeout(async () => {
-            if (isCancelled) return;
-            
-            const midiPlayer = document.querySelector('midi-player');
-            if (midiPlayer && !isCancelled) {
-              midiPlayerRef.current = midiPlayer;
-              
-              const handleLoad = async () => {
-                if (isCancelled) return;
-                
-                console.log('MIDI loaded successfully');
-                setMidiError(false);
-                
-                // Ensure audio context is running before playing
-                if (window.Tone && Tone.context.state !== 'running') {
-                  await Tone.start();
-                  console.log('Audio context started from MIDI player');
-                }
-                
-                if (isCancelled) return;
-                
-                // Find first note time from the noteSequence and seek to it
-                try {
-                  const noteSequence = midiPlayer.noteSequence;
-                  if (noteSequence && noteSequence.notes && noteSequence.notes.length > 0) {
-                    // Find the earliest note start time
-                    const firstNoteTime = Math.min(...noteSequence.notes.map(n => n.startTime));
-                    
-                    // If there's significant silence at the start (more than 0.5 seconds), seek past it
-                    if (firstNoteTime > 0.5) {
-                      const seekTime = Math.max(0, firstNoteTime - 0.2); // Start 0.2s before first note
-                      console.log(`Seeking to ${seekTime}s (first note at ${firstNoteTime}s)`);
-                      midiPlayer.currentTime = seekTime;
-                    }
-                  }
-                } catch (e) {
-                  console.log('Could not detect first note time:', e);
-                }
-                
-                if (isCancelled) return;
-                
-                // Autoplay when loaded
-                midiPlayer.start();
-              };
-              
-              const handleError = (e) => {
-                if (isCancelled) return;
-                console.error('MIDI error, falling back to YouTube:', e);
-                setMidiError(true);
-                setUseMidi(false);
-              };
-              
-              const handleStart = () => {
-                if (isCancelled) return;
-                setIsPlaying(true);
-              };
-              
-              const handleStop = () => {
-                if (isCancelled) return;
-                setIsPlaying(false);
-              };
-              
-              midiPlayer.addEventListener('load', handleLoad);
-              midiPlayer.addEventListener('error', handleError);
-              midiPlayer.addEventListener('start', handleStart);
-              midiPlayer.addEventListener('stop', handleStop);
-            }
-          }, 100);
-          
-          // Cleanup function
-          return () => {
-            isCancelled = true;
-            clearTimeout(timeoutId);
-          };
-        }
-      }, [audioUnlocked, gameWon, gameLost, useMidi, currentSong, preloadedMidi]);
+      }, [showVideo, currentSong, gameWon, itunesError]);
 
       const searchSongs = async (query) => {
         if (!query || query.length < 2) {
@@ -1221,45 +1150,13 @@
       };
 
       const stopAllAudio = () => {
-        // Stop MIDI player and remove it from DOM to kill all sounds
-        if (midiPlayerRef.current) {
+        // Stop iTunes audio
+        if (itunesAudioRef.current) {
           try {
-            midiPlayerRef.current.stop();
-            // Remove the element to force stop all audio
-            midiPlayerRef.current.remove();
-            midiPlayerRef.current = null;
+            itunesAudioRef.current.pause();
+            itunesAudioRef.current.currentTime = 0;
           } catch (e) {
-            console.log('Error stopping MIDI player:', e);
-          }
-        }
-        
-        // Also remove any orphaned midi-player elements
-        document.querySelectorAll('midi-player').forEach(player => {
-          try {
-            player.stop();
-            player.remove();
-          } catch (e) {
-            console.log('Error removing midi-player:', e);
-          }
-        });
-        
-        // Force stop all Tone.js audio
-        if (window.Tone) {
-          try {
-            // Stop the transport
-            Tone.Transport.stop();
-            Tone.Transport.cancel();
-            
-            // Mute immediately to cut off any lingering sounds
-            Tone.Destination.volume.value = -Infinity;
-            
-            // Restore volume after a brief moment
-            setTimeout(() => {
-              const dB = (midiVolume / 100) * 40 - 40;
-              Tone.Destination.volume.value = dB;
-            }, 150);
-          } catch (e) {
-            console.log('Error stopping Tone.js:', e);
+            console.log('Error stopping iTunes audio:', e);
           }
         }
         
@@ -1355,8 +1252,47 @@
       // Start a specific song from the archive
       const startSpecificSong = (song) => {
         stopAllAudio();
-        resetGameState(song);
-        setGameMode('play');
+        
+        // Check if this song has an in-progress game
+        const savedState = loadGameState();
+        if (savedState && 
+            savedState.songTitle === song.title && 
+            savedState.songArtist === song.artist &&
+            savedState.guesses && 
+            savedState.guesses.length > 0) {
+          // Restore the in-progress game instead of starting fresh
+          console.log('Restoring in-progress game for:', song.title);
+          setCurrentSong(song);
+          setGuesses(savedState.guesses);
+          setGameWon(false);
+          setGameLost(false);
+          setGuess('');
+          setShowHint(false);
+          setSuggestions([]);
+          setShowSuggestions(false);
+          setSearchError(null);
+          setShowVideo(false);
+          setPlayerReady(false);
+          setYtPlayer(null);
+          setShowPictureOverVideo(false);
+          setItunesPreviewUrl(null);
+          setItunesError(false);
+          
+          // Restore audio unlocked state based on guess count
+          if (savedState.guesses.length >= GUESSES_BEFORE_AUDIO) {
+            setAudioUnlocked(true);
+          } else {
+            setAudioUnlocked(false);
+          }
+          
+          // Fetch iTunes preview
+          fetchItunesPreview(song);
+          setGameMode('play');
+        } else {
+          // No in-progress game, start fresh
+          resetGameState(song);
+          setGameMode('play');
+        }
       };
 
       // Reset all game state for a new song
@@ -1375,14 +1311,21 @@
         setShowVideo(false);
         setPlayerReady(false);
         setYtPlayer(null);
-        setUseMidi(true);
-        setMidiError(false);
-        setPreloadedMidi(null);
         setShowPictureOverVideo(false);
-        midiPlayerRef.current = null;
         
-        // Preload MIDI file in background
-        preloadMidiFile(song);
+        // Reset iTunes state
+        setItunesPreviewUrl(null);
+        setItunesError(false);
+        
+        // Save initial game state (no guesses yet)
+        saveGameState({
+          songTitle: song.title,
+          songArtist: song.artist,
+          guesses: []
+        });
+        
+        // Fetch iTunes preview in background
+        fetchItunesPreview(song);
       };
 
       // Go back to menu
@@ -1395,12 +1338,6 @@
       const handleGuess = async () => {
         if (!guess.trim() || gameWon || gameLost) return;
 
-        // Start audio context on first user interaction
-        if (window.Tone && Tone.context.state !== 'running') {
-          await Tone.start();
-          console.log('Audio context started');
-        }
-
         // Helper function to normalize strings for comparison
         // Removes punctuation, extra spaces, and converts to lowercase
         const normalizeForComparison = (str) => {
@@ -1408,6 +1345,34 @@
             .replace(/[^a-z0-9\s]/g, '') // Remove punctuation and special characters
             .replace(/\s+/g, ' ')         // Collapse multiple spaces
             .trim();
+        };
+
+        // Levenshtein distance for fuzzy matching
+        const levenshteinDistance = (str1, str2) => {
+          const m = str1.length;
+          const n = str2.length;
+          const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+          
+          for (let i = 0; i <= m; i++) dp[i][0] = i;
+          for (let j = 0; j <= n; j++) dp[0][j] = j;
+          
+          for (let i = 1; i <= m; i++) {
+            for (let j = 1; j <= n; j++) {
+              if (str1[i - 1] === str2[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1];
+              } else {
+                dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+              }
+            }
+          }
+          return dp[m][n];
+        };
+
+        // Check if two strings are similar enough (allow ~1 error per 10 characters, minimum 2)
+        const isSimilarEnough = (str1, str2) => {
+          const distance = levenshteinDistance(str1, str2);
+          const maxAllowedDistance = Math.max(2, Math.floor(Math.max(str1.length, str2.length) / 10));
+          return distance <= maxAllowedDistance;
         };
 
         const normalizedGuess = normalizeForComparison(guess);
@@ -1424,10 +1389,19 @@
         // Also check for exact artist match or artist as substring
         const artistInGuess = normalizedGuess.includes(normalizedArtist) || guessContainsArtist;
 
-        const isCorrect = normalizedGuess === normalizedTitle || 
-                          normalizedGuess === `${normalizedTitle} ${normalizedArtist}` ||
-                          normalizedGuess === `${normalizedArtist} ${normalizedTitle}` ||
-                          (normalizedGuess.includes(normalizedTitle) && artistInGuess);
+        // Check for exact or fuzzy title match
+        const titleMatches = normalizedGuess === normalizedTitle || 
+                            isSimilarEnough(normalizedGuess, normalizedTitle);
+        
+        const titleWithArtistMatches = normalizedGuess === `${normalizedTitle} ${normalizedArtist}` ||
+                                       normalizedGuess === `${normalizedArtist} ${normalizedTitle}` ||
+                                       isSimilarEnough(normalizedGuess, `${normalizedTitle} ${normalizedArtist}`) ||
+                                       isSimilarEnough(normalizedGuess, `${normalizedArtist} ${normalizedTitle}`);
+
+        const isCorrect = titleMatches || 
+                          titleWithArtistMatches ||
+                          (normalizedGuess.includes(normalizedTitle) && artistInGuess) ||
+                          (isSimilarEnough(normalizedGuess, normalizedTitle) && artistInGuess);
 
         // Check if artist was guessed correctly (but not the song)
         const artistMatch = !isCorrect && artistInGuess;
@@ -1441,7 +1415,8 @@
 
         if (isCorrect) {
           setGameWon(true);
-          stopAllAudio(); // Stop MIDI so YouTube can play
+          stopAllAudio();
+          clearGameState(); // Clear saved game state on win
           if (!alreadyPlayed) {
             recordWin(currentSong, newGuesses.length);
           }
@@ -1454,13 +1429,23 @@
           }
         } else if (newGuesses.length >= MAX_GUESSES) {
           setGameLost(true);
-          stopAllAudio(); // Stop MIDI so YouTube can play
+          stopAllAudio();
+          clearGameState(); // Clear saved game state on loss
           if (!alreadyPlayed) {
             recordLoss(currentSong);
           }
           setAudioUnlocked(true);
-        } else if (newGuesses.length >= GUESSES_BEFORE_AUDIO) {
-          setAudioUnlocked(true);
+        } else {
+          // Save game state for incomplete games (prevent reload exploit)
+          saveGameState({
+            songTitle: currentSong.title,
+            songArtist: currentSong.artist,
+            guesses: newGuesses
+          });
+          
+          if (newGuesses.length >= GUESSES_BEFORE_AUDIO) {
+            setAudioUnlocked(true);
+          }
         }
 
         setGuess('');
@@ -1472,12 +1457,6 @@
       const handleSkip = async () => {
         if (gameWon || gameLost) return;
 
-        // Start audio context on first user interaction
-        if (window.Tone && Tone.context.state !== 'running') {
-          await Tone.start();
-          console.log('Audio context started');
-        }
-
         const newGuesses = [...guesses, { text: '(Skipped)', correct: false, artistMatch: false, skipped: true }];
         setGuesses(newGuesses);
 
@@ -1487,13 +1466,23 @@
 
         if (newGuesses.length >= MAX_GUESSES) {
           setGameLost(true);
-          stopAllAudio(); // Stop MIDI so YouTube can play
+          stopAllAudio();
+          clearGameState(); // Clear saved game state on loss
           if (!alreadyPlayed) {
             recordLoss(currentSong);
           }
           setAudioUnlocked(true);
-        } else if (newGuesses.length >= GUESSES_BEFORE_AUDIO) {
-          setAudioUnlocked(true);
+        } else {
+          // Save game state for incomplete games (prevent reload exploit)
+          saveGameState({
+            songTitle: currentSong.title,
+            songArtist: currentSong.artist,
+            guesses: newGuesses
+          });
+          
+          if (newGuesses.length >= GUESSES_BEFORE_AUDIO) {
+            setAudioUnlocked(true);
+          }
         }
 
         setGuess('');
@@ -1565,7 +1554,7 @@
         if ((gameWon || gameLost) && currentSong.youtubeId) {
           const timestamp = currentSong.youtubeTimestamp || 0;
           return (
-            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+            <div className="relative w-full" style={{ paddingBottom: '100%' }}>
               <iframe
                 className="absolute top-0 left-0 w-full h-full"
                 src={`https://www.youtube.com/embed/${currentSong.youtubeId}?autoplay=1&start=${timestamp}`}
@@ -1579,7 +1568,7 @@
         }
 
         // Determine which hint to show based on guess count and toggle
-        const shouldShowVideo = guesses.length >= GUESSES_BEFORE_AUDIO && !showPictureOverVideo;
+        const shouldShowVideo = guesses.length >= GUESSES_BEFORE_VIDEO && !showPictureOverVideo;
         
         // Show video if we have enough guesses and not toggled to picture
         if (shouldShowVideo) {
@@ -1641,7 +1630,7 @@
                 }}
               />
             )}
-            {guesses.length >= GUESSES_BEFORE_AUDIO && showPictureOverVideo && (
+            {guesses.length >= GUESSES_BEFORE_VIDEO && showPictureOverVideo && (
               <button
                 onClick={() => setShowPictureOverVideo(false)}
                 className="absolute bottom-3 right-3 px-3 py-2 bg-black/60 hover:bg-black/80 text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2 pointer-events-auto"
@@ -1654,63 +1643,108 @@
         );
       };
 
-      // Handle MIDI volume changes using Tone.js master volume
-      const handleMidiVolumeChange = (e) => {
-        const newVolume = parseInt(e.target.value);
-        setMidiVolume(newVolume);
+      // Render iTunes preview player
+      const renderItunesPlayer = () => {
+        const PREVIEW_DURATION = 10; // seconds before fade out
+        const FADE_DURATION = 2; // seconds for fade out
         
-        // Tone.js volume is in decibels, convert percentage to dB
-        // 0% = -Infinity (mute), 50% = -12dB, 100% = 0dB
-        if (window.Tone) {
-          if (newVolume === 0) {
-            Tone.Destination.volume.value = -Infinity;
-          } else {
-            // Convert 0-100 to roughly -40dB to 0dB range
-            const dB = (newVolume / 100) * 40 - 40;
-            Tone.Destination.volume.value = dB;
+        const handleItunesVolumeChange = (e) => {
+          const newVolume = parseInt(e.target.value);
+          setItunesVolume(newVolume);
+          if (itunesAudioRef.current) {
+            itunesAudioRef.current.volume = newVolume / 100;
           }
-        }
-      };
-      
-      // Set initial volume on load
-      useEffect(() => {
-        if (window.Tone) {
-          const dB = (midiVolume / 100) * 40 - 40;
-          Tone.Destination.volume.value = dB;
-        }
-      }, []);
-
-      // Render MIDI player without visualizer, with volume control
-      const renderMidiPlayer = () => {
-        if (!currentSong?.midi) return null;
+        };
         
-        // Use preloaded data URL if available, otherwise fall back to file path
-        const midiSrc = preloadedMidi || currentSong.midi;
+        const toggleItunesPlayback = () => {
+          if (!itunesAudioRef.current) return;
+          
+          if (isPlaying) {
+            itunesAudioRef.current.pause();
+            setIsPlaying(false);
+          } else {
+            // Reset volume to current slider value when starting
+            itunesAudioRef.current.volume = itunesVolume / 100;
+            itunesAudioRef.current.play();
+            setIsPlaying(true);
+            
+            // Set up auto-stop with fade out
+            const startTime = itunesAudioRef.current.currentTime;
+            const targetVolume = itunesVolume / 100;
+            
+            const checkTime = setInterval(() => {
+              if (!itunesAudioRef.current || itunesAudioRef.current.paused) {
+                clearInterval(checkTime);
+                return;
+              }
+              
+              const elapsed = itunesAudioRef.current.currentTime - startTime;
+              
+              // Start fading when we hit the preview duration
+              if (elapsed >= PREVIEW_DURATION) {
+                const fadeElapsed = elapsed - PREVIEW_DURATION;
+                const fadeProgress = Math.min(fadeElapsed / FADE_DURATION, 1);
+                const newVol = targetVolume * (1 - fadeProgress);
+                itunesAudioRef.current.volume = Math.max(0, newVol);
+                
+                // Stop when fade is complete
+                if (fadeProgress >= 1) {
+                  itunesAudioRef.current.pause();
+                  itunesAudioRef.current.currentTime = 0;
+                  itunesAudioRef.current.volume = targetVolume; // Reset volume for next play
+                  setIsPlaying(false);
+                  clearInterval(checkTime);
+                }
+              }
+            }, 50);
+          }
+        };
         
         return (
-          <div className="w-full">
-            <div className="w-full px-2 sm:px-4 py-2 sm:py-3 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white">
-              <midi-player
-                src={midiSrc}
-                sound-font={SOUNDFONT_URL}
-              ></midi-player>
-              <div className="mt-2">
-                <div className="flex items-center gap-1.5 sm:gap-3">
-                  <span className="text-xs opacity-75">🔇</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={midiVolume}
-                    onChange={handleMidiVolumeChange}
-                    className="flex-1 h-2 bg-white/30 rounded-lg appearance-none cursor-pointer min-w-0"
-                    style={{ accentColor: 'white' }}
-                  />
-                  <span className="text-xs opacity-75">🔊</span>
-                  <span className="text-xs bg-white/20 px-1 sm:px-2 py-0.5 sm:py-1 rounded whitespace-nowrap">
-                    {midiVolume}%
-                  </span>
-                </div>
+          <div className="w-full px-4 sm:px-6 py-4 sm:py-6 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 text-white text-center">
+            <audio
+              ref={itunesAudioRef}
+              src={itunesPreviewUrl}
+              onLoadedData={() => {
+                if (itunesAudioRef.current) {
+                  itunesAudioRef.current.volume = itunesVolume / 100;
+                }
+              }}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              onEnded={() => setIsPlaying(false)}
+              preload="auto"
+            />
+            <div className="mb-3">
+              <Music className={`w-12 h-12 mx-auto ${isPlaying ? 'animate-pulse' : ''}`} />
+            </div>
+            <h3 className="text-lg font-bold mb-2">Audio Hint ({PREVIEW_DURATION}s Preview)</h3>
+            <p className="text-sm opacity-90 mb-3">
+              {isPlaying ? 'Now playing...' : 'Click to play preview'}
+            </p>
+            <button
+              onClick={toggleItunesPlayback}
+              className="px-6 py-3 rounded-lg font-semibold transition-all bg-white text-green-600 hover:bg-gray-100"
+            >
+              {isPlaying ? '⏸️ Pause' : '▶️ Play'}
+            </button>
+            
+            <div className="mt-4 px-4">
+              <div className="flex items-center gap-3">
+                <span className="text-sm opacity-75">🔇</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={itunesVolume}
+                  onChange={handleItunesVolumeChange}
+                  className="flex-1 h-2 bg-white/30 rounded-lg appearance-none cursor-pointer"
+                  style={{ accentColor: 'white' }}
+                />
+                <span className="text-sm opacity-75">🔊</span>
+                <span className="text-xs bg-white/20 px-2 py-1 rounded min-w-[3rem] text-center">
+                  {itunesVolume}%
+                </span>
               </div>
             </div>
           </div>
@@ -1857,26 +1891,46 @@
                     const bestScore = songStat?.bestScore;
                     const grade = completed ? getGrade(bestScore) : (failed ? 'F' : null);
                     const gradeColors = grade ? getGradeColors(grade) : null;
+                    
+                    // Check if this song has an in-progress game
+                    const savedState = loadGameState();
+                    const isInProgress = savedState && 
+                      savedState.songTitle === song.title && 
+                      savedState.songArtist === song.artist &&
+                      savedState.guesses && 
+                      savedState.guesses.length > 0;
+                    
                     return (
                       <button
                         key={idx}
                         onClick={() => startSpecificSong(song)}
                         className={`p-4 hover:bg-purple-50 border-2 hover:border-purple-400 rounded-lg transition-all text-center ${
-                          completed ? `${gradeColors.bg} ${gradeColors.border}` : failed ? 'bg-red-50 border-red-300' : 'bg-gray-50 border-gray-200'
+                          isInProgress 
+                            ? 'bg-yellow-100 border-yellow-400' 
+                            : completed 
+                              ? `${gradeColors.bg} ${gradeColors.border}` 
+                              : failed 
+                                ? 'bg-red-50 border-red-300' 
+                                : 'bg-gray-50 border-gray-200'
                         }`}
                       >
                         <p className={`font-bold text-2xl mb-1 ${
-                          completed ? gradeColors.text : failed ? 'text-red-700' : 'text-gray-800'
+                          isInProgress ? 'text-yellow-700' : completed ? gradeColors.text : failed ? 'text-red-700' : 'text-gray-800'
                         }`}>#{idx + 1}</p>
-                        {(completed || failed) && (
+                        {isInProgress ? (
+                          <p className="text-sm font-semibold text-yellow-700 mb-2">
+                            ⏳ In Progress
+                          </p>
+                        ) : (completed || failed) ? (
                           <p className={`text-2xl font-black mb-2 ${gradeColors ? gradeColors.text : 'text-red-700'}`}>
                             {grade}
                           </p>
-                        )}
+                        ) : null}
                         <div className="flex flex-wrap gap-1 justify-center">
                           <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
                             song.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
-                            song.difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
+                            song.difficulty === 'Very Hard' ? 'bg-red-100 text-red-700' :
+                            song.difficulty === 'Hard' ? 'bg-orange-100 text-orange-700' :
                             'bg-yellow-100 text-yellow-700'
                           }`}>
                             {song.difficulty || 'Medium'}
@@ -2051,7 +2105,8 @@
                   </span>
                   <span className={`px-4 py-2 rounded-lg text-base font-bold ${
                     currentSong.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
-                    currentSong.difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
+                    currentSong.difficulty === 'Very Hard' ? 'bg-red-100 text-red-700' :
+                    currentSong.difficulty === 'Hard' ? 'bg-orange-100 text-orange-700' :
                     'bg-yellow-100 text-yellow-700'
                   }`}>
                     {currentSong.difficulty || 'Medium'}
@@ -2064,12 +2119,12 @@
                 {renderVisualHint()}
               </div>
 
-              {/* Progressive hints - Genre + Lyric 1 (4), Year + Lyric 2 (5), Artist (6) */}
+              {/* Progressive hints - Genre + Lyric 1 (3), Year + Lyric 2 (4), Artist (5) */}
               {/* Also show after game completion if they were unlocked */}
-              {currentSong && (guesses.length >= 3 || gameWon || gameLost) && (
+              {currentSong && (guesses.length >= 2 || gameWon || gameLost) && (
                 <div className="mb-4 flex flex-col gap-2 items-center">
                   {/* Row 1: Genre + Lyric 1 */}
-                  {(guesses.length >= 3 || gameWon || gameLost) && (currentSong.genre || currentSong.keyLyric1) && (
+                  {(guesses.length >= 2 || gameWon || gameLost) && (currentSong.genre || currentSong.keyLyric1) && (
                     <div className="flex flex-wrap gap-3 justify-center">
                       {currentSong.genre && (
                         <div className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-base font-bold">
@@ -2084,7 +2139,7 @@
                     </div>
                   )}
                   {/* Row 2: Year + Lyric 2 */}
-                  {(guesses.length >= 4 || gameWon || gameLost) && (currentSong.year || currentSong.keyLyric2) && (
+                  {(guesses.length >= 3 || gameWon || gameLost) && (currentSong.year || currentSong.keyLyric2) && (
                     <div className="flex flex-wrap gap-3 justify-center">
                       {currentSong.year && (
                         <div className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-base font-bold">
@@ -2099,7 +2154,7 @@
                     </div>
                   )}
                   {/* Row 3: Artist */}
-                  {(guesses.length >= 5 || gameWon || gameLost) && currentSong.artist && (
+                  {(guesses.length >= 4 || gameWon || gameLost) && currentSong.artist && (
                     <div className="flex justify-center">
                       <div className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-base font-bold">
                         Artist: {currentSong.artist}
@@ -2223,28 +2278,31 @@
                 <div className="text-sm text-gray-600">
                   {MAX_GUESSES - guesses.length} {MAX_GUESSES - guesses.length === 1 ? 'guess' : 'guesses'} remaining
                 </div>
+                {guesses.length >= GUESSES_BEFORE_VIDEO && !audioUnlocked && (
+                  <div className="text-sm text-blue-600 font-semibold">
+                    🎬 Video Unlocked!
+                  </div>
+                )}
                 {audioUnlocked && (
                   <div className="text-sm text-green-600 font-semibold">
-                    🎵 Audio + Video Unlocked!
+                    🎵 Audio Unlocked!
                   </div>
                 )}
               </div>
 
-              {/* Audio player section - show during gameplay after 2 wrong guesses, hide on win/loss */}
+              {/* Audio player section - show during gameplay after 5 guesses, hide on win/loss */}
               {audioUnlocked && guesses.length >= GUESSES_BEFORE_AUDIO && !gameWon && !gameLost && (
                 <div className="mb-4">
-                  {useMidi && currentSong?.midi && !midiError ? (
-                    // MIDI Player
-                    <div className="rounded-lg overflow-hidden">
-                      {midiLoading ? (
-                        <div className="w-full px-6 py-8 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white text-center">
-                          <Music className="w-12 h-12 mx-auto mb-3 animate-pulse" />
-                          <p className="text-sm">Loading audio...</p>
-                        </div>
-                      ) : (
-                        renderMidiPlayer()
-                      )}
-                    </div>
+                  {itunesPreviewUrl && !itunesError ? (
+                    // iTunes Preview (primary)
+                    itunesLoading ? (
+                      <div className="w-full px-6 py-8 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 text-white text-center">
+                        <Music className="w-12 h-12 mx-auto mb-3 animate-pulse" />
+                        <p className="text-sm">Loading audio preview...</p>
+                      </div>
+                    ) : (
+                      renderItunesPlayer()
+                    )
                   ) : currentSong?.youtubeId ? (
                     // YouTube fallback
                     renderYouTubePlayer()
@@ -2357,8 +2415,8 @@
 
             {gameMode === 'play' && (
             <div className="text-center text-purple-200 text-sm space-y-1">
-              <p>After {GUESSES_BEFORE_AUDIO} guesses, unlock video + audio hints!</p>
-              <p className="text-xs">Visual and audio clues to help you guess</p>
+              <p>After {GUESSES_BEFORE_AUDIO} guesses, unlock audio hint!</p>
+              <p className="text-xs">Video unlocks after {GUESSES_BEFORE_VIDEO} guess</p>
               {playedSongs.length > 0 && (
                 <p className="text-xs mt-2">
                   Songs played: {playedSongs.length}/{SONGS.length}
