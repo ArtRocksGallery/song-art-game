@@ -900,7 +900,7 @@
           // Search iTunes for the song
           const searchQuery = encodeURIComponent(`${song.title} ${song.artist}`);
           const response = await fetch(
-            `https://itunes.apple.com/search?term=${searchQuery}&media=music&entity=song&limit=5`
+            `https://itunes.apple.com/search?term=${searchQuery}&media=music&entity=song&limit=10`
           );
           
           if (!response.ok) {
@@ -910,33 +910,41 @@
           const data = await response.json();
           
           if (data.results && data.results.length > 0) {
-            // Try to find the best match
+            // Try to find the best match - MUST match artist
             const songTitleLower = song.title.toLowerCase();
             const songArtistLower = song.artist.toLowerCase();
             
-            // Look for exact or close match
+            // Helper to check if artists match (handles variations like "John Mellencamp" vs "John Cougar Mellencamp")
+            const artistMatches = (trackArtist) => {
+              const trackArtistLower = trackArtist.toLowerCase();
+              // Check if either contains the other, or if they share significant words
+              if (trackArtistLower.includes(songArtistLower) || songArtistLower.includes(trackArtistLower)) {
+                return true;
+              }
+              // Check for shared significant words (at least 2 chars, not common words)
+              const commonWords = ['the', 'and', 'of', 'a', 'an'];
+              const songWords = songArtistLower.split(/\s+/).filter(w => w.length > 2 && !commonWords.includes(w));
+              const trackWords = trackArtistLower.split(/\s+/).filter(w => w.length > 2 && !commonWords.includes(w));
+              return songWords.some(sw => trackWords.some(tw => tw.includes(sw) || sw.includes(tw)));
+            };
+            
+            // Look for title AND artist match
             let bestMatch = data.results.find(track => {
               const trackTitle = track.trackName.toLowerCase();
-              const trackArtist = track.artistName.toLowerCase();
-              return trackTitle.includes(songTitleLower) && trackArtist.includes(songArtistLower);
+              return trackTitle.includes(songTitleLower) && artistMatches(track.artistName);
             });
             
-            // If no exact match, try partial title match with artist
+            // If no title match, try just artist match
             if (!bestMatch) {
-              bestMatch = data.results.find(track => {
-                const trackArtist = track.artistName.toLowerCase();
-                return trackArtist.includes(songArtistLower);
-              });
+              bestMatch = data.results.find(track => artistMatches(track.artistName));
             }
             
-            // Fall back to first result if no better match
-            const match = bestMatch || data.results[0];
-            
-            if (match.previewUrl) {
-              console.log(`iTunes preview found: ${match.trackName} by ${match.artistName}`);
-              setItunesPreviewUrl(match.previewUrl);
+            // Only use the match if we found one with correct artist - don't fall back to wrong artist
+            if (bestMatch && bestMatch.previewUrl) {
+              console.log(`iTunes preview found: ${bestMatch.trackName} by ${bestMatch.artistName}`);
+              setItunesPreviewUrl(bestMatch.previewUrl);
             } else {
-              console.log('No preview URL in iTunes result');
+              console.log('No matching iTunes result found for correct artist');
               setItunesError(true);
             }
           } else {
