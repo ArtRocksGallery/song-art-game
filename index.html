@@ -1230,6 +1230,22 @@
       const startNewGame = () => {
         stopAllAudio();
         
+        // Check if there's an in-progress game
+        const savedState = loadGameState();
+        if (savedState && savedState.guesses && savedState.guesses.length > 0) {
+          // Redirect to the in-progress game
+          const inProgressSong = SONGS.find(s => 
+            s.title === savedState.songTitle && s.artist === savedState.songArtist
+          );
+          if (inProgressSong) {
+            alert(`You have an in-progress game for "${savedState.songTitle}". Please finish it first!`);
+            return;
+          } else {
+            // In-progress song not found, clear the state
+            clearGameState();
+          }
+        }
+        
         let availableSongs = SONGS.filter(song => 
           !playedSongs.some(played => 
             played.title === song.title && played.artist === song.artist
@@ -1255,11 +1271,17 @@
         
         // Check if this song has an in-progress game
         const savedState = loadGameState();
-        if (savedState && 
+        const isThisSongInProgress = savedState && 
             savedState.songTitle === song.title && 
             savedState.songArtist === song.artist &&
             savedState.guesses && 
-            savedState.guesses.length > 0) {
+            savedState.guesses.length > 0;
+        
+        const hasAnyInProgressGame = savedState && 
+            savedState.guesses && 
+            savedState.guesses.length > 0;
+        
+        if (isThisSongInProgress) {
           // Restore the in-progress game instead of starting fresh
           console.log('Restoring in-progress game for:', song.title);
           setCurrentSong(song);
@@ -1288,6 +1310,21 @@
           // Fetch iTunes preview
           fetchItunesPreview(song);
           setGameMode('play');
+        } else if (hasAnyInProgressGame) {
+          // Different song selected but there's an in-progress game
+          // Don't allow starting a new song - redirect to the in-progress one
+          const inProgressSong = SONGS.find(s => 
+            s.title === savedState.songTitle && s.artist === savedState.songArtist
+          );
+          if (inProgressSong) {
+            alert(`You have an in-progress game for "${savedState.songTitle}". Please finish it first!`);
+            return;
+          } else {
+            // In-progress song not found in SONGS array (shouldn't happen), clear it
+            clearGameState();
+            resetGameState(song);
+            setGameMode('play');
+          }
         } else {
           // No in-progress game, start fresh
           resetGameState(song);
