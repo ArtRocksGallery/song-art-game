@@ -692,6 +692,9 @@
 
     // Stats localStorage key - change version to reset all users' stats
     const STATS_KEY = 'songArtStats_v2';
+    
+    // Game state localStorage key - persists current game to prevent reload exploit
+    const GAME_STATE_KEY = 'songArtGameState_v1';
 
     // Load stats from localStorage
     const loadStats = () => {
@@ -714,6 +717,37 @@
         localStorage.setItem(STATS_KEY, JSON.stringify(stats));
       } catch (e) {
         console.error('Error saving stats:', e);
+      }
+    };
+    
+    // Load game state from localStorage
+    const loadGameState = () => {
+      try {
+        const saved = localStorage.getItem(GAME_STATE_KEY);
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      } catch (e) {
+        console.error('Error loading game state:', e);
+      }
+      return null;
+    };
+    
+    // Save game state to localStorage
+    const saveGameState = (state) => {
+      try {
+        localStorage.setItem(GAME_STATE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.error('Error saving game state:', e);
+      }
+    };
+    
+    // Clear game state from localStorage (when game completes)
+    const clearGameState = () => {
+      try {
+        localStorage.removeItem(GAME_STATE_KEY);
+      } catch (e) {
+        console.error('Error clearing game state:', e);
       }
     };
 
@@ -872,6 +906,32 @@
       const isTouchDevice = () => {
         return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       };
+
+      // Check for saved game state on load (prevent reload exploit)
+      useEffect(() => {
+        const savedState = loadGameState();
+        if (savedState && savedState.songTitle && savedState.songArtist) {
+          // Find the song in SONGS array
+          const song = SONGS.find(s => 
+            s.title === savedState.songTitle && s.artist === savedState.songArtist
+          );
+          
+          if (song) {
+            console.log('Restoring saved game state:', savedState.songTitle);
+            setCurrentSong(song);
+            setGuesses(savedState.guesses || []);
+            setGameMode('play');
+            
+            // Restore audio unlocked state based on guess count
+            if (savedState.guesses && savedState.guesses.length >= GUESSES_BEFORE_AUDIO) {
+              setAudioUnlocked(true);
+            }
+            
+            // Fetch iTunes preview for restored song
+            fetchItunesPreview(song);
+          }
+        }
+      }, []);
 
       // Load YouTube API as fallback
       useEffect(() => {
@@ -1218,6 +1278,13 @@
         setItunesPreviewUrl(null);
         setItunesError(false);
         
+        // Save initial game state (no guesses yet)
+        saveGameState({
+          songTitle: song.title,
+          songArtist: song.artist,
+          guesses: []
+        });
+        
         // Fetch iTunes preview in background
         fetchItunesPreview(song);
       };
@@ -1309,7 +1376,8 @@
 
         if (isCorrect) {
           setGameWon(true);
-          stopAllAudio(); // Stop MIDI so YouTube can play
+          stopAllAudio();
+          clearGameState(); // Clear saved game state on win
           if (!alreadyPlayed) {
             recordWin(currentSong, newGuesses.length);
           }
@@ -1322,13 +1390,23 @@
           }
         } else if (newGuesses.length >= MAX_GUESSES) {
           setGameLost(true);
-          stopAllAudio(); // Stop MIDI so YouTube can play
+          stopAllAudio();
+          clearGameState(); // Clear saved game state on loss
           if (!alreadyPlayed) {
             recordLoss(currentSong);
           }
           setAudioUnlocked(true);
-        } else if (newGuesses.length >= GUESSES_BEFORE_AUDIO) {
-          setAudioUnlocked(true);
+        } else {
+          // Save game state for incomplete games (prevent reload exploit)
+          saveGameState({
+            songTitle: currentSong.title,
+            songArtist: currentSong.artist,
+            guesses: newGuesses
+          });
+          
+          if (newGuesses.length >= GUESSES_BEFORE_AUDIO) {
+            setAudioUnlocked(true);
+          }
         }
 
         setGuess('');
@@ -1350,12 +1428,22 @@
         if (newGuesses.length >= MAX_GUESSES) {
           setGameLost(true);
           stopAllAudio();
+          clearGameState(); // Clear saved game state on loss
           if (!alreadyPlayed) {
             recordLoss(currentSong);
           }
           setAudioUnlocked(true);
-        } else if (newGuesses.length >= GUESSES_BEFORE_AUDIO) {
-          setAudioUnlocked(true);
+        } else {
+          // Save game state for incomplete games (prevent reload exploit)
+          saveGameState({
+            songTitle: currentSong.title,
+            songArtist: currentSong.artist,
+            guesses: newGuesses
+          });
+          
+          if (newGuesses.length >= GUESSES_BEFORE_AUDIO) {
+            setAudioUnlocked(true);
+          }
         }
 
         setGuess('');
