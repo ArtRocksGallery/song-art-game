@@ -690,10 +690,13 @@
       songStats: {} // { "songTitle - artist": { completed: true, bestScore: 3, attempts: 2 } }
     };
 
+    // Stats localStorage key - change version to reset all users' stats
+    const STATS_KEY = 'songArtStats_v2';
+
     // Load stats from localStorage
     const loadStats = () => {
       try {
-        const saved = localStorage.getItem('songArtStats');
+        const saved = localStorage.getItem(STATS_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
           // Merge with defaults to handle any missing fields
@@ -708,7 +711,7 @@
     // Save stats to localStorage
     const saveStats = (stats) => {
       try {
-        localStorage.setItem('songArtStats', JSON.stringify(stats));
+        localStorage.setItem(STATS_KEY, JSON.stringify(stats));
       } catch (e) {
         console.error('Error saving stats:', e);
       }
@@ -880,10 +883,6 @@
         window.onYouTubeIframeAPIReady = () => {
           console.log('YouTube API Ready (fallback)');
         };
-      }, []);
-
-      useEffect(() => {
-        startNewGame();
       }, []);
 
       // Fetch iTunes preview URL for a song
