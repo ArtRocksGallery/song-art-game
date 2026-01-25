@@ -1738,7 +1738,7 @@
         };
         
         return (
-          <div className="w-full px-4 sm:px-6 py-4 sm:py-6 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 text-white text-center">
+          <div className="w-full px-4 py-3 sm:py-4 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 text-white">
             <audio
               ref={itunesAudioRef}
               src={itunesPreviewUrl}
@@ -1752,36 +1752,64 @@
               onEnded={() => setIsPlaying(false)}
               preload="auto"
             />
-            <div className="mb-3">
-              <Music className={`w-12 h-12 mx-auto ${isPlaying ? 'animate-pulse' : ''}`} />
-            </div>
-            <h3 className="text-lg font-bold mb-2">Audio Hint ({PREVIEW_DURATION}s Preview)</h3>
-            <p className="text-sm opacity-90 mb-3">
-              {isPlaying ? 'Now playing...' : 'Click to play preview'}
-            </p>
-            <button
-              onClick={toggleItunesPlayback}
-              className="px-6 py-3 rounded-lg font-semibold transition-all bg-white text-green-600 hover:bg-gray-100"
-            >
-              {isPlaying ? '⏸️ Pause' : '▶️ Play'}
-            </button>
-            
-            <div className="mt-4 px-4">
-              <div className="flex items-center gap-3">
-                <span className="text-sm opacity-75">🔇</span>
+            {/* Compact horizontal layout for desktop */}
+            <div className="hidden sm:flex items-center gap-4">
+              <Music className={`w-8 h-8 flex-shrink-0 ${isPlaying ? 'animate-pulse' : ''}`} />
+              <div className="flex-1">
+                <h3 className="text-sm font-bold">Audio Hint ({PREVIEW_DURATION}s Preview)</h3>
+                <p className="text-xs opacity-90">
+                  {isPlaying ? 'Now playing...' : 'Click to play preview'}
+                </p>
+              </div>
+              <button
+                onClick={toggleItunesPlayback}
+                className="px-4 py-2 rounded-lg font-semibold transition-all bg-white text-green-600 hover:bg-gray-100 text-sm flex-shrink-0"
+              >
+                {isPlaying ? '⏸️ Pause' : '▶️ Play'}
+              </button>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className="text-xs opacity-75">🔇</span>
                 <input
                   type="range"
                   min="0"
                   max="100"
                   value={itunesVolume}
                   onChange={handleItunesVolumeChange}
-                  className="flex-1 h-2 bg-white/30 rounded-lg appearance-none cursor-pointer"
+                  className="w-20 h-2 bg-white/30 rounded-lg appearance-none cursor-pointer"
                   style={{ accentColor: 'white' }}
                 />
-                <span className="text-sm opacity-75">🔊</span>
-                <span className="text-xs bg-white/20 px-2 py-1 rounded min-w-[3rem] text-center">
-                  {itunesVolume}%
-                </span>
+                <span className="text-xs opacity-75">🔊</span>
+              </div>
+            </div>
+            {/* Stacked layout for mobile */}
+            <div className="sm:hidden text-center">
+              <div className="mb-2">
+                <Music className={`w-10 h-10 mx-auto ${isPlaying ? 'animate-pulse' : ''}`} />
+              </div>
+              <h3 className="text-base font-bold mb-1">Audio Hint ({PREVIEW_DURATION}s Preview)</h3>
+              <p className="text-sm opacity-90 mb-2">
+                {isPlaying ? 'Now playing...' : 'Click to play preview'}
+              </p>
+              <button
+                onClick={toggleItunesPlayback}
+                className="px-5 py-2 rounded-lg font-semibold transition-all bg-white text-green-600 hover:bg-gray-100"
+              >
+                {isPlaying ? '⏸️ Pause' : '▶️ Play'}
+              </button>
+              <div className="mt-3 px-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm opacity-75">🔇</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={itunesVolume}
+                    onChange={handleItunesVolumeChange}
+                    className="flex-1 h-2 bg-white/30 rounded-lg appearance-none cursor-pointer"
+                    style={{ accentColor: 'white' }}
+                  />
+                  <span className="text-sm opacity-75">🔊</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1859,14 +1887,14 @@
       };
 
       return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4">
+        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4 sm:p-3">
           <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-8 pt-6">
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <Music className="w-10 h-10 text-yellow-400" />
-                <h1 className="text-4xl font-bold text-white">Song Inspired Art</h1>
+            <div className="text-center mb-4 sm:mb-3 pt-4 sm:pt-2">
+              <div className="flex items-center justify-center gap-2 sm:gap-2 mb-1">
+                <Music className="w-8 h-8 sm:w-7 sm:h-7 text-yellow-400" />
+                <h1 className="text-3xl sm:text-2xl font-bold text-white">Song Inspired Art</h1>
               </div>
-              <p className="text-purple-200">Guess the song from its visual hints</p>
+              <p className="text-purple-200 text-sm">Guess the song from its visual hints</p>
             </div>
 
             {/* MENU MODE */}
@@ -2123,9 +2151,9 @@
 
             {/* PLAY MODE */}
             {gameMode === 'play' && (
-            <div className="bg-white rounded-lg shadow-2xl p-6 mb-6">
+            <div className="bg-white rounded-lg shadow-2xl p-4 sm:p-4 mb-4 sm:mb-3">
               {/* Back to menu button */}
-              <div className="flex justify-end mb-3">
+              <div className="flex justify-end mb-2">
                 <button
                   onClick={goToMenu}
                   className="px-3 py-1 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 transition-colors text-sm"
@@ -2136,11 +2164,11 @@
               
               {/* Game number and Difficulty badge */}
               {currentSong && (
-                <div className="flex justify-center gap-3 mb-3">
-                  <span className="px-4 py-2 rounded-lg text-base font-bold bg-gray-100 text-gray-700">
+                <div className="flex justify-center gap-2 mb-2">
+                  <span className="px-3 py-1 rounded-lg text-sm font-bold bg-gray-100 text-gray-700">
                     Game #{SONGS.findIndex(s => s.title === currentSong.title && s.artist === currentSong.artist) + 1}
                   </span>
-                  <span className={`px-4 py-2 rounded-lg text-base font-bold ${
+                  <span className={`px-3 py-1 rounded-lg text-sm font-bold ${
                     currentSong.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
                     currentSong.difficulty === 'Very Hard' ? 'bg-red-100 text-red-700' :
                     currentSong.difficulty === 'Hard' ? 'bg-orange-100 text-orange-700' :
@@ -2152,24 +2180,24 @@
               )}
               
               {/* Visual hint area - image or video */}
-              <div className="bg-gray-100 rounded-lg mb-4 overflow-hidden">
+              <div className="bg-gray-100 rounded-lg mb-3 overflow-hidden">
                 {renderVisualHint()}
               </div>
 
               {/* Progressive hints - Genre + Lyric 1 (3), Year + Lyric 2 (4), Artist (5) */}
               {/* Also show after game completion if they were unlocked */}
               {currentSong && (guesses.length >= 2 || gameWon || gameLost) && (
-                <div className="mb-4 flex flex-col gap-2 items-center">
+                <div className="mb-3 flex flex-col gap-1.5 items-center">
                   {/* Row 1: Genre + Lyric 1 */}
                   {(guesses.length >= 2 || gameWon || gameLost) && (currentSong.genre || currentSong.keyLyric1) && (
-                    <div className="flex flex-wrap gap-3 justify-center">
+                    <div className="flex flex-wrap gap-2 justify-center">
                       {currentSong.genre && (
-                        <div className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-base font-bold">
+                        <div className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-sm font-bold">
                           Genre: {currentSong.genre}
                         </div>
                       )}
                       {currentSong.keyLyric1 && (
-                        <div className="px-4 py-2 bg-pink-100 text-pink-700 rounded-lg text-base font-bold italic">
+                        <div className="px-3 py-1.5 bg-pink-100 text-pink-700 rounded-lg text-sm font-bold italic">
                           "{currentSong.keyLyric1}"
                         </div>
                       )}
@@ -2177,14 +2205,14 @@
                   )}
                   {/* Row 2: Year + Lyric 2 */}
                   {(guesses.length >= 3 || gameWon || gameLost) && (currentSong.year || currentSong.keyLyric2) && (
-                    <div className="flex flex-wrap gap-3 justify-center">
+                    <div className="flex flex-wrap gap-2 justify-center">
                       {currentSong.year && (
-                        <div className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-base font-bold">
+                        <div className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm font-bold">
                           Year: {currentSong.year}
                         </div>
                       )}
                       {currentSong.keyLyric2 && (
-                        <div className="px-4 py-2 bg-pink-100 text-pink-700 rounded-lg text-base font-bold italic">
+                        <div className="px-3 py-1.5 bg-pink-100 text-pink-700 rounded-lg text-sm font-bold italic">
                           "{currentSong.keyLyric2}"
                         </div>
                       )}
@@ -2193,7 +2221,7 @@
                   {/* Row 3: Artist */}
                   {(guesses.length >= 4 || gameWon || gameLost) && currentSong.artist && (
                     <div className="flex justify-center">
-                      <div className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-base font-bold">
+                      <div className="px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg text-sm font-bold">
                         Artist: {currentSong.artist}
                       </div>
                     </div>
@@ -2202,7 +2230,7 @@
               )}
 
               {/* Guess indicator boxes */}
-              <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="flex items-center justify-center gap-1.5 mb-3">
                 {Array.from({ length: MAX_GUESSES }).map((_, idx) => {
                   const guess = guesses[idx];
                   let bgColor = 'bg-gray-200'; // neutral/unused
@@ -2225,8 +2253,8 @@
                   return (
                     <div
                       key={idx}
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg ${bgColor} ${textColor} transition-all duration-300 ${
-                        isCurrentGuess ? 'ring-4 ring-purple-600 scale-110' : ''
+                      className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center font-bold text-base ${bgColor} ${textColor} transition-all duration-300 ${
+                        isCurrentGuess ? 'ring-3 ring-purple-600 scale-110' : ''
                       }`}
                     >
                       {idx + 1}
@@ -2311,17 +2339,17 @@
                 </div>
               )}
               
-              <div className="flex items-center justify-between mb-4">
-                <div className="text-sm text-gray-600">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-xs text-gray-600">
                   {MAX_GUESSES - guesses.length} {MAX_GUESSES - guesses.length === 1 ? 'guess' : 'guesses'} remaining
                 </div>
                 {guesses.length >= GUESSES_BEFORE_VIDEO && !audioUnlocked && (
-                  <div className="text-sm text-blue-600 font-semibold">
+                  <div className="text-xs text-blue-600 font-semibold">
                     🎬 Video Unlocked!
                   </div>
                 )}
                 {audioUnlocked && (
-                  <div className="text-sm text-green-600 font-semibold">
+                  <div className="text-xs text-green-600 font-semibold">
                     🎵 Audio Unlocked!
                   </div>
                 )}
@@ -2329,12 +2357,12 @@
 
               {/* Audio player section - show during gameplay after 5 guesses, hide on win/loss */}
               {audioUnlocked && guesses.length >= GUESSES_BEFORE_AUDIO && !gameWon && !gameLost && (
-                <div className="mb-4">
+                <div className="mb-3">
                   {itunesPreviewUrl && !itunesError ? (
                     // iTunes Preview (primary)
                     itunesLoading ? (
-                      <div className="w-full px-6 py-8 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 text-white text-center">
-                        <Music className="w-12 h-12 mx-auto mb-3 animate-pulse" />
+                      <div className="w-full px-4 py-4 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 text-white text-center">
+                        <Music className="w-8 h-8 mx-auto mb-2 animate-pulse" />
                         <p className="text-sm">Loading audio preview...</p>
                       </div>
                     ) : (
@@ -2344,8 +2372,8 @@
                     // YouTube fallback
                     renderYouTubePlayer()
                   ) : (
-                    <div className="w-full px-6 py-4 rounded-lg bg-yellow-100 text-yellow-800 text-sm">
-                      <p className="font-semibold mb-2">🎵 No Audio Available</p>
+                    <div className="w-full px-4 py-3 rounded-lg bg-yellow-100 text-yellow-800 text-sm">
+                      <p className="font-semibold mb-1">🎵 No Audio Available</p>
                       <p className="text-xs">Keep guessing based on the visual hints!</p>
                     </div>
                   )}
@@ -2354,7 +2382,7 @@
 
               {!gameWon && !gameLost && (
                 <>
-                  <div className="mb-4 autocomplete-container relative">
+                  <div className="mb-3 autocomplete-container relative">
                     <div className="relative">
                       <input
                         type="text"
@@ -2368,18 +2396,18 @@
                         }}
                         onFocus={() => guess.length >= 2 && setShowSuggestions(true)}
                         placeholder="Enter song title or artist..."
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none"
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none text-sm"
                         autoComplete="off"
                       />
                       {showSuggestions && suggestions.length > 0 && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border-2 border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        <div className="absolute z-10 w-full mt-1 bg-white border-2 border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                           {suggestions.map((suggestion, idx) => (
                             <div
                               key={idx}
                               onClick={() => selectSuggestion(suggestion)}
-                              className="px-4 py-3 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                              className="px-3 py-2 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-b-0"
                             >
-                              <div className="font-semibold text-gray-800">{suggestion.title}</div>
+                              <div className="font-semibold text-gray-800 text-sm">{suggestion.title}</div>
                               <div className="text-sm text-gray-600">{suggestion.artist}</div>
                             </div>
                           ))}
@@ -2390,7 +2418,7 @@
                   <div className="flex gap-2 mb-4">
                     <button
                       onClick={handleSkip}
-                      className="flex-1 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors"
+                      className="flex-1 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors text-sm"
                     >
                       Skip
                     </button>
@@ -2399,7 +2427,7 @@
                         handleGuess();
                         setShowSuggestions(false);
                       }}
-                      className="flex-1 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors"
+                      className="flex-1 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors text-sm"
                     >
                       Guess
                     </button>
@@ -2408,7 +2436,7 @@
                   {guesses.length >= 1 && (
                     <button
                       onClick={() => setShowHint(!showHint)}
-                      className="w-full px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 transition-colors flex items-center justify-center gap-2 font-bold"
+                      className="w-full px-3 py-1.5 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 transition-colors flex items-center justify-center gap-2 font-bold text-sm"
                     >
                       <Lightbulb className="w-4 h-4" />
                       {showHint ? 'Hide' : 'Show'} Text Hint
@@ -2416,7 +2444,7 @@
                   )}
 
                   {showHint && currentSong && (
-                    <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-gray-700 font-bold">
+                    <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg text-xs text-gray-700 font-bold">
                       {currentSong.description}
                     </div>
                   )}
@@ -2424,20 +2452,20 @@
               )}
 
               {guesses.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="font-semibold text-gray-700 mb-2">Your Guesses:</h3>
-                  <div className="space-y-2">
+                <div className="mt-4">
+                  <h3 className="font-semibold text-gray-700 mb-1.5 text-sm">Your Guesses:</h3>
+                  <div className="space-y-1.5">
                     {guesses.map((g, idx) => (
                       <div
                         key={idx}
-                        className={`flex items-center gap-2 p-3 rounded-lg ${
+                        className={`flex items-center gap-2 p-2 rounded-lg text-sm ${
                           g.correct ? 'bg-green-100 border-2 border-green-500' : 'bg-gray-100'
                         }`}
                       >
                         {g.correct ? (
-                          <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                          <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
                         ) : (
-                          <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                          <XCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
                         )}
                         <span className={g.correct ? 'text-green-800 font-semibold' : 'text-gray-700'}>
                           {g.text}
@@ -2451,11 +2479,11 @@
             )}
 
             {gameMode === 'play' && (
-            <div className="text-center text-purple-200 text-sm space-y-1">
+            <div className="text-center text-purple-200 text-xs space-y-0.5">
               <p>After {GUESSES_BEFORE_AUDIO} guesses, unlock audio hint!</p>
               <p className="text-xs">Video unlocks after {GUESSES_BEFORE_VIDEO} guess</p>
               {playedSongs.length > 0 && (
-                <p className="text-xs mt-2">
+                <p className="text-xs mt-1">
                   Songs played: {playedSongs.length}/{SONGS.length}
                   {playedSongs.length === SONGS.length && " - Starting fresh next round!"}
                 </p>
