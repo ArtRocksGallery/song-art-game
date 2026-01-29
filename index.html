@@ -103,6 +103,19 @@
       </svg>
     );
 
+    const Loader = ({ className }) => (
+      <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="2" x2="12" y2="6"></line>
+        <line x1="12" y1="18" x2="12" y2="22"></line>
+        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+        <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+        <line x1="2" y1="12" x2="6" y2="12"></line>
+        <line x1="18" y1="12" x2="22" y2="12"></line>
+        <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+        <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+      </svg>
+    );
+
     // SONGS array - update paths to match your hosted files
     // 'youtubeId' is used as fallback if iTunes preview is unavailable
     // 'youtubeTimestamp' is seconds into the video to start on win (optional, defaults to 0)
@@ -1244,6 +1257,13 @@
       const MAGNIFIER_SIZE = 280;
       const ZOOM_LEVEL = 4;
       
+      // Image loading state
+      const [imageLoading, setImageLoading] = useState(true);
+      
+      // Archive pagination state
+      const [archivePage, setArchivePage] = useState(1);
+      const SONGS_PER_PAGE = 20;
+      
       // Check if device is touch/mobile (magnifier only shows on desktop)
       const isTouchDevice = () => {
         return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -1691,6 +1711,7 @@
         setPlayerReady(false);
         setYtPlayer(null);
         setShowPictureOverVideo(false);
+        setImageLoading(true);
         
         // Reset iTunes state
         setItunesPreviewUrl(null);
@@ -1712,6 +1733,12 @@
         stopAllAudio();
         setGameMode('menu');
         setCurrentSong(null);
+      };
+
+      // Go to archive (reset to page 1)
+      const goToArchive = () => {
+        setArchivePage(1);
+        setGameMode('archive');
       };
 
       const handleGuess = async () => {
@@ -1978,7 +2005,7 @@
         return (
           <div 
             ref={imageContainerRef}
-            className={`relative w-full ${!isTouch ? 'cursor-crosshair' : ''}`}
+            className={`relative w-full ${!isTouch ? 'cursor-crosshair' : ''} ${imageLoading ? 'min-h-[300px]' : ''}`}
             onMouseEnter={() => !isTouch && setShowMagnifier(true)}
             onMouseLeave={() => !isTouch && setShowMagnifier(false)}
             onMouseMove={(e) => {
@@ -1988,11 +2015,18 @@
               }
             }}
           >
+            {/* Loading spinner overlay */}
+            {imageLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 z-10 rounded-lg">
+                <Loader className="w-12 h-12 text-purple-400 animate-spin" />
+              </div>
+            )}
             <img
               src={currentSong.image}
               alt="Song hint"
               className="w-full h-auto object-contain"
               draggable="false"
+              onLoad={() => setImageLoading(false)}
             />
             {showMagnifier && !isTouch && (
               <div
@@ -2254,7 +2288,7 @@
                   </button>
                   
                   <button
-                    onClick={() => setGameMode('archive')}
+                    onClick={goToArchive}
                     className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:to-cyan-700 font-semibold transition-all flex items-center justify-center gap-3 text-lg"
                   >
                     <Archive className="w-6 h-6" />
@@ -2277,9 +2311,15 @@
             )}
 
             {/* ARCHIVE MODE */}
-            {gameMode === 'archive' && (
-              <div className="bg-white rounded-lg shadow-2xl p-4 sm:p-6 mb-6 max-h-[80vh] overflow-y-auto">
-                <div className="flex items-center justify-between mb-4 sticky top-0 bg-white pb-2">
+            {gameMode === 'archive' && (() => {
+              const totalPages = Math.ceil(SONGS.length / SONGS_PER_PAGE);
+              const startIdx = (archivePage - 1) * SONGS_PER_PAGE;
+              const endIdx = startIdx + SONGS_PER_PAGE;
+              const paginatedSongs = SONGS.slice(startIdx, endIdx);
+              
+              return (
+              <div className="bg-white rounded-lg shadow-2xl p-4 sm:p-6 mb-6">
+                <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Song Archive</h2>
                   <button
                     onClick={goToMenu}
@@ -2289,8 +2329,14 @@
                   </button>
                 </div>
                 
+                {/* Pagination info */}
+                <div className="text-center text-sm text-gray-600 mb-3">
+                  Showing {startIdx + 1}-{Math.min(endIdx, SONGS.length)} of {SONGS.length} songs
+                </div>
+                
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                  {SONGS.map((song, idx) => {
+                  {paginatedSongs.map((song, idx) => {
+                    const globalIdx = startIdx + idx;
                     const songKey = `${song.title} - ${song.artist}`;
                     const songStat = stats.songStats[songKey];
                     const completed = songStat?.completed;
@@ -2309,7 +2355,7 @@
                     
                     return (
                       <button
-                        key={idx}
+                        key={globalIdx}
                         onClick={() => startSpecificSong(song)}
                         className={`p-4 hover:bg-purple-50 border-2 hover:border-purple-400 rounded-lg transition-all text-center ${
                           isInProgress 
@@ -2323,7 +2369,7 @@
                       >
                         <p className={`font-bold text-2xl mb-1 ${
                           isInProgress ? 'text-yellow-700' : completed ? gradeColors.text : failed ? 'text-red-700' : 'text-gray-800'
-                        }`}>#{idx + 1}</p>
+                        }`}>#{globalIdx + 1}</p>
                         {isInProgress ? (
                           <p className="text-sm font-semibold text-yellow-700 mb-2">
                             ⏳ In Progress
@@ -2347,8 +2393,64 @@
                     );
                   })}
                 </div>
+                
+                {/* Pagination controls */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => setArchivePage(1)}
+                      disabled={archivePage === 1}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                        archivePage === 1 
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                          : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                      }`}
+                    >
+                      ««
+                    </button>
+                    <button
+                      onClick={() => setArchivePage(p => Math.max(1, p - 1))}
+                      disabled={archivePage === 1}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                        archivePage === 1 
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                          : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                      }`}
+                    >
+                      ‹ Prev
+                    </button>
+                    
+                    <span className="px-4 py-1.5 text-sm font-semibold text-gray-700">
+                      Page {archivePage} of {totalPages}
+                    </span>
+                    
+                    <button
+                      onClick={() => setArchivePage(p => Math.min(totalPages, p + 1))}
+                      disabled={archivePage === totalPages}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                        archivePage === totalPages 
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                          : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                      }`}
+                    >
+                      Next ›
+                    </button>
+                    <button
+                      onClick={() => setArchivePage(totalPages)}
+                      disabled={archivePage === totalPages}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                        archivePage === totalPages 
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                          : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                      }`}
+                    >
+                      »»
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
+              );
+            })()}
 
             {/* STATS MODE */}
             {gameMode === 'stats' && (
@@ -2653,7 +2755,7 @@
                       Next Game
                     </button>
                     <button
-                      onClick={() => setGameMode('archive')}
+                      onClick={goToArchive}
                       className="flex-1 max-w-[150px] px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-colors flex items-center justify-center gap-2"
                     >
                       <Archive className="w-4 h-4" />
@@ -2689,7 +2791,7 @@
                       Next Game
                     </button>
                     <button
-                      onClick={() => setGameMode('archive')}
+                      onClick={goToArchive}
                       className="flex-1 max-w-[150px] px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-colors flex items-center justify-center gap-2"
                     >
                       <Archive className="w-4 h-4" />
