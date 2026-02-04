@@ -106,14 +106,16 @@
     // ============================================
     // DAILY UNLOCK CONFIGURATION
     // ============================================
-    // Set this to the launch date (YYYY-MM-DD format)
+    // Set this to the launch date (YYYY, MM (1-12), DD format)
     // Games unlock one per day starting from this date
     // Day 1 = Game #1, Day 2 = Games #1-2, etc.
-    const START_DATE = '2025-02-04'; // Change this to your launch date
+    const START_YEAR = 2025;
+    const START_MONTH = 2; // 1 = January, 2 = February, etc.
+    const START_DAY = 4;   // Day of month
     
     // Calculate how many games are unlocked based on current date
     const getUnlockedGameCount = () => {
-      const start = new Date(START_DATE);
+      const start = new Date(START_YEAR, START_MONTH - 1, START_DAY); // Month is 0-indexed
       const today = new Date();
       // Reset time portions to compare just dates
       start.setHours(0, 0, 0, 0);
