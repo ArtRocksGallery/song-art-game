@@ -1045,7 +1045,13 @@
     ];
 
     // SONGS = only the unlocked games based on current date
-    const SONGS = ALL_SONGS.slice(0, getUnlockedGameCount());
+    const unlockedCount = getUnlockedGameCount();
+    console.log('Start date:', new Date(START_YEAR, START_MONTH - 1, START_DAY));
+    console.log('Today:', new Date());
+    console.log('Unlocked count:', unlockedCount);
+    console.log('Total songs:', ALL_SONGS.length);
+    const SONGS = ALL_SONGS.slice(0, unlockedCount);
+    console.log('SONGS length:', SONGS.length);
 
     // Default stats structure
     const DEFAULT_STATS = {
