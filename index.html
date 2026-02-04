@@ -2555,45 +2555,54 @@
                 {renderVisualHint()}
               </div>
 
-              {/* Progressive hints - Genre + Lyric 1 (3), Year + Lyric 2 (4), Artist (5) */}
+              {/* Progressive hints - Genre + Lyric 1 (2), Year + Lyric 2 (3), Artist (4) */}
               {/* Also show after game completion if they were unlocked */}
               {currentSong && (guesses.length >= 2 || gameWon || gameLost) && (
-                <div className="mb-3 flex flex-col gap-1.5 items-center">
-                  {/* Row 1: Genre + Lyric 1 */}
+                <div className="mb-3 flex flex-col gap-2">
+                  {/* Hint #1: Genre + Lyric 1 */}
                   {(guesses.length >= 2 || gameWon || gameLost) && (currentSong.genre || currentSong.keyLyric1) && (
-                    <div className="flex flex-wrap gap-2 justify-center">
-                      {currentSong.genre && (
-                        <div className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-sm font-bold">
-                          Genre: {currentSong.genre}
-                        </div>
-                      )}
-                      {currentSong.keyLyric1 && (
-                        <div className="px-3 py-1.5 bg-pink-100 text-pink-700 rounded-lg text-sm font-bold italic">
-                          "{currentSong.keyLyric1}"
-                        </div>
-                      )}
+                    <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
+                      <span className="px-2 py-1 bg-gray-600 text-white rounded text-xs font-bold whitespace-nowrap">Hint 1</span>
+                      <div className="flex flex-wrap gap-2 flex-1">
+                        {currentSong.genre && (
+                          <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-sm font-bold">
+                            Genre: {currentSong.genre}
+                          </span>
+                        )}
+                        {currentSong.keyLyric1 && (
+                          <span className="px-2 py-1 bg-pink-100 text-pink-700 rounded text-sm font-bold italic">
+                            "{currentSong.keyLyric1}"
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )}
-                  {/* Row 2: Year + Lyric 2 */}
+                  {/* Hint #2: Year + Lyric 2 */}
                   {(guesses.length >= 3 || gameWon || gameLost) && (currentSong.year || currentSong.keyLyric2) && (
-                    <div className="flex flex-wrap gap-2 justify-center">
-                      {currentSong.year && (
-                        <div className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm font-bold">
-                          Year: {currentSong.year}
-                        </div>
-                      )}
-                      {currentSong.keyLyric2 && (
-                        <div className="px-3 py-1.5 bg-pink-100 text-pink-700 rounded-lg text-sm font-bold italic">
-                          "{currentSong.keyLyric2}"
-                        </div>
-                      )}
+                    <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
+                      <span className="px-2 py-1 bg-gray-600 text-white rounded text-xs font-bold whitespace-nowrap">Hint 2</span>
+                      <div className="flex flex-wrap gap-2 flex-1">
+                        {currentSong.year && (
+                          <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm font-bold">
+                            Year: {currentSong.year}
+                          </span>
+                        )}
+                        {currentSong.keyLyric2 && (
+                          <span className="px-2 py-1 bg-pink-100 text-pink-700 rounded text-sm font-bold italic">
+                            "{currentSong.keyLyric2}"
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )}
-                  {/* Row 3: Artist */}
+                  {/* Hint #3: Artist */}
                   {(guesses.length >= 4 || gameWon || gameLost) && currentSong.artist && (
-                    <div className="flex justify-center">
-                      <div className="px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg text-sm font-bold">
-                        Artist: {currentSong.artist}
+                    <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
+                      <span className="px-2 py-1 bg-gray-600 text-white rounded text-xs font-bold whitespace-nowrap">Hint 3</span>
+                      <div className="flex flex-wrap gap-2 flex-1">
+                        <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-sm font-bold">
+                          Artist: {currentSong.artist}
+                        </span>
                       </div>
                     </div>
                   )}
