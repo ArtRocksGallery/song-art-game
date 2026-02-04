@@ -103,11 +103,32 @@
       </svg>
     );
 
-    // SONGS array - update paths to match your hosted files
+    // ============================================
+    // DAILY UNLOCK CONFIGURATION
+    // ============================================
+    // Set this to the launch date (YYYY-MM-DD format)
+    // Games unlock one per day starting from this date
+    // Day 1 = Game #1, Day 2 = Games #1-2, etc.
+    const START_DATE = '2025-02-10'; // Change this to your launch date
+    
+    // Calculate how many games are unlocked based on current date
+    const getUnlockedGameCount = () => {
+      const start = new Date(START_DATE);
+      const today = new Date();
+      // Reset time portions to compare just dates
+      start.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+      const diffTime = today - start;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      // Day 0 (launch day) = 1 game, Day 1 = 2 games, etc.
+      return Math.max(0, diffDays + 1);
+    };
+
+    // ALL_SONGS array - the complete song database
     // 'youtubeId' is used as fallback if iTunes preview is unavailable
     // 'youtubeTimestamp' is seconds into the video to start on win (optional, defaults to 0)
     // 'difficulty' can be 'Easy', 'Medium', or 'Hard'
-    const SONGS = [
+    const ALL_SONGS = [
       {
         title: "Rooster",
         artist: "Alice in Chains",
@@ -1020,6 +1041,9 @@
         description: "A new wave reinvention of the Al Green soul classic, transforming the baptismal imagery into a twitchy, angular art-rock masterpiece."
       },
     ];
+
+    // SONGS = only the unlocked games based on current date
+    const SONGS = ALL_SONGS.slice(0, getUnlockedGameCount());
 
     // Default stats structure
     const DEFAULT_STATS = {
@@ -2271,7 +2295,10 @@
                 </div>
                 
                 <div className="mt-6 text-center text-gray-500 text-sm">
-                  <p>{SONGS.length} songs available</p>
+                  <p>{SONGS.length} {SONGS.length === 1 ? 'song' : 'songs'} available</p>
+                  {SONGS.length < ALL_SONGS.length && (
+                    <p className="text-xs mt-1">New song unlocks daily!</p>
+                  )}
                 </div>
               </div>
             )}
