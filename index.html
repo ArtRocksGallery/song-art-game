@@ -1335,6 +1335,37 @@
         };
       }, []);
 
+      // JSONP helper to bypass CORS restrictions (needed for iOS in iframes)
+      const fetchJsonp = (url) => {
+        return new Promise((resolve, reject) => {
+          const callbackName = '_jsonp_cb_' + Math.random().toString(36).slice(2);
+          const timeout = setTimeout(() => {
+            cleanup();
+            reject(new Error('JSONP request timed out'));
+          }, 10000);
+          
+          const cleanup = () => {
+            clearTimeout(timeout);
+            delete window[callbackName];
+            if (script.parentNode) script.parentNode.removeChild(script);
+          };
+          
+          window[callbackName] = (data) => {
+            cleanup();
+            resolve(data);
+          };
+          
+          const script = document.createElement('script');
+          const separator = url.includes('?') ? '&' : '?';
+          script.src = `${url}${separator}callback=${callbackName}`;
+          script.onerror = () => {
+            cleanup();
+            reject(new Error('JSONP script load failed'));
+          };
+          document.head.appendChild(script);
+        });
+      };
+
       // Fetch iTunes preview URL for a song
       const fetchItunesPreview = async (song) => {
         if (!song) {
@@ -1348,15 +1379,9 @@
         try {
           // Search iTunes for the song
           const searchQuery = encodeURIComponent(`${song.title} ${song.artist}`);
-          const response = await fetch(
+          const data = await fetchJsonp(
             `https://itunes.apple.com/search?term=${searchQuery}&media=music&entity=song&limit=10`
           );
-          
-          if (!response.ok) {
-            throw new Error('iTunes API request failed');
-          }
-          
-          const data = await response.json();
           
           if (data.results && data.results.length > 0) {
             // Try to find the best match - MUST match artist
@@ -1460,12 +1485,11 @@
 
         try {
           const searchQuery = encodeURIComponent(query);
-          const response = await fetch(
+          const data = await fetchJsonp(
             `https://itunes.apple.com/search?term=${searchQuery}&media=music&entity=song&limit=10`
           );
 
-          if (response.ok) {
-            const data = await response.json();
+          if (data) {
             if (data.results && data.results.length > 0) {
               let tracks = data.results.map(track => ({
                 title: track.trackName,
@@ -1502,7 +1526,7 @@
             searchLocalSongs(query);
           }
         } catch (error) {
-          console.error('Error searching iTunes:', error);
+          console.error('Error searching iTunes (JSONP):', error);
           searchLocalSongs(query);
         }
       };
@@ -2149,6 +2173,10 @@
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
               onEnded={() => setIsPlaying(false)}
+              onError={() => {
+                console.warn('iTunes audio failed to load, falling back to YouTube');
+                setItunesError(true);
+              }}
               preload="auto"
             />
             {/* Compact horizontal layout for desktop */}
