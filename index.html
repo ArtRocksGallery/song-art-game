@@ -714,7 +714,7 @@
         year: 1975,
         keyLyric1: "We're just two lost souls swimming in a fish bowl",
 		keyLyric2: "So, so you think you can tell - Heaven from hell?",
-        description: "A poignant acoustic tribute to former bandmate Syd Barrett, reflecting on absence, the music industry, and the loss of innocence."
+        description: "A poignant acoustic tribute to a former bandmate, reflecting on absence, the music industry, and the loss of innocence."
       },
 	  {
         title: "Witchy Woman",
@@ -1988,6 +1988,9 @@
                 playsInline
                 className="w-full h-auto object-contain"
               />
+              <div className="absolute bottom-3 left-3 px-3 py-2 bg-black/60 text-white text-sm font-semibold rounded-lg">
+                Hint #1
+              </div>
               <button
                 onClick={() => setShowPictureOverVideo(true)}
                 className="absolute bottom-3 right-3 px-3 py-2 bg-black/60 hover:bg-black/80 text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
@@ -2034,6 +2037,12 @@
                   backgroundRepeat: 'no-repeat',
                 }}
               />
+            )}
+            {/* Hint #1 label */}
+            {!gameWon && !gameLost && (
+              <div className="absolute bottom-3 left-3 px-3 py-2 bg-black/60 text-white text-sm font-semibold rounded-lg pointer-events-none">
+                Hint #1
+              </div>
             )}
             {guesses.length >= GUESSES_BEFORE_VIDEO && showPictureOverVideo && (
               <button
@@ -2555,14 +2564,25 @@
                 {renderVisualHint()}
               </div>
 
-              {/* Progressive hints - Genre + Lyric 1 (2), Year + Lyric 2 (3), Artist (4) */}
-              {/* Also show after game completion if they were unlocked */}
-              {currentSong && (guesses.length >= 2 || gameWon || gameLost) && (
+              {/* Progressive hints */}
+              {/* Hint #1 = Image (shown on image), Hint #2 = Text, Hint #3 = Genre/Lyric1, Hint #4 = Year/Lyric2, Hint #5 = Artist, Hint #6 = Audio */}
+              {currentSong && (guesses.length >= 1 || gameWon || gameLost) && (
                 <div className="mb-3 flex flex-col gap-2">
-                  {/* Hint #1: Genre + Lyric 1 */}
+                  {/* Hint #2: Text Description - shows after 1 guess */}
+                  {(guesses.length >= 1 || gameWon || gameLost) && currentSong.description && (
+                    <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
+                      <span className="px-2 py-1 bg-gray-600 text-white rounded text-xs font-bold whitespace-nowrap">Hint #2</span>
+                      <div className="flex-1">
+                        <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-sm font-bold">
+                          {currentSong.description}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {/* Hint #3: Genre + Lyric 1 - shows after 2 guesses */}
                   {(guesses.length >= 2 || gameWon || gameLost) && (currentSong.genre || currentSong.keyLyric1) && (
                     <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
-                      <span className="px-2 py-1 bg-gray-600 text-white rounded text-xs font-bold whitespace-nowrap">Hint 1</span>
+                      <span className="px-2 py-1 bg-gray-600 text-white rounded text-xs font-bold whitespace-nowrap">Hint #3</span>
                       <div className="flex flex-wrap gap-2 flex-1">
                         {currentSong.genre && (
                           <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-sm font-bold">
@@ -2577,10 +2597,10 @@
                       </div>
                     </div>
                   )}
-                  {/* Hint #2: Year + Lyric 2 */}
+                  {/* Hint #4: Year + Lyric 2 - shows after 3 guesses */}
                   {(guesses.length >= 3 || gameWon || gameLost) && (currentSong.year || currentSong.keyLyric2) && (
                     <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
-                      <span className="px-2 py-1 bg-gray-600 text-white rounded text-xs font-bold whitespace-nowrap">Hint 2</span>
+                      <span className="px-2 py-1 bg-gray-600 text-white rounded text-xs font-bold whitespace-nowrap">Hint #4</span>
                       <div className="flex flex-wrap gap-2 flex-1">
                         {currentSong.year && (
                           <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm font-bold">
@@ -2595,33 +2615,15 @@
                       </div>
                     </div>
                   )}
-                  {/* Hint #3: Artist */}
+                  {/* Hint #5: Artist - shows after 4 guesses */}
                   {(guesses.length >= 4 || gameWon || gameLost) && currentSong.artist && (
                     <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
-                      <span className="px-2 py-1 bg-gray-600 text-white rounded text-xs font-bold whitespace-nowrap">Hint 3</span>
+                      <span className="px-2 py-1 bg-gray-600 text-white rounded text-xs font-bold whitespace-nowrap">Hint #5</span>
                       <div className="flex flex-wrap gap-2 flex-1">
                         <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-sm font-bold">
                           Artist: {currentSong.artist}
                         </span>
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Text Hint button - show after first guess */}
-              {currentSong && guesses.length >= 1 && !gameWon && !gameLost && (
-                <div className="mb-3 flex flex-col items-center">
-                  <button
-                    onClick={() => setShowHint(!showHint)}
-                    className="px-3 py-1.5 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 transition-colors flex items-center justify-center gap-2 font-bold text-sm"
-                  >
-                    <Lightbulb className="w-4 h-4" />
-                    {showHint ? 'Hide' : 'Show'} Text Hint
-                  </button>
-                  {showHint && (
-                    <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg text-xs text-gray-700 font-bold max-w-md text-center">
-                      {currentSong.description}
                     </div>
                   )}
                 </div>
@@ -2748,33 +2750,38 @@
                 )}
                 {audioUnlocked && (
                   <div className="text-xs text-green-600 font-semibold">
-                    🎵 Audio Unlocked!
+                    🎵 Hint #6 Unlocked!
                   </div>
                 )}
               </div>
 
-              {/* Audio player section - show during gameplay after 5 guesses, hide on win/loss */}
+              {/* Audio player section (Hint #6) - show during gameplay after 5 guesses, hide on win/loss */}
               {audioUnlocked && guesses.length >= GUESSES_BEFORE_AUDIO && !gameWon && !gameLost && (
-                <div className="mb-3">
-                  {itunesPreviewUrl && !itunesError ? (
-                    // iTunes Preview (primary)
-                    itunesLoading ? (
-                      <div className="w-full px-4 py-4 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 text-white text-center">
-                        <Music className="w-8 h-8 mx-auto mb-2 animate-pulse" />
-                        <p className="text-sm">Loading audio preview...</p>
-                      </div>
-                    ) : (
-                      renderItunesPlayer()
-                    )
-                  ) : currentSong?.youtubeId ? (
-                    // YouTube fallback
-                    renderYouTubePlayer()
-                  ) : (
-                    <div className="w-full px-4 py-3 rounded-lg bg-yellow-100 text-yellow-800 text-sm">
-                      <p className="font-semibold mb-1">🎵 No Audio Available</p>
-                      <p className="text-xs">Keep guessing based on the visual hints!</p>
+                <div className="mb-3 flex flex-col gap-2">
+                  <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
+                    <span className="px-2 py-1 bg-gray-600 text-white rounded text-xs font-bold whitespace-nowrap">Hint #6</span>
+                    <div className="flex-1">
+                      {itunesPreviewUrl && !itunesError ? (
+                        // iTunes Preview (primary)
+                        itunesLoading ? (
+                          <div className="w-full px-4 py-4 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 text-white text-center">
+                            <Music className="w-8 h-8 mx-auto mb-2 animate-pulse" />
+                            <p className="text-sm">Loading audio preview...</p>
+                          </div>
+                        ) : (
+                          renderItunesPlayer()
+                        )
+                      ) : currentSong?.youtubeId ? (
+                        // YouTube fallback
+                        renderYouTubePlayer()
+                      ) : (
+                        <div className="w-full px-4 py-3 rounded-lg bg-yellow-100 text-yellow-800 text-sm">
+                          <p className="font-semibold mb-1">🎵 No Audio Available</p>
+                          <p className="text-xs">Keep guessing based on the visual hints!</p>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
               )}
 
