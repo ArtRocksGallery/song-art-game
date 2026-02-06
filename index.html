@@ -2069,8 +2069,8 @@
                 }}
               />
             )}
-            {/* Hint #1 label */}
-            {!gameWon && !gameLost && (
+            {/* Hint #1 label - only shows once video is unlocked */}
+            {!gameWon && !gameLost && guesses.length >= GUESSES_BEFORE_VIDEO && (
               <div className="absolute bottom-3 left-3 px-3 py-2 bg-black/60 text-white text-sm font-semibold rounded-lg pointer-events-none">
                 Hint #1
               </div>
@@ -2580,19 +2580,15 @@
             {/* PLAY MODE */}
             {gameMode === 'play' && (
             <div className="bg-white rounded-lg shadow-2xl p-4 sm:p-4 mb-4 sm:mb-3">
-              {/* Back to menu button */}
-              <div className="flex justify-end mb-2">
-                <button
-                  onClick={goToMenu}
-                  className="px-3 py-1 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 transition-colors text-sm"
-                >
-                  ← Menu
-                </button>
-              </div>
-              
-              {/* Game number and Difficulty badge */}
+              {/* Game number, Difficulty badge, and Menu button */}
               {currentSong && (
-                <div className="flex justify-center gap-2 mb-2">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <button
+                    onClick={goToMenu}
+                    className="px-3 py-1 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 transition-colors text-sm font-bold"
+                  >
+                    ← Menu
+                  </button>
                   <span className="px-3 py-1 rounded-lg text-sm font-bold bg-gray-100 text-gray-700">
                     Game #{SONGS.findIndex(s => s.title === currentSong.title && s.artist === currentSong.artist) + 1}
                   </span>
