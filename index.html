@@ -1331,6 +1331,7 @@
       const [volume, setVolume] = useState(50);
       
       const videoRef = useRef(null);
+      const topRef = useRef(null);
       const MAX_GUESSES = 6;
       const GUESSES_BEFORE_VIDEO = 1;
       const GUESSES_BEFORE_AUDIO = 5;
@@ -1415,6 +1416,7 @@
         } else {
           setHasSpotify(false);
           setSpotifyReady(false);
+          setSpotifyNeedsRestart(false);
         }
       };
 
@@ -1700,6 +1702,7 @@
           setShowPictureOverVideo(false);
           setHasSpotify(false);
           setSpotifyReady(false);
+          setSpotifyNeedsRestart(false);
           
           // Restore audio unlocked state based on guess count
           if (savedState.guesses.length >= GUESSES_BEFORE_AUDIO) {
@@ -1735,9 +1738,23 @@
 
       // Scroll to top - works both standalone and inside iframes
       const scrollToTop = () => {
-        window.scrollTo(0, 0);
+        // Strategy 1: Scroll within our own document
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        
+        // Strategy 2: Scroll our top element into view
+        if (topRef.current) {
+          topRef.current.scrollIntoView({ block: 'start', behavior: 'instant' });
+        }
+        
+        // Strategy 3: Try parent frame (cross-origin will silently fail)
         try { window.parent.scrollTo(0, 0); } catch (e) {}
         try { window.parent.postMessage({ type: 'scrollToTop' }, '*'); } catch (e) {}
+        
+        // Strategy 4: Hash trick to nudge browser scroll in iframe context
+        window.location.hash = '';
+        window.location.hash = 'game-top';
       };
 
       // Reset all game state for a new song
@@ -1762,6 +1779,7 @@
         // Reset Spotify state
         setHasSpotify(false);
         setSpotifyReady(false);
+        setSpotifyNeedsRestart(false);
         
         // Save initial game state (no guesses yet)
         saveGameState({
@@ -2101,6 +2119,7 @@
 
       // Render Spotify embed player - hidden iframe with custom UI
       const [spotifyReady, setSpotifyReady] = useState(false);
+      const [spotifyNeedsRestart, setSpotifyNeedsRestart] = useState(false);
       
       // Listen for Spotify embed messages to track actual playback state
       useEffect(() => {
@@ -2122,20 +2141,20 @@
         return () => window.removeEventListener('message', handleMessage);
       }, []);
       
-      // Auto-stop Spotify after 30 seconds
+      // Auto-stop Spotify after 10 seconds
       const spotifyTimerRef = useRef(null);
       
       useEffect(() => {
         if (isPlaying) {
           // Clear any existing timer
           if (spotifyTimerRef.current) clearTimeout(spotifyTimerRef.current);
-          // Set 30-second auto-stop
           spotifyTimerRef.current = setTimeout(() => {
             const iframe = document.querySelector('#spotify-embed');
             if (iframe) {
               iframe.contentWindow.postMessage({command: 'pause'}, '*');
             }
             setIsPlaying(false);
+            setSpotifyNeedsRestart(true);
           }, 10000);
         } else {
           if (spotifyTimerRef.current) {
@@ -2153,7 +2172,22 @@
         
         const toggleSpotify = () => {
           const iframe = document.querySelector('#spotify-embed');
-          if (iframe) {
+          if (!iframe) return;
+          
+          if (spotifyNeedsRestart) {
+            // Reload iframe to reset playback position, then auto-play
+            setSpotifyReady(false);
+            setSpotifyNeedsRestart(false);
+            const src = iframe.src;
+            iframe.src = '';
+            iframe.onload = () => {
+              setTimeout(() => {
+                iframe.contentWindow.postMessage({command: 'toggle'}, '*');
+                setSpotifyReady(true);
+              }, 1000);
+            };
+            setTimeout(() => { iframe.src = src; }, 50);
+          } else {
             iframe.contentWindow.postMessage({command: 'toggle'}, '*');
           }
         };
@@ -2280,7 +2314,7 @@
       };
 
       return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4 sm:p-3">
+        <div id="game-top" ref={topRef} className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4 sm:p-3">
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-4 sm:mb-3 pt-4 sm:pt-2">
               <div className="flex items-center justify-center gap-2 sm:gap-2 mb-1">
