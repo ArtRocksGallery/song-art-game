@@ -127,7 +127,7 @@
     };
 
     // ALL_SONGS array - the complete song database
-    // 'youtubeId' is used as fallback if iTunes preview is unavailable
+    // 'youtubeId' is used as fallback if Spotify is unavailable
     // 'youtubeTimestamp' is seconds into the video to start on win (optional, defaults to 0)
     // 'difficulty' can be 'Easy', 'Medium', or 'Hard'
     const ALL_SONGS = [
@@ -1390,7 +1390,7 @@
               setAudioUnlocked(true);
             }
             
-            // Fetch iTunes preview for restored song
+            // Check Spotify for restored song
             checkSpotify(song);
           }
         }
@@ -1414,6 +1414,7 @@
           setHasSpotify(true);
         } else {
           setHasSpotify(false);
+          setSpotifyReady(false);
         }
       };
 
@@ -1697,8 +1698,8 @@
           setPlayerReady(false);
           setYtPlayer(null);
           setShowPictureOverVideo(false);
-          setItunesPreviewUrl(null);
-          setItunesError(false);
+          setHasSpotify(false);
+          setSpotifyReady(false);
           
           // Restore audio unlocked state based on guess count
           if (savedState.guesses.length >= GUESSES_BEFORE_AUDIO) {
@@ -1707,7 +1708,7 @@
             setAudioUnlocked(false);
           }
           
-          // Fetch iTunes preview
+          // Check Spotify availability
           checkSpotify(song);
           setGameMode('play');
         } else if (hasAnyInProgressGame) {
@@ -1750,9 +1751,9 @@
         setYtPlayer(null);
         setShowPictureOverVideo(false);
         
-        // Reset iTunes state
-        setItunesPreviewUrl(null);
-        setItunesError(false);
+        // Reset Spotify state
+        setHasSpotify(false);
+        setSpotifyReady(false);
         
         // Save initial game state (no guesses yet)
         saveGameState({
@@ -1761,7 +1762,7 @@
           guesses: []
         });
         
-        // Fetch iTunes preview in background
+        // Check Spotify availability
         checkSpotify(song);
       };
 
@@ -2090,6 +2091,54 @@
       };
 
       // Render Spotify embed player - hidden iframe with custom UI
+      const [spotifyReady, setSpotifyReady] = useState(false);
+      
+      // Listen for Spotify embed messages to track actual playback state
+      useEffect(() => {
+        const handleMessage = (event) => {
+          if (event.origin !== 'https://open.spotify.com') return;
+          try {
+            const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+            if (data.type === 'ready') {
+              setSpotifyReady(true);
+            }
+            if (data.type === 'playback_update') {
+              setIsPlaying(!data.payload.isPaused);
+            }
+          } catch (e) {
+            // ignore non-JSON messages
+          }
+        };
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+      }, []);
+      
+      // Auto-stop Spotify after 30 seconds
+      const spotifyTimerRef = useRef(null);
+      
+      useEffect(() => {
+        if (isPlaying) {
+          // Clear any existing timer
+          if (spotifyTimerRef.current) clearTimeout(spotifyTimerRef.current);
+          // Set 30-second auto-stop
+          spotifyTimerRef.current = setTimeout(() => {
+            const iframe = document.querySelector('#spotify-embed');
+            if (iframe) {
+              iframe.contentWindow.postMessage({command: 'pause'}, '*');
+            }
+            setIsPlaying(false);
+          }, 10000);
+        } else {
+          if (spotifyTimerRef.current) {
+            clearTimeout(spotifyTimerRef.current);
+            spotifyTimerRef.current = null;
+          }
+        }
+        return () => {
+          if (spotifyTimerRef.current) clearTimeout(spotifyTimerRef.current);
+        };
+      }, [isPlaying]);
+      
       const renderSpotifyPlayer = () => {
         if (!currentSong?.spotifyId) return null;
         
@@ -2097,38 +2146,54 @@
           const iframe = document.querySelector('#spotify-embed');
           if (iframe) {
             iframe.contentWindow.postMessage({command: 'toggle'}, '*');
-            setIsPlaying(!isPlaying);
           }
         };
         
         return (
-          <div className="w-full">
-            {/* Hidden Spotify iframe */}
+          <div className="w-full" style={{ position: 'relative', overflow: 'hidden' }}>
+            {/* Spotify iframe - real dimensions but hidden behind custom UI */}
             <iframe
               id="spotify-embed"
               src={`https://open.spotify.com/embed/track/${currentSong.spotifyId}?utm_source=generator&theme=0`}
-              width="0"
-              height="0"
+              width="100%"
+              height="152"
               frameBorder="0"
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy"
-              style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}
+              onLoad={() => {
+                // Give the embed a moment to initialize after DOM load
+                setTimeout(() => setSpotifyReady(true), 1000);
+              }}
+              style={{ position: 'absolute', top: 0, left: 0, opacity: 0, pointerEvents: 'none' }}
             />
-            {/* Custom play UI */}
-            <div className="w-full px-4 py-3 sm:py-4 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 text-white">
+            {/* Custom play UI layered on top */}
+            <div style={{ position: 'relative', zIndex: 1 }} className="w-full px-4 py-3 sm:py-4 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 text-white">
               <div className="flex items-center justify-center gap-4">
                 <Music className={`w-8 h-8 flex-shrink-0 ${isPlaying ? 'animate-pulse' : ''}`} />
                 <div className="flex-1">
-                  <h3 className="text-sm font-bold">Audio Hint</h3>
+                  <h3 className="text-sm font-bold">Audio Hint (10s Preview)</h3>
                   <p className="text-xs opacity-90">
-                    {isPlaying ? 'Now playing...' : 'Click to play preview'}
+                    {!spotifyReady ? 'Loading audio...' : isPlaying ? 'Now playing...' : 'Click to play preview'}
                   </p>
                 </div>
                 <button
                   onClick={toggleSpotify}
-                  className="px-4 py-2 rounded-lg font-semibold transition-all bg-white text-green-600 hover:bg-gray-100 text-sm flex-shrink-0"
+                  disabled={!spotifyReady}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-all text-sm flex-shrink-0 ${
+                    !spotifyReady 
+                      ? 'bg-white/50 text-green-400 cursor-wait' 
+                      : 'bg-white text-green-600 hover:bg-gray-100'
+                  }`}
                 >
-                  {isPlaying ? '⏸️ Pause' : '▶️ Play'}
+                  {!spotifyReady ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                      Loading
+                    </span>
+                  ) : isPlaying ? '⏸️ Pause' : '▶️ Play'}
                 </button>
               </div>
             </div>
