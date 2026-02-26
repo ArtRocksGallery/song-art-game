@@ -80,6 +80,21 @@
       </svg>
     );
 
+    const ShoppingBag = ({ className }) => (
+      <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <path d="M16 10a4 4 0 01-8 0"></path>
+      </svg>
+    );
+
+    const Tag = ({ className }) => (
+      <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"></path>
+        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+      </svg>
+    );
+
     const BarChart = ({ className }) => (
       <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <line x1="12" y1="20" x2="12" y2="10"></line>
@@ -112,6 +127,13 @@
     const START_YEAR = 2025;
     const START_MONTH = 2; // 1 = January, 2 = February, etc.
     const START_DAY = 4;   // Day of month
+
+    // ============================================
+    // STORE / DISCOUNT CONFIGURATION
+    // ============================================
+    const DISCOUNT_CODE = "ZJZ7BZ7";        // 15% discount code
+    const DISCOUNT_PERCENT = 15;                // Discount percentage
+    const DISCOUNT_MAX_GUESSES = 2;             // Must guess in this many tries or fewer
     
     // Calculate how many games are unlocked based on current date
     const getUnlockedGameCount = () => {
@@ -145,7 +167,8 @@
         keyLyric1: "Ain't found a way to kill me yet",
         keyLyric2: "Here they come to snuff the [...]",
         description: "A gritty, haunting song about a soldier’s survival and trauma during the Vietnam War, inspired by the guitarist’s father.",
-        spotifyId: "0wvIGFIgbyz4JNwQhZgTv2"
+        spotifyId: "0wvIGFIgbyz4JNwQhZgTv2",
+        storeUrl: "https://www.artrocks.gallery/shop/p/rooster"
       },
       {
         title: "Pink Houses",
@@ -161,7 +184,8 @@
         keyLyric1: "Ain't that America? Home of the free, yeah",
         keyLyric2: "Little [...] for you and me",
         description: "A commentary on the American Dream that contrasts patriotic imagery with everyday economic and social struggles.",
-        spotifyId: "5JKQMoGmXwDHCodn5pFVHB"
+        spotifyId: "5JKQMoGmXwDHCodn5pFVHB",
+        storeUrl: ""
       },
       {
         title: "Purple Rain",
@@ -177,7 +201,8 @@
         keyLyric1: "I never meant to cause you any sorrow",
         keyLyric2: "I only want to see you laughing in the [...]",
         description: "An emotional power ballad about love, loss, and reconciliation, blending personal regret with spiritual overtones.",
-        spotifyId: "3FnP3j1TyiTwbJb5AR2ynT"
+        spotifyId: "3FnP3j1TyiTwbJb5AR2ynT",
+        storeUrl: ""
       },
       {
         title: "Dancing Queen",
@@ -193,7 +218,8 @@
         keyLyric1: "Friday night and the lights are low",
         keyLyric2: "Young and sweet, only seventeen",
         description: "A joyful celebration of freedom and youthful escape found on the dance floor.",
-        spotifyId: "0GjEhVFGZW8afUYGChu3Rr"
+        spotifyId: "0GjEhVFGZW8afUYGChu3Rr",
+        storeUrl: ""
       },
       {
         title: "Old Town Road",
@@ -209,7 +235,8 @@
 		keyLyric1: "Yeah, I'm gonna take my horse to the [...]",
         keyLyric2: "I'm gonna ride 'til I can't no more",
         description: "A genre-blending anthem about independence and persistence that fuses country imagery with hip-hop swagger.",
-        spotifyId: "6woeVu3fVMflqen1t4N6pg"
+        spotifyId: "6woeVu3fVMflqen1t4N6pg",
+        storeUrl: ""
       },
       {
         title: "Itsy Bitsy Teenie Weenie Yellow Polka Dot Bikini",
@@ -225,7 +252,8 @@
         keyLyric1: "She was afraid to come out of the locker",
         keyLyric2: "Two, three, four, tell the people what she wore",
         description: "A playful novelty song about teenage shyness and embarrassment at the beach.",
-        spotifyId: "4aTCNddtjztjuK2EOgz7ZZ"
+        spotifyId: "4aTCNddtjztjuK2EOgz7ZZ",
+        storeUrl: ""
       },
       {
         title: "Y.M.C.A.",
@@ -241,7 +269,8 @@
         keyLyric1: "Young man, there's no need to feel down",
         keyLyric2: "They have everything for young men to enjoy",
         description: "An upbeat disco song promoting community, belonging, and carefree fun, widely embraced as a cultural anthem.",
-        spotifyId: "4YOJFyjqh8eAcbKFfv88mV"
+        spotifyId: "4YOJFyjqh8eAcbKFfv88mV",
+        storeUrl: ""
       },
       {
         title: "Who Let The Dogs Out",
@@ -257,7 +286,8 @@
         keyLyric1: "Well, the party was nice, the party was pumpin'",
         keyLyric2: "Heya, yippie yi yo",
         description: "A high-energy chant calling out unruly behavior while masking its message behind a party-friendly hook.",
-        spotifyId: "1H5tvpoApNDxvxDexoaAUo"
+        spotifyId: "1H5tvpoApNDxvxDexoaAUo",
+        storeUrl: ""
       },
 	  {
         title: "Baby Got Back",
@@ -273,7 +303,8 @@
         keyLyric1: "My anaconda don't want none",
         keyLyric2: "Deep in the jeans she's wearing, I'm hooked and I can't stop staring",
         description: "A playful and irreverent hip-hop anthem celebrating body positivity and challenging mainstream beauty standards of the early 90s.",
-        spotifyId: "1SAkL1mYNJlaqnBQxVZrRl"
+        spotifyId: "1SAkL1mYNJlaqnBQxVZrRl",
+        storeUrl: ""
       },
 	  {
         title: "Dancing in the Moonlight",
@@ -289,7 +320,8 @@
         keyLyric1: "And when that ol' moon gets so big and bright",
         keyLyric2: "Everybody's feeling warm and bright, It's such a fine and natural sight",
         description: "A feel-good soft rock classic about carefree nighttime celebrations and the universal joy of dancing under the stars.",
-        spotifyId: "0q21FNwES2bbtcduB6kjEU"
+        spotifyId: "0q21FNwES2bbtcduB6kjEU",
+        storeUrl: ""
       },
 	  {
         title: "Girl on Fire",
@@ -305,7 +337,8 @@
         keyLyric1: "Oh-oh, she got both feet on the ground",
         keyLyric2: "Looks like a girl, but she's a flame",
         description: "An empowering anthem celebrating female strength and independence, with soaring vocals that capture unstoppable confidence.",
-        spotifyId: "4esOae7i4rqTbAu9o5Pxco"
+        spotifyId: "4esOae7i4rqTbAu9o5Pxco",
+        storeUrl: ""
       },
 	  {
         title: "I Can't Drive 55",
@@ -321,7 +354,8 @@
         keyLyric1: "One foot on the brake and one on the gas",
         keyLyric2: "Go on and write me up for 125",
         description: "A rebellious hard rock protest against the national speed limit, born from the singer's frustration after getting a speeding ticket.",
-        spotifyId: "1MqGKtY9L5qjPi8s7gX645"
+        spotifyId: "1MqGKtY9L5qjPi8s7gX645",
+        storeUrl: ""
       },
 	  {
         title: "I Drink Alone",
@@ -337,7 +371,8 @@
         keyLyric1: "I prefer to be by myself",
         keyLyric2: "Yeah, with nobody else",
         description: "A blues-rock ode to solitary drinking, featuring gritty slide guitar and a defiant celebration of preferring one's own company.",
-        spotifyId: "2nIDPfhjHZP8UOXPenLZUC"
+        spotifyId: "2nIDPfhjHZP8UOXPenLZUC",
+        storeUrl: ""
       },
 	  {
         title: "Joy to the World",
@@ -353,7 +388,8 @@
         keyLyric1: "Jeremiah was a bullfrog",
         keyLyric2: "If I were the king of the world",
         description: "A whimsical and joyful song featuring a bullfrog named Jeremiah, celebrating friendship and simple pleasures with infectious optimism.",
-        spotifyId: "2ymeOsYijJz09LfKw3yM2x"
+        spotifyId: "2ymeOsYijJz09LfKw3yM2x",
+        storeUrl: "https://www.artrocks.gallery/shop/p/joy-to-the-world"
       },
 	  {
         title: "Mustang Sally",
@@ -369,7 +405,8 @@
         keyLyric1: "Guess you better slow your [...] down",
         keyLyric2: "All you wanna do is ride around",
         description: "A soulful R&B classic about a free-spirited woman and her Ford Mustang, featuring an irresistible groove and call-and-response vocals.",
-        spotifyId: "5Sz09kaSzvpTC8lgm5W8Mt"
+        spotifyId: "5Sz09kaSzvpTC8lgm5W8Mt",
+        storeUrl: ""
       },
 	  {
         title: "Paint it Black",
@@ -385,7 +422,8 @@
         keyLyric1: "I see a red door and I want it [...]",
         keyLyric2: "No colors anymore, I want them to turn [...]",
         description: "A dark and hypnotic rock song driven by sitar, expressing grief and despair through vivid imagery of darkness and loss.",
-        spotifyId: "63T7DJ1AFDD6Bn8VzG6JE8"
+        spotifyId: "63T7DJ1AFDD6Bn8VzG6JE8",
+        storeUrl: ""
       },
 	  {
         title: "Poker Face",
@@ -401,7 +439,8 @@
         keyLyric1: "I wanna hold 'em like they do in Texas, please",
         keyLyric2: "Can't read my, can't read my",
         description: "An electropop hit about hiding emotions and bluffing in love, featuring an iconic synth hook and unforgettable chorus.",
-        spotifyId: "1Vazr394PPfV5sqWl4KjK7"
+        spotifyId: "1Vazr394PPfV5sqWl4KjK7",
+        storeUrl: ""
       },
 	  {
         title: "Rock the Boat",
@@ -417,7 +456,8 @@
         keyLyric1: "So I'd like to know where you got the notion",
         keyLyric2: "Don't [...] baby",
         description: "A smooth disco-soul track using a boat metaphor for a romantic relationship, urging a lover not to disrupt their steady love.",
-        spotifyId: "7fu3Tv5rcoGD1PZV7s57WW"
+        spotifyId: "7fu3Tv5rcoGD1PZV7s57WW",
+        storeUrl: ""
       },
 	  {
         title: "Santa Baby",
@@ -433,7 +473,8 @@
         keyLyric1: "Think of all the fun I've missed",
         keyLyric2: "Slip a sable under the tree for me",
         description: "A playfully seductive Christmas classic where a woman flirtatiously asks Santa for extravagant gifts with purring vocals.",
-        spotifyId: "59hKzj0h6ElhQv8rBqvpUz"
+        spotifyId: "59hKzj0h6ElhQv8rBqvpUz",
+        storeUrl: ""
       },
 	  {
         title: "Stuck in the Middle With You",
@@ -449,7 +490,8 @@
 		keyLyric1: "I'm so scared in case I fall off my chair",
         keyLyric2: "Clowns to the left of me, jokers to the right",
         description: "A wry folk-rock song about feeling caught between competing factions in the music industry, later iconic from its use in Reservoir Dogs.",
-        spotifyId: "3Vby4nGmtbDo7HDJamOWkT"
+        spotifyId: "3Vby4nGmtbDo7HDJamOWkT",
+        storeUrl: ""
       },
 	  {
         title: "I Am The Walrus",
@@ -465,7 +507,8 @@
         keyLyric1: "I am he as you are he, as you are me and we are all together",
         keyLyric2: "I am the eggman, I am the [...]",
         description: "A surreal psychedelic masterpiece filled with nonsensical imagery and wordplay, deliberately written to confuse those who over-analyzed song lyrics.",
-        spotifyId: "6Pq9MmkDQYZiiCDpxnvrf6"
+        spotifyId: "6Pq9MmkDQYZiiCDpxnvrf6",
+        storeUrl: ""
       },
 	  {
         title: "What's Up",
@@ -481,7 +524,8 @@
         keyLyric1: "And so I cry sometimes when I'm lying in bed",
         keyLyric2: "And I scream from the top of my lungs, [...]",
         description: "An emotional alternative rock anthem featuring a powerful female vocalist, about searching for meaning and feeling like an outsider with a soaring chorus.",
-        spotifyId: "0jWgAnTrNZmOGmqgvHhZEm"
+        spotifyId: "0jWgAnTrNZmOGmqgvHhZEm",
+        storeUrl: ""
       },
 	  {
         title: "Yellow",
@@ -497,7 +541,8 @@
         keyLyric1: "And everything you do - Yeah, they were all [...]",
         keyLyric2: "Look at the stars, look how they shine for you",
         description: "A tender and atmospheric love song using color as a symbol of devotion, featuring shimmering guitars and heartfelt vocals.",
-        spotifyId: "3AJwUDP919kvQ9QcozQPxg"
+        spotifyId: "3AJwUDP919kvQ9QcozQPxg",
+        storeUrl: ""
       },
 	  {
         title: "Tenth Avenue Freeze-Out",
@@ -513,7 +558,8 @@
         keyLyric1: "Tear drops on the city, Bad Scooter searching for his groove",
         keyLyric2: "When the change was made uptown and the Big Man joined the band",
         description: "A jubilant horn-driven anthem about early struggles and the formation of a legendary band, celebrating musical brotherhood.",
-        spotifyId: "4Gmdm6oRVwJgsM8gYnwRoE"
+        spotifyId: "4Gmdm6oRVwJgsM8gYnwRoE",
+        storeUrl: ""
       },
 	  {
         title: "A Bar Song (Tipsy)",
@@ -529,7 +575,8 @@
         keyLyric1: "One, here comes the two to the three to the four",
         keyLyric2: "Pour me up a double shot of whiskey",
         description: "A laid-back country-infused hit about finding solace at the bar, blending modern production with classic drinking song themes.",
-        spotifyId: "2FQrifJ1N335Ljm3TjTVVf"
+        spotifyId: "2FQrifJ1N335Ljm3TjTVVf",
+        storeUrl: ""
       },
 	  {
         title: "Have a Cigar",
@@ -545,7 +592,8 @@
         keyLyric1: "We call it riding the gravy train",
         keyLyric2: "Come in here, dear boy, have a [...], you're gonna go far",
         description: "A biting satire of the music industry sung by a sycophantic record executive, featuring searing guitar and cynical lyrics about exploitation.",
-        spotifyId: "3CmHvyZQQAGkKkTjTBFWN6"
+        spotifyId: "3CmHvyZQQAGkKkTjTBFWN6",
+        storeUrl: ""
       },
 	  {
         title: "Long Cool Woman (In a Black Dress)",
@@ -561,7 +609,8 @@
         keyLyric1: "Saturday night I was downtown, working for the FBI",
         keyLyric2: "Well, she was a [...], Just a five-foot-nine beautiful n tall",
         description: "A swampy, Creedence-influenced rocker about an undercover FBI agent who falls for a mysterious woman during a raid on a bootleg joint.",
-        spotifyId: "1J5XEPamp7iQaCU0aFuMnd"
+        spotifyId: "1J5XEPamp7iQaCU0aFuMnd",
+        storeUrl: ""
       },
 	  {
         title: "Long Tall Sally",
@@ -577,7 +626,8 @@
         keyLyric1: "Gonna tell Aunt Mary 'bout Uncle John",
         keyLyric2: "Well, [...], she's built for speed",
         description: "A frenetic early rock and roll classic with explosive vocals, telling of a woman who's built for speed and having fun.",
-        spotifyId: "507IFqPuG8mBQoKebfGG9t"
+        spotifyId: "507IFqPuG8mBQoKebfGG9t",
+        storeUrl: ""
       },
 	  {
         title: "The Long and Winding Road",
@@ -593,7 +643,8 @@
         keyLyric1: "Lead me to your door",
         keyLyric2: "Many times I've been alone - And many times I've cried",
         description: "A melancholic piano ballad about longing and lost love, written as the band was dissolving, with orchestral arrangements added later.",
-        spotifyId: "3mlMpmY8oZIBFc39D9zLbh"
+        spotifyId: "3mlMpmY8oZIBFc39D9zLbh",
+        storeUrl: "https://www.artrocks.gallery/shop/p/the-long-and-winding-road"
       },
 	  {
         title: "These Boots Are Made For Walkin'",
@@ -609,7 +660,8 @@
         keyLyric1: "You keep sayin' you got something for me",
         keyLyric2: "One of these days [...] are gonna walk all over you",
         description: "A sassy declaration of female empowerment with a walking bass line, warning a cheating lover that she's ready to leave him behind.",
-        spotifyId: "2PneNdtypG6XcgmWmGd9FI"
+        spotifyId: "2PneNdtypG6XcgmWmGd9FI",
+        storeUrl: ""
       },
 	  {
         title: "Three Cool Cats",
@@ -625,7 +677,8 @@
         keyLyric1: "Well they looked like angels from up above",
         keyLyric2: "And [...] really fell in love",
         description: "A playful doo-wop tune about three hip guys hanging on a corner who get outsmarted by three sharp chicks, originally by The Coasters.",
-        spotifyId: "6xAiyH80RTPPMBZwvWpTEN"
+        spotifyId: "6xAiyH80RTPPMBZwvWpTEN",
+        storeUrl: ""
       },
 	  {
         title: "Three Little Birds",
@@ -641,7 +694,8 @@
         keyLyric1: "Don't worry about a thing",
         keyLyric2: "Cause every little thing gonna be alright",
         description: "A gentle reggae anthem of reassurance with its iconic chorus promising that every thing will be alright, inspired by birds outside the singer's home.",
-        spotifyId: "7vggqxNKwd6xdRoYS0pQtM"
+        spotifyId: "7vggqxNKwd6xdRoYS0pQtM",
+        storeUrl: ""
       },
 	  {
         title: "Tie a Yellow Ribbon Round the Ole Oak Tree",
@@ -657,7 +711,8 @@
         keyLyric1: "I'm comin' home, I've done my time",
         keyLyric2: "It's been three long years, do ya still want me?",
         description: "A sentimental story-song about a man returning from prison, hoping for a signal that his lover still wants him back home.",
-        spotifyId: "12UzVR0M7asW2MHAZRJk0I"
+        spotifyId: "12UzVR0M7asW2MHAZRJk0I",
+        storeUrl: ""
       },
 	  {
         title: "Twist And Shout",
@@ -673,7 +728,8 @@
         keyLyric1: "Shake it up, baby now",
         keyLyric2: "You know you got me goin' now, Just like you knew you would",
         description: "A high-energy dance track with raw, shredded vocals recorded in one take at the end of a marathon session, becoming a live staple.",
-        spotifyId: "5ZBeML7Lf3FMEVviTyvi8l"
+        spotifyId: "5ZBeML7Lf3FMEVviTyvi8l",
+        storeUrl: ""
       },
 	  {
         title: "Up On The Roof",
@@ -689,7 +745,8 @@
         keyLyric1: "When this old world starts getting me down",
         keyLyric2: "[...], it's peaceful as can be",
         description: "A gentle cover of the Drifters classic about finding peace and escape from urban troubles on a city rooftop, delivered with warm acoustic intimacy.",
-        spotifyId: "1nQ6m2FxsxjH8Qjmh1X0Oj"
+        spotifyId: "1nQ6m2FxsxjH8Qjmh1X0Oj",
+        storeUrl: ""
       },
 	  {
         title: "Up, Up and Away",
@@ -705,7 +762,8 @@
         keyLyric1: "Would you like to ride in my beautiful balloon?",
         keyLyric2: "We could float among the stars together, you and I",
         description: "A dreamy, orchestral pop song about floating away in a beautiful balloon, capturing the optimistic spirit of 1960s California pop.",
-        spotifyId: "3JdToGxgvH9SnO1a605Ztr"
+        spotifyId: "3JdToGxgvH9SnO1a605Ztr",
+        storeUrl: ""
       },
 	  {
         title: "Who Are You",
@@ -721,7 +779,8 @@
         keyLyric1: "I woke up in a Soho doorway, a policeman knew my name",
         keyLyric2: "Who who, who who?",
         description: "A powerful rock track born from a drunken encounter, featuring driving synthesizers and an explosive chorus that became the CSI theme song.",
-        spotifyId: "23IJ5wLRhEZ9DOuia5mPiZ"
+        spotifyId: "23IJ5wLRhEZ9DOuia5mPiZ",
+        storeUrl: ""
       },
 	  {
         title: "Wild Thing",
@@ -737,7 +796,8 @@
         keyLyric1: "You make everything groovy",
 		keyLyric2: "[...], you make my heart sing",
         description: "A primal three-chord anthem of raw desire with a memorable ocarina solo, becoming one of the most recognized riffs in rock history.",
-        spotifyId: "7jGzYUZ2Bgg8BDfYlQRfn8"
+        spotifyId: "7jGzYUZ2Bgg8BDfYlQRfn8",
+        storeUrl: ""
       },
 	  {
         title: "Wish You Were Here",
@@ -753,7 +813,8 @@
         keyLyric1: "We're just two lost souls swimming in a fish bowl",
 		keyLyric2: "So, so you think you can tell - Heaven from hell?",
         description: "A poignant acoustic tribute to a former bandmate, reflecting on absence, the music industry, and the loss of innocence.",
-        spotifyId: "6mFkJmJqdDVQ1REhVfGgd1"
+        spotifyId: "6mFkJmJqdDVQ1REhVfGgd1",
+        storeUrl: ""
       },
 	  {
         title: "Witchy Woman",
@@ -769,7 +830,8 @@
         keyLyric1: "Raven hair and ruby lips",
         keyLyric2: "Ooh-ooh, [...], see how high she flies",
         description: "A dark, mysterious track about a seductive enchantress, featuring hypnotic guitar and haunting harmonies that launched the band's career.",
-        spotifyId: "436yrzQWA32vb1sTZKXg9r"
+        spotifyId: "436yrzQWA32vb1sTZKXg9r",
+        storeUrl: ""
       },
 	  {
         title: "Wooly Bully",
@@ -785,7 +847,8 @@
         keyLyric1: "Uno, dos, one, two, tres, quatro",
         keyLyric2: "Had two big horns, and a wooly jaw",
         description: "A nonsensical party song with a Tex-Mex flavor, featuring playful gibberish lyrics and an irresistible groove that made it a dance floor staple.",
-        spotifyId: "4GNmvOYZW11lGzcZm0FKGY"
+        spotifyId: "4GNmvOYZW11lGzcZm0FKGY",
+        storeUrl: ""
       },
 	  {
         title: "The Yellow Rose of Texas",
@@ -801,7 +864,8 @@
         keyLyric1: "Oh, the [...] is the only girl I love",
         keyLyric2: "Her eyes are bright as diamonds, they sparkle like the dew",
         description: "A spirited rendition of the classic Texas folk song about a soldier pining for his sweetheart back home, rooted in Civil War-era tradition.",
-        spotifyId: "5y0PXkDyefSKQauonvsB4O"
+        spotifyId: "5y0PXkDyefSKQauonvsB4O",
+        storeUrl: ""
       },
 	  {
         title: "Yellow Submarine",
@@ -817,7 +881,8 @@
         keyLyric1: "In the town where I was born lived a man who sailed to sea",
 		keyLyric2: "We all live in a [...]",
         description: "A whimsical sing-along about life aboard a colorful submarine, written as a children's song and filled with playful sound effects.",
-        spotifyId: "1tdltVUBkiBCW1C3yB4zyD"
+        spotifyId: "1tdltVUBkiBCW1C3yB4zyD",
+        storeUrl: ""
       },
 	  {
         title: "Lucy in the Sky with Diamonds",
@@ -832,7 +897,8 @@
         keyLyric1: "Picture yourself in a boat on a river",
 		keyLyric2: "A girl with kaleidoscope eyes",
         description: "A vivid psychedelic journey through surreal imagery, inspired by a child's drawing and featuring dreamlike verses that shift into an anthemic chorus.",
-        spotifyId: "25yQPHgC35WNnnOUqFhgVR"
+        spotifyId: "25yQPHgC35WNnnOUqFhgVR",
+        storeUrl: ""
       },
 	  {
         title: "Martha My Dear",
@@ -847,7 +913,8 @@
         keyLyric1: "Hold your head up, you silly girl",
 		keyLyric2: "Look what you've done",
         description: "A charming music hall-style piano piece written about the author's beloved Old English Sheepdog, blending affection with whimsical brass arrangements.",
-        spotifyId: "1swmf4hFMJYRNA8Rq9PVaW"
+        spotifyId: "1swmf4hFMJYRNA8Rq9PVaW",
+        storeUrl: ""
       },
 	  {
         title: "Muskrat Love",
@@ -862,7 +929,8 @@
         keyLyric1: "[...] Susie, [...] Sam",
 		keyLyric2: "Floatin' like the heavens above - Looks like [...]",
         description: "A quirky soft-rock ballad about two rodents falling in love, complete with synthesized animal sounds that made it both a hit and a punchline.",
-        spotifyId: "3NRiJ7XFMALvrXXB1oRBFO"
+        spotifyId: "3NRiJ7XFMALvrXXB1oRBFO",
+        storeUrl: ""
       },
 	  {
         title: "Octopus's Garden",
@@ -877,7 +945,8 @@
         keyLyric1: "I'd like to be under the sea",
 		keyLyric2: "He'd let us in, knows where we've been",
         description: "A cheerful underwater fantasy written after learning about octopus behavior, offering a whimsical escape to a peaceful seabed sanctuary.",
-        spotifyId: "0suLngfo7rJoetk7Ub6N8l"
+        spotifyId: "0suLngfo7rJoetk7Ub6N8l",
+        storeUrl: ""
       },
 	  {
         title: "Our House",
@@ -892,7 +961,8 @@
         keyLyric1: "[...] is a very, very, very fine house",
 		keyLyric2: "With two cats in the yard - Life used to be so hard",
         description: "A warm acoustic ode to domestic bliss, capturing the simple joys of love, togetherness, and finding happiness at home.",
-        spotifyId: "2hitsKa8SthKhRJBXUHbIv"
+        spotifyId: "2hitsKa8SthKhRJBXUHbIv",
+        storeUrl: ""
       },
 	  {
         title: "People Are Strange",
@@ -907,7 +977,8 @@
         keyLyric1: "Faces come out of the rain",
 		keyLyric2: "When you're [...], no one remembers your name",
         description: "A moody carnival-like rock song about alienation and loneliness, written during a melancholy walk through Laurel Canyon with its signature minor-key melody.",
-        spotifyId: "1Jmqubf9kGkWeYQXQKImL5"
+        spotifyId: "1Jmqubf9kGkWeYQXQKImL5",
+        storeUrl: ""
       },
 	  {
         title: "The Phantom of the Opera",
@@ -922,7 +993,8 @@
         keyLyric1: "Sing, my angel of music",
 		keyLyric2: "He's there, the [...]",
         description: "The dramatic title song from the legendary musical, featuring a haunting pipe organ motif and a powerful duet between a mysterious masked figure and his protégé.",
-        spotifyId: "3oPiyTWNUPODOXfXMSXwB2"
+        spotifyId: "3oPiyTWNUPODOXfXMSXwB2",
+        storeUrl: ""
       },
 	  {
         title: "Piggies",
@@ -937,7 +1009,8 @@
         keyLyric1: "Have you seen the little [...], Crawling in the dirt?",
 		keyLyric2: "Always having dirt to play around in",
         description: "A baroque-styled satire of class society and greed, featuring harpsichord and strings while taking aim at the complacent bourgeoisie with biting wit.",
-        spotifyId: "4ZmjfLdJXbqjAENqk7eWSE"
+        spotifyId: "4ZmjfLdJXbqjAENqk7eWSE",
+        storeUrl: ""
       },
 	  {
         title: "Refugee",
@@ -952,7 +1025,8 @@
         keyLyric1: "It don't really matter to me, baby",
 		keyLyric2: "Always having dirt to play around in",
         description: "A defiant heartland rock anthem about resilience and refusing to be broken, driven by jangling guitars and an unforgettable hook about standing your ground.",
-        spotifyId: "4mcZYzoGwPRDdhWVlygiHf"
+        spotifyId: "4mcZYzoGwPRDdhWVlygiHf",
+        storeUrl: ""
       },
 	  {
         title: "Rockin' Robin",
@@ -967,7 +1041,8 @@
         keyLyric1: "Tweedily-deedily-dee, tweedily-deedily-dee",
 		keyLyric2: "He rocks in the treetops all day long - Hoppin' and a-boppin' and singin' his song",
         description: "A bubbly cover of the 1958 Bobby Day classic, featuring energetic vocals celebrating a bird who rules the treetops with his song.",
-        spotifyId: "63gcHyuhAC8G2C0bVQUOJI"
+        spotifyId: "63gcHyuhAC8G2C0bVQUOJI",
+        storeUrl: ""
       },
 	  {
         title: "Rockin’ Around the Christmas Tree",
@@ -982,7 +1057,8 @@
         keyLyric1: "At the Christmas party hop",
 		keyLyric2: "Voices singing, let's be jolly - Deck the halls with boughs of holly",
         description: "A timeless holiday classic blending rockabilly energy with festive cheer, becoming an enduring seasonal staple since its 1958 release.",
-        spotifyId: "2EjXfH91m7f8HiJN1yQg97"
+        spotifyId: "2EjXfH91m7f8HiJN1yQg97",
+        storeUrl: ""
       },
 	  {
         title: "Sharp Dressed Man",
@@ -997,7 +1073,8 @@
         keyLyric1: "Clean shirt, new shoes",
 		keyLyric2: "Cause every girl crazy 'bout a [...]",
         description: "A boogie-rock anthem about the power of looking good, featuring a signature fuzzy guitar tone and a strutting groove that defined 80s MTV.",
-        spotifyId: "0bRNszTbTFLNlunAeh7eom"
+        spotifyId: "0bRNszTbTFLNlunAeh7eom",
+        storeUrl: ""
       },
 	  {
         title: "She's a Rainbow",
@@ -1012,7 +1089,8 @@
         keyLyric1: "She comes in colors everywhere",
 		keyLyric2: "She's like a [...]",
         description: "A lush, orchestral psychedelic pop song celebrating a colorful woman, featuring piano flourishes and sweeping string arrangements.",
-        spotifyId: "6KOtheMY0KN4s9TrQHr9It"
+        spotifyId: "6KOtheMY0KN4s9TrQHr9It",
+        storeUrl: "https://www.artrocks.gallery/shop/p/shes-a-rainbow"
       },
 	  {
         title: "Shiny Happy People",
@@ -1027,7 +1105,8 @@
         keyLyric1: "Meet me in the crowd, people, people",
 		keyLyric2: "[...] holding hands",
         description: "An irresistibly upbeat pop song with a guest female vocalist, deliberately written as a sunny counterpoint to the band's typically darker material.",
-        spotifyId: "1v2zyAJrChw5JnfafSkwkJ"
+        spotifyId: "1v2zyAJrChw5JnfafSkwkJ",
+        storeUrl: ""
       },
 	  {
         title: "(Sittin' On) The Dock Of The Bay",
@@ -1042,7 +1121,8 @@
         keyLyric1: "Sittin' in the mornin' sun",
 		keyLyric2: "Watching the tide roll away",
         description: "A soulful meditation on restlessness and longing, recorded just days before the artist's tragic death, featuring an iconic whistled outro.",
-        spotifyId: "3zBhihYUHBmGd2bcQIobrF"
+        spotifyId: "3zBhihYUHBmGd2bcQIobrF",
+        storeUrl: ""
       },
 	  {
         title: "Smokin' in the Boy's Room",
@@ -1057,7 +1137,8 @@
         keyLyric1: "Sittin' in the classroom, thinkin' it's a drag",
 		keyLyric2: "Cause everybody knows that [...] ain't allowed in school",
         description: "A rebellious rock anthem about teenage defiance and sneaking cigarettes at school, later covered by Mötley Crüe for a new generation of rebels.",
-        spotifyId: "1AIGp3gpj1NXJvh3engmUQ"
+        spotifyId: "1AIGp3gpj1NXJvh3engmUQ",
+        storeUrl: ""
       },
 	  {
         title: "Somebody’s Watching Me",
@@ -1072,7 +1153,8 @@
         keyLyric1: "I'm just an average man with an average life",
 		keyLyric2: "I always feel like [...]",
         description: "A paranoid synth-pop hit about surveillance anxiety, featuring a famous uncredited guest vocalist on the iconic chorus and becoming a Halloween staple.",
-        spotifyId: "2H2379xRxgQVvcOSoL8Ajr"
+        spotifyId: "2H2379xRxgQVvcOSoL8Ajr",
+        storeUrl: ""
       },
 	  {
         title: "Squeeze Box",
@@ -1087,7 +1169,8 @@
         keyLyric1: "Cause she's playing all night, and the music's all right",
 		keyLyric2: "Mama's got a [...], Daddy never sleeps at night",
         description: "A playful acoustic-driven rocker with cheeky double entendres about a mother's late-night accordion playing that keeps the whole family awake.",
-        spotifyId: "4lzNP52B3CfeVr2drfPh6X"
+        spotifyId: "4lzNP52B3CfeVr2drfPh6X",
+        storeUrl: ""
       },
 	  {
         title: "Take Me To The River",
@@ -1102,7 +1185,8 @@
         keyLyric1: "I don't know why I love her like I do",
 		keyLyric2: "[...], drop me in the water",
         description: "A new wave reinvention of the Al Green soul classic, transforming the baptismal imagery into a twitchy, angular art-rock masterpiece.",
-        spotifyId: "1auuYcOrua5hrsGCS7idun"
+        spotifyId: "1auuYcOrua5hrsGCS7idun",
+        storeUrl: ""
       },
       {
         title: "Love Shack",
@@ -1117,7 +1201,8 @@
         keyLyric1: "Headed down the Atlanta highway",
         keyLyric2: "Tin roof, [...]!",
         description: "A wildly exuberant party anthem about a funky little roadside getaway where everyone comes together to dance and have a good time.",
-        spotifyId: "4W4wYHtsrgDiivRASVOINL"
+        spotifyId: "4W4wYHtsrgDiivRASVOINL",
+        storeUrl: ""
       },
 	  {
         title: "Lovely Rita",
@@ -1132,7 +1217,8 @@
         keyLyric1: "[...], meter maid",
         keyLyric2: "Standing by a parking meter",
         description: "A whimsical, lighthearted tribute to a parking enforcement officer who catches the narrator's eye.",
-        spotifyId: "6h9W5FxX4E9lUFsyq8j1AD"
+        spotifyId: "6h9W5FxX4E9lUFsyq8j1AD",
+        storeUrl: ""
       },
 	  {
         title: "Blue Suede Shoes",
@@ -1147,7 +1233,8 @@
         keyLyric1: "Well it's one for the money, two for the show",
         keyLyric2: "But don't you step on my [...]",
         description: "A pioneering rock and roll anthem about style and self-respect, warning everyone to watch where they step.",
-        spotifyId: "47gmoUrZV3w20JAnQOZMcO"
+        spotifyId: "47gmoUrZV3w20JAnQOZMcO",
+        storeUrl: ""
       },
 	  {
         title: "Mean Mr. Mustard",
@@ -1162,7 +1249,8 @@
         keyLyric1: "Such a mean old man",
         keyLyric2: "[...] sleeps in the park, shaves in the dark, trying to save paper",
         description: "A brief, quirky character sketch of a miserly eccentric, nestled within a famous medley on one of rock's greatest albums.",
-        spotifyId: "25jKgfxWqISbOF5qjowYDa"
+        spotifyId: "25jKgfxWqISbOF5qjowYDa",
+        storeUrl: ""
       },
 	  {
         title: "Foxy Lady",
@@ -1177,7 +1265,8 @@
         keyLyric1: "Now you know you're a cute little heartbreaker",
         keyLyric2: "I wanna take you home, I won't do you no harm",
         description: "A sultry, electrifying rock track driven by a legendary guitar riff, oozing confidence and desire.",
-        spotifyId: "6sn4DnB2sO4ASDDVowV9xu"
+        spotifyId: "6sn4DnB2sO4ASDDVowV9xu",
+        storeUrl: ""
       },
 	  {
         title: "While My Guitar Gently Weeps",
@@ -1192,7 +1281,24 @@
         keyLyric1: "I look at the floor and I see it needs sweeping",
         keyLyric2: "I don't know why nobody told you",
         description: "A soulful, soaring meditation on human indifference and missed potential, elevated by an iconic guest guitar solo.",
-        spotifyId: "389QX9Q1eUOEZ19vtzzI9O"
+        spotifyId: "389QX9Q1eUOEZ19vtzzI9O",
+        storeUrl: ""
+      },
+	  {
+        title: "I've Got The Music In Me",
+        artist: "The Kiki Dee Band",
+        image: "images/ive-got-the-music-in-me.jpg",
+        video: "videos/ive-got-the-music-in-me.mp4",
+        youtubeId: "eZSjzWbr2js",
+        youtubeTimestamp: 0,
+        difficulty: "Hard",
+        genre: "Pop/Soul",
+        year: 1974,
+        keyLyric1: "Gonna fly like a bird on the wing",
+        keyLyric2: "Catch a hold of my blues, gonna play them",
+        description: "An exuberant, high-energy anthem about unstoppable confidence and the joy of music, featuring a famous false ending.",
+        spotifyId: "2dpGNisIy8LNjpEGzDdtft",
+        storeUrl: "https://www.artrocks.gallery/shop/p/ive-got-the-music-in-me"
       },
     ];
 
@@ -1387,6 +1493,8 @@
       const [guesses, setGuesses] = useState([]);
       const [gameWon, setGameWon] = useState(false);
       const [gameLost, setGameLost] = useState(false);
+      const [copiedDiscount, setCopiedDiscount] = useState(false);
+      const [isFirstAttempt, setIsFirstAttempt] = useState(true);
       const [audioUnlocked, setAudioUnlocked] = useState(false);
       const [isPlaying, setIsPlaying] = useState(false);
       const [showHint, setShowHint] = useState(false);
@@ -1766,6 +1874,8 @@
           setGuesses(savedState.guesses);
           setGameWon(false);
           setGameLost(false);
+          setCopiedDiscount(false);
+          setIsFirstAttempt(true);
           setGuess('');
           setShowHint(false);
           setSuggestions([]);
@@ -1840,6 +1950,8 @@
         setGuesses([]);
         setGameWon(false);
         setGameLost(false);
+        setCopiedDiscount(false);
+        setIsFirstAttempt(true);
         setAudioUnlocked(false);
         setIsPlaying(false);
         setShowHint(false);
@@ -1955,6 +2067,7 @@
 
         if (isCorrect) {
           setGameWon(true);
+          setIsFirstAttempt(!alreadyPlayed);
           stopAllAudio();
           clearGameState(); // Clear saved game state on win
           if (!alreadyPlayed) {
@@ -2817,8 +2930,26 @@
                       </div>
                     );
                   })()}
+
+                  {currentSong.storeUrl && guesses.length <= DISCOUNT_MAX_GUESSES && isFirstAttempt && (
+                    <div className="mb-4 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
+                      <div className="flex items-center justify-center gap-2 mb-1">
+                        <Tag className="w-4 h-4 text-yellow-600" />
+                        <p className="text-sm font-bold text-yellow-700">You earned {DISCOUNT_PERCENT}% off this art!</p>
+                      </div>
+                      <div className="flex items-center justify-center gap-2">
+                        <code className="px-3 py-1 bg-yellow-100 border border-yellow-300 rounded text-lg font-mono font-bold text-yellow-800 tracking-wider">{DISCOUNT_CODE}</code>
+                        <button
+                          onClick={() => { navigator.clipboard.writeText(DISCOUNT_CODE); setCopiedDiscount(true); setTimeout(() => setCopiedDiscount(false), 2000); }}
+                          className="px-3 py-1 bg-yellow-200 hover:bg-yellow-300 rounded text-sm font-semibold text-yellow-800 transition-colors"
+                        >
+                          {copiedDiscount ? '✓ Copied!' : 'Copy'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   
-                  <div className="flex gap-2 justify-center">
+                  <div className="flex gap-2 justify-center flex-wrap">
                     <button
                       onClick={startNewGame}
                       className="flex-1 max-w-[150px] px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors flex items-center justify-center gap-2"
@@ -2833,6 +2964,17 @@
                       <Archive className="w-4 h-4" />
                       Archive
                     </button>
+                    {currentSong.storeUrl && (
+                      <a
+                        href={currentSong.storeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 max-w-[150px] px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors flex items-center justify-center gap-2"
+                      >
+                        <ShoppingBag className="w-4 h-4" />
+                        Shop Art
+                      </a>
+                    )}
                   </div>
                 </div>
               )}
@@ -2854,7 +2996,7 @@
                     );
                   })()}
                   
-                  <div className="flex gap-2 justify-center">
+                  <div className="flex gap-2 justify-center flex-wrap">
                     <button
                       onClick={startNewGame}
                       className="flex-1 max-w-[150px] px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition-colors flex items-center justify-center gap-2"
@@ -2869,6 +3011,17 @@
                       <Archive className="w-4 h-4" />
                       Archive
                     </button>
+                    {currentSong.storeUrl && (
+                      <a
+                        href={currentSong.storeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 max-w-[150px] px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors flex items-center justify-center gap-2"
+                      >
+                        <ShoppingBag className="w-4 h-4" />
+                        Shop Art
+                      </a>
+                    )}
                   </div>
                 </div>
               )}
