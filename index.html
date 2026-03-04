@@ -1390,7 +1390,7 @@
         difficulty: "Very Hard",
         genre: "Folk",
         year: 1968,
-        keyLyric1: "Born a young country boy",
+        keyLyric1: "Born a poor young country boy",
         keyLyric2: "Sit beside a mountain stream - See her waters rise",
         description: "A gentle, pastoral acoustic ballad inspired by a Maharishi lecture in India, showcasing a gift for simple, nature-inspired melodies.",
         spotifyId: "6TjUg1cTUzWHbal6yQAi7c",
@@ -2255,6 +2255,11 @@
         const normalizedTitle = normalizeForComparison(currentSong.title);
         const normalizedArtist = normalizeForComparison(currentSong.artist);
         
+        // Also create versions with common articles stripped for flexible matching
+        const stripArticles = (str) => str.replace(/\b(a|an|the)\b/g, '').replace(/\s+/g, ' ').trim();
+        const strippedGuess = stripArticles(normalizedGuess);
+        const strippedTitle = stripArticles(normalizedTitle);
+        
         // Split artist name into words for flexible matching
         const artistWords = normalizedArtist.split(/\s+/).filter(w => w.length > 2);
         
@@ -2267,7 +2272,9 @@
 
         // Check for exact or fuzzy title match
         const titleMatches = normalizedGuess === normalizedTitle || 
-                            isSimilarEnough(normalizedGuess, normalizedTitle);
+                            isSimilarEnough(normalizedGuess, normalizedTitle) ||
+                            strippedGuess === strippedTitle ||
+                            isSimilarEnough(strippedGuess, strippedTitle);
         
         const titleWithArtistMatches = normalizedGuess === `${normalizedTitle} ${normalizedArtist}` ||
                                        normalizedGuess === `${normalizedArtist} ${normalizedTitle}` ||
@@ -2277,6 +2284,7 @@
         const isCorrect = titleMatches || 
                           titleWithArtistMatches ||
                           (normalizedGuess.includes(normalizedTitle) && artistInGuess) ||
+                          (strippedGuess.includes(strippedTitle) && strippedTitle.length >= 4) ||
                           (isSimilarEnough(normalizedGuess, normalizedTitle) && artistInGuess);
 
         // Check if artist was guessed correctly (but not the song)
