@@ -13,12 +13,17 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <style>
     /* Mobile iframe scroll fixes */
-    html, body {
+    html {
+      overflow-y: scroll;
       -webkit-overflow-scrolling: touch;
-      touch-action: manipulation;
     }
     button, a {
       touch-action: manipulation;
+    }
+    /* Prevent hidden iframes from capturing scroll context */
+    iframe {
+      touch-action: none;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -2216,21 +2221,43 @@
         window.location.hash = 'game-top';
       };
 
-      // Fix mobile iframe scroll locking: blur active element after button/link taps
-      // so the browser releases scroll focus back to the document
+      // Fix mobile iframe scroll locking on Android Chrome / iOS Safari
+      // Inside nested iframes, the browser can intermittently lose scroll context.
+      // This uses multiple strategies to recover:
+      // 1) Blur + scroll nudge after button taps
+      // 2) On every touchstart, re-assert document as scroll owner
       useEffect(() => {
+        const blurAndNudge = () => {
+          if (document.activeElement && document.activeElement !== document.body && 
+              document.activeElement.tagName !== 'INPUT') {
+            document.activeElement.blur();
+          }
+          const y = window.scrollY;
+          window.scrollTo(0, y + 1);
+          requestAnimationFrame(() => window.scrollTo(0, y));
+        };
+
         const handleClick = (e) => {
-          const tag = e.target.tagName;
-          if (tag === 'BUTTON' || tag === 'A' || e.target.closest('button') || e.target.closest('a')) {
-            setTimeout(() => {
-              if (document.activeElement && document.activeElement !== document.body) {
-                document.activeElement.blur();
-              }
-            }, 50);
+          const el = e.target;
+          if (el.tagName === 'BUTTON' || el.tagName === 'A' || 
+              el.closest('button') || el.closest('a')) {
+            setTimeout(blurAndNudge, 100);
           }
         };
+
+        // On every touchstart, ensure the document body can scroll.
+        // This recovers from stuck states by forcing a layout recalc.
+        const handleTouchStart = () => {
+          document.documentElement.style.overflowY = 'scroll';
+          void document.documentElement.offsetHeight;
+        };
+        
         document.addEventListener('click', handleClick, true);
-        return () => document.removeEventListener('click', handleClick, true);
+        document.addEventListener('touchstart', handleTouchStart, { passive: true });
+        return () => {
+          document.removeEventListener('click', handleClick, true);
+          document.removeEventListener('touchstart', handleTouchStart);
+        };
       }, []);
 
       // Reset all game state for a new song
@@ -2680,7 +2707,7 @@
         };
         
         return (
-          <div className="w-full" style={{ position: 'relative', overflow: 'hidden' }}>
+          <div className="w-full" style={{ position: 'relative' }}>
             {/* Spotify iframe - real dimensions but hidden behind custom UI */}
             <iframe
               id="spotify-embed"
@@ -2694,7 +2721,7 @@
                 // Give the embed a moment to initialize after DOM load
                 setTimeout(() => setSpotifyReady(true), 1000);
               }}
-              style={{ position: 'absolute', top: 0, left: 0, opacity: 0, pointerEvents: 'none' }}
+              style={{ position: 'absolute', top: '-9999px', left: '-9999px', width: '300px', height: '152px', pointerEvents: 'none' }}
             />
             {/* Custom play UI layered on top */}
             <div style={{ position: 'relative', zIndex: 1 }} className="w-full px-4 py-3 sm:py-4 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 text-white">
