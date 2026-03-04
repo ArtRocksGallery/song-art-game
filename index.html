@@ -2702,7 +2702,7 @@
         };
         
         return (
-          <div className="w-full" style={{ position: 'relative' }}>
+          <div className="w-full" style={{ position: 'relative', overflow: 'hidden' }}>
             {/* Spotify iframe - real dimensions but hidden behind custom UI */}
             <iframe
               id="spotify-embed"
@@ -2716,7 +2716,7 @@
                 // Give the embed a moment to initialize after DOM load
                 setTimeout(() => setSpotifyReady(true), 1000);
               }}
-              style={{ position: 'absolute', top: '-9999px', left: '-9999px', width: '300px', height: '152px', pointerEvents: 'none' }}
+              style={{ position: 'absolute', top: 0, left: 0, opacity: 0, pointerEvents: 'none' }}
             />
             {/* Custom play UI layered on top */}
             <div style={{ position: 'relative', zIndex: 1 }} className="w-full px-4 py-3 sm:py-4 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 text-white">
