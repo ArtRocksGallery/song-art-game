@@ -11,6 +11,16 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <style>
+    /* Mobile iframe scroll fixes */
+    html, body {
+      -webkit-overflow-scrolling: touch;
+      touch-action: manipulation;
+    }
+    button, a {
+      touch-action: manipulation;
+    }
+  </style>
 </head>
 <body>
   <div id="root"></div>
@@ -2205,6 +2215,23 @@
         window.location.hash = '';
         window.location.hash = 'game-top';
       };
+
+      // Fix mobile iframe scroll locking: blur active element after button/link taps
+      // so the browser releases scroll focus back to the document
+      useEffect(() => {
+        const handleClick = (e) => {
+          const tag = e.target.tagName;
+          if (tag === 'BUTTON' || tag === 'A' || e.target.closest('button') || e.target.closest('a')) {
+            setTimeout(() => {
+              if (document.activeElement && document.activeElement !== document.body) {
+                document.activeElement.blur();
+              }
+            }, 50);
+          }
+        };
+        document.addEventListener('click', handleClick, true);
+        return () => document.removeEventListener('click', handleClick, true);
+      }, []);
 
       // Reset all game state for a new song
       const resetGameState = (song) => {
