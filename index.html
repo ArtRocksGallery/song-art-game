@@ -2057,7 +2057,7 @@
         keyLyric1: "Now you know you're a cute little heartbreaker",
         keyLyric2: "I wanna take you home, I won't do you no harm",
         description: "A sultry, electrifying rock track driven by a legendary guitar riff, oozing confidence and desire.",
-        spotifyId: "6sn4DnB2sO4ASDDVowV9xu",
+        spotifyId: "23MrkN7g6Q5U7GLIxNHN1B",
         storeUrl: "https://www.artrocks.gallery/shop/p/foxy-lady"
       },
 	  {
@@ -3385,6 +3385,7 @@
       // Render Spotify embed player - hidden iframe with custom UI
       const [spotifyReady, setSpotifyReady] = useState(false);
       const [spotifyNeedsRestart, setSpotifyNeedsRestart] = useState(false);
+      const [isPlayLoading, setIsPlayLoading] = useState(false);
       
       // Listen for Spotify embed messages to track actual playback state
       useEffect(() => {
@@ -3396,7 +3397,10 @@
               setSpotifyReady(true);
             }
             if (data.type === 'playback_update') {
-              setIsPlaying(!data.payload.isPaused);
+              const playing = !data.payload.isPaused;
+              setIsPlaying(playing);
+              // Audio actually started — clear loading state
+              if (playing) setIsPlayLoading(false);
             }
           } catch (e) {
             // ignore non-JSON messages
@@ -3405,6 +3409,14 @@
         window.addEventListener('message', handleMessage);
         return () => window.removeEventListener('message', handleMessage);
       }, []);
+      
+      // Safety net: if Spotify never reports playback (e.g. network failure),
+      // clear the loading state after 5s so the user can retry
+      useEffect(() => {
+        if (!isPlayLoading) return;
+        const timer = setTimeout(() => setIsPlayLoading(false), 5000);
+        return () => clearTimeout(timer);
+      }, [isPlayLoading]);
       
       // Auto-stop Spotify after 10 seconds
       const spotifyTimerRef = useRef(null);
@@ -3443,6 +3455,7 @@
             // Reload iframe to reset playback position, then auto-play
             setSpotifyReady(false);
             setSpotifyNeedsRestart(false);
+            setIsPlayLoading(true);
             const src = iframe.src;
             iframe.src = '';
             iframe.onload = () => {
@@ -3454,6 +3467,8 @@
             setTimeout(() => { iframe.src = src; }, 50);
           } else {
             iframe.contentWindow.postMessage({command: 'toggle'}, '*');
+            // Only show loading state when initiating play, not when pausing
+            if (!isPlaying) setIsPlayLoading(true);
           }
         };
         
@@ -3481,19 +3496,19 @@
                 <div className="flex-1">
                   <h3 className="text-sm font-bold">Audio Hint (10s Preview)</h3>
                   <p className="text-xs opacity-90">
-                    {!spotifyReady ? 'Loading audio...' : isPlaying ? 'Now playing...' : 'Click to play preview'}
+                    {!spotifyReady ? 'Loading audio...' : isPlayLoading ? 'Starting playback...' : isPlaying ? 'Now playing...' : 'Click to play preview'}
                   </p>
                 </div>
                 <button
                   onClick={toggleSpotify}
-                  disabled={!spotifyReady}
+                  disabled={!spotifyReady || isPlayLoading}
                   className={`px-4 py-2 rounded-lg font-semibold transition-all text-sm flex-shrink-0 ${
-                    !spotifyReady 
+                    !spotifyReady || isPlayLoading
                       ? 'bg-white/50 text-green-400 cursor-wait' 
                       : 'bg-white text-green-600 hover:bg-gray-100'
                   }`}
                 >
-                  {!spotifyReady ? (
+                  {!spotifyReady || isPlayLoading ? (
                     <span className="flex items-center gap-2">
                       <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
