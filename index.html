@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Song Inspired Art - Guess the Song Game</title>
   <link rel="icon" href="data:,">
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -19,6 +19,25 @@
     }
     button, a {
       touch-action: manipulation;
+    }
+
+    /* iOS safe-area handling (notch / Dynamic Island / home indicator).
+       env() returns 0 on devices without insets (Android, older iPhones,
+       desktop, web), so this is a no-op everywhere except where needed.
+       The gradient background stays full-bleed; only content is inset. */
+    #game-top {
+      padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+      padding-left: calc(1rem + env(safe-area-inset-left, 0px));
+      padding-right: calc(1rem + env(safe-area-inset-right, 0px));
+    }
+
+    /* Keep fullscreen modal content clear of the notch and home indicator */
+    .modal-safe-area {
+      padding-top: calc(2rem + env(safe-area-inset-top, 0px));
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+      padding-left: calc(1rem + env(safe-area-inset-left, 0px));
+      padding-right: calc(1rem + env(safe-area-inset-right, 0px));
     }
   </style>
 </head>
@@ -1135,7 +1154,7 @@
         video: "videos/blowin-in-wind.mp4",
         youtubeId: "MMFj8uDubsE",
         youtubeTimestamp: 0,
-        difficulty: "Easy",
+        difficulty: "Hard",
         genre: "Folk",
         year: 1962,
         keyLyric1: "How many roads must a man walk down - Before you call him a man?",
@@ -3056,6 +3075,40 @@
         setCurrentSong(null);
       };
 
+      // Android hardware back button — pop modals and sub-views before exiting the app.
+      // No-op on web (window.Capacitor is undefined outside the wrapped app).
+      useEffect(() => {
+        const AppPlugin = window.Capacitor?.Plugins?.App;
+        if (!AppPlugin) return;
+
+        let backHandler;
+        const registration = AppPlugin.addListener('backButton', () => {
+          if (showHowToPlay) {
+            setShowHowToPlay(false);
+          } else if (showPictureOverVideo) {
+            setShowPictureOverVideo(false);
+          } else if (showMagnifier) {
+            setShowMagnifier(false);
+          } else if (gameMode === 'play') {
+            goToMenu();
+          } else if (gameMode === 'archive' || gameMode === 'stats') {
+            scrollToTop();
+            setGameMode('menu');
+          } else {
+            AppPlugin.exitApp();
+          }
+        });
+        // Capacitor versions differ: addListener may return the handle directly
+        // or a Promise that resolves to it. Handle both.
+        if (registration && typeof registration.then === 'function') {
+          registration.then(h => { backHandler = h; });
+        } else {
+          backHandler = registration;
+        }
+
+        return () => { if (backHandler && backHandler.remove) backHandler.remove(); };
+      }, [gameMode, showHowToPlay, showPictureOverVideo, showMagnifier]);
+
       const handleGuess = async () => {
         if (!guess.trim() || gameWon || gameLost) return;
 
@@ -4285,7 +4338,7 @@
 
             {/* HOW TO PLAY MODAL */}
             {showHowToPlay && (
-              <div className="fixed inset-0 bg-black/60 flex items-start sm:items-center justify-center z-50 p-4 pt-8 sm:pt-4 overflow-y-auto" onClick={() => { setShowHowToPlay(false); scrollToTop(); }}>
+              <div className="fixed inset-0 bg-black/60 flex items-start sm:items-center justify-center z-50 overflow-y-auto modal-safe-area" onClick={() => { setShowHowToPlay(false); scrollToTop(); }}>
                 <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-y-auto p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
