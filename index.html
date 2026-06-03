@@ -15,10 +15,21 @@
     /* Mobile iframe scroll fixes */
     html {
       overflow-y: scroll;
+      overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
+    }
+    body {
+      overflow-x: hidden;
     }
     button, a {
       touch-action: manipulation;
+    }
+
+    /* iOS WKWebView iframe sizing fix.
+       iOS defaults iframes to their content's intrinsic width, ignoring the
+       container. This forces them to respect their parent. */
+    iframe {
+      max-width: 100%;
     }
 
     /* iOS safe-area handling (notch / Dynamic Island / home indicator).
