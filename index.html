@@ -32,6 +32,13 @@
       max-width: 100%;
     }
 
+    /* Prevent iOS Safari from auto-zooming on input focus.
+       iOS auto-zooms when input font-size < 16px, which causes a viewport
+       zoom that doesn't fully reset and creates horizontal scroll. */
+    input, select, textarea {
+      font-size: 16px;
+    }
+
     /* iOS safe-area handling (notch / Dynamic Island / home indicator).
        env() returns 0 on devices without insets (Android, older iPhones,
        desktop, web), so this is a no-op everywhere except where needed.
