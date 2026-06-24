@@ -121,6 +121,15 @@
       </svg>
     );
 
+    const Calendar = ({ className }) => (
+      <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
+    );
+
     const ArrowRight = ({ className }) => (
       <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -2862,6 +2871,38 @@
         setGameMode('play');
       };
 
+      // Start today's song (the most recently unlocked song)
+      const startTodaysSong = () => {
+        stopAllAudio();
+
+        // Check if there's an in-progress game
+        const savedState = loadGameState();
+        if (savedState && savedState.guesses && savedState.guesses.length > 0) {
+          const inProgressSongIndex = SONGS.findIndex(s =>
+            s.title === savedState.songTitle && s.artist === savedState.songArtist
+          );
+          if (inProgressSongIndex !== -1) {
+            alert(`You have an in-progress game (Game #${inProgressSongIndex + 1}). Please finish it first!`);
+            return;
+          } else {
+            clearGameState();
+          }
+        }
+
+        if (SONGS.length === 0) return;
+        const todaysSong = SONGS[SONGS.length - 1];
+
+        // Add to playedSongs only if not already there
+        setPlayedSongs(prev =>
+          prev.some(p => p.title === todaysSong.title && p.artist === todaysSong.artist)
+            ? prev
+            : [...prev, { title: todaysSong.title, artist: todaysSong.artist }]
+        );
+
+        resetGameState(todaysSong);
+        setGameMode('play');
+      };
+
       // Start the next song in order
       const startNextSong = () => {
         stopAllAudio();
@@ -3693,13 +3734,23 @@
                     How To Play
                   </button>
                   
-                  <button
-                    onClick={startNewGame}
-                    className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 font-semibold transition-all flex items-center justify-center gap-3 text-lg"
-                  >
-                    <RotateCcw className="w-6 h-6" />
-                    Random Song
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={startTodaysSong}
+                      className="flex-1 px-4 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 font-semibold transition-all flex items-center justify-center gap-2 text-base"
+                    >
+                      <Calendar className="w-5 h-5" />
+                      Today's Song
+                    </button>
+
+                    <button
+                      onClick={startNewGame}
+                      className="flex-1 px-4 py-4 bg-gradient-to-l from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 font-semibold transition-all flex items-center justify-center gap-2 text-base"
+                    >
+                      <RotateCcw className="w-5 h-5" />
+                      Random Song
+                    </button>
+                  </div>
                   
                   <button
                     onClick={() => { scrollToTop(); setGameMode('archive'); }}
