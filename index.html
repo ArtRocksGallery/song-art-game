@@ -208,6 +208,7 @@
     const DISCOUNT_CODE = "ZJZ7BZ7";        // 15% discount code
     const DISCOUNT_PERCENT = 15;                // Discount percentage
     const DISCOUNT_MAX_GUESSES = 2;             // Must guess in this many tries or fewer
+    const ARCHIVE_WINDOW = 10;                  // Rolling archive: last N days of songs shown
     
     // Calculate how many games are unlocked based on current date
     const getUnlockedGameCount = () => {
@@ -588,7 +589,7 @@
       },
 	  {
         title: "Long Tall Sally",
-        artist: "Little Richard",
+        artist: "The Beatles",
         image: "images/long-tall-sally.jpg",
         video: "videos/long-tall-sally.mp4",
         midi: "midi/long-tall-sally.mid",
@@ -596,11 +597,11 @@
         youtubeTimestamp: 18,
         difficulty: "Very Hard",
         genre: "Rock and Roll",
-        year: 1957,
+        year: 1964,
         keyLyric1: "Gonna tell Aunt Mary 'bout Uncle John",
         keyLyric2: "Well, [...], she's built for speed",
-        description: "A frenetic early rock and roll classic with explosive vocals, telling of a woman who's built for speed and having fun.",
-        spotifyId: "507IFqPuG8mBQoKebfGG9t",
+        description: "A blistering, high-tempo rock and roll romp powered by pounding piano and unhinged screaming vocals, telling of a woman built for speed and having fun.",
+        spotifyId: "7ds98B8y5BQltzC60Gdkri",
         storeUrl: "https://www.artrocks.gallery/shop/p/long-tall-sally"
       },
 	  {
@@ -2321,7 +2322,20 @@
     ];
 
     // SONGS = only the unlocked games based on current date
-    const SONGS = ALL_SONGS.slice(0, getUnlockedGameCount());
+    // SONGS: rolling archive window. Contains the last ARCHIVE_WINDOW unlocked
+    // songs (or fewer if we're within the first ARCHIVE_WINDOW days). Songs
+    // cycle back to ALL_SONGS[0] after ALL_SONGS.length days, so content never
+    // "runs out" — old songs return once the queue rotates around.
+    const SONGS = (() => {
+      const currentDay = getUnlockedGameCount(); // 1-indexed day since launch
+      if (currentDay <= 0) return [];
+      const windowStart = Math.max(1, currentDay - ARCHIVE_WINDOW + 1);
+      const result = [];
+      for (let d = windowStart; d <= currentDay; d++) {
+        result.push(ALL_SONGS[(d - 1) % ALL_SONGS.length]);
+      }
+      return result;
+    })();
 
     // Default stats structure
     const DEFAULT_STATS = {
@@ -2553,8 +2567,25 @@
       };
 
       // Countdown timer to next song unlock (midnight local time)
+      // Ref mirror of gameMode so the countdown interval (empty deps) can read
+      // the current mode without re-subscribing every mode change
+      const gameModeRef = useRef(gameMode);
+      useEffect(() => { gameModeRef.current = gameMode; }, [gameMode]);
+
+      // Capture the day number at initial mount. If the day advances while the
+      // app is open (common in the wrapped mobile apps), reload to pick up the
+      // new day's rolling window. Only reload from the menu, so we never
+      // interrupt an active game — any in-progress game is restored from
+      // saved state after reload anyway.
+      const initialDayRef = useRef(getUnlockedGameCount());
+
       useEffect(() => {
         const updateCountdown = () => {
+          const currentDay = getUnlockedGameCount();
+          if (currentDay > initialDayRef.current && gameModeRef.current === 'menu') {
+            window.location.reload();
+            return;
+          }
           const now = new Date();
           const tomorrow = new Date(now);
           tomorrow.setDate(tomorrow.getDate() + 1);
@@ -2576,8 +2607,9 @@
       useEffect(() => {
         const savedState = loadGameState();
         if (savedState && savedState.songTitle && savedState.songArtist) {
-          // Find the song in SONGS array
-          const song = SONGS.find(s => 
+          // Search ALL_SONGS (not SONGS) so users can finish an in-progress
+          // game even if the song has rotated out of the archive window.
+          const song = ALL_SONGS.find(s =>
             s.title === savedState.songTitle && s.artist === savedState.songArtist
           );
           
@@ -2598,8 +2630,17 @@
         }
       }, []);
 
-      // Load YouTube API as fallback
+      // Load YouTube API as fallback.
+      // ytApiReady is tracked in state so the player-init effect re-runs once the
+      // API script finishes loading — otherwise, if the user clicks "Load Audio"
+      // before the script arrives (slow connection), the player never initializes
+      // and the button is stuck on "Loading...".
+      const [ytApiReady, setYtApiReady] = useState(false);
       useEffect(() => {
+        if (window.YT && window.YT.Player) {
+          setYtApiReady(true);
+          return;
+        }
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
         const firstScriptTag = document.getElementsByTagName('script')[0];
@@ -2607,6 +2648,7 @@
 
         window.onYouTubeIframeAPIReady = () => {
           console.log('YouTube API Ready (fallback)');
+          setYtApiReady(true);
         };
       }, []);
 
@@ -2623,7 +2665,7 @@
 
       // Initialize YouTube player when needed (fallback)
       useEffect(() => {
-        if (showVideo && currentSong?.youtubeId && window.YT && !ytPlayer && !hasSpotify) {
+        if (showVideo && currentSong?.youtubeId && ytApiReady && window.YT && !ytPlayer && !hasSpotify) {
           const player = new window.YT.Player('youtube-player', {
             height: '200',
             width: '100%',
@@ -2665,7 +2707,7 @@
             }
           });
         }
-      }, [showVideo, currentSong, gameWon, hasSpotify]);
+      }, [showVideo, currentSong, gameWon, hasSpotify, ytApiReady]);
 
       const searchSongs = async (query) => {
         if (!query || query.length < 2) {
@@ -2840,7 +2882,7 @@
         const savedState = loadGameState();
         if (savedState && savedState.guesses && savedState.guesses.length > 0) {
           // Redirect to the in-progress game
-          const inProgressSongIndex = SONGS.findIndex(s => 
+          const inProgressSongIndex = ALL_SONGS.findIndex(s => 
             s.title === savedState.songTitle && s.artist === savedState.songArtist
           );
           if (inProgressSongIndex !== -1) {
@@ -2878,7 +2920,7 @@
         // Check if there's an in-progress game
         const savedState = loadGameState();
         if (savedState && savedState.guesses && savedState.guesses.length > 0) {
-          const inProgressSongIndex = SONGS.findIndex(s =>
+          const inProgressSongIndex = ALL_SONGS.findIndex(s =>
             s.title === savedState.songTitle && s.artist === savedState.songArtist
           );
           if (inProgressSongIndex !== -1) {
@@ -2910,7 +2952,7 @@
         // Check if there's an in-progress game
         const savedState = loadGameState();
         if (savedState && savedState.guesses && savedState.guesses.length > 0) {
-          const inProgressSongIndex = SONGS.findIndex(s => 
+          const inProgressSongIndex = ALL_SONGS.findIndex(s => 
             s.title === savedState.songTitle && s.artist === savedState.songArtist
           );
           if (inProgressSongIndex !== -1) {
@@ -2939,7 +2981,7 @@
         
         const savedState = loadGameState();
         if (savedState && savedState.guesses && savedState.guesses.length > 0) {
-          const inProgressSongIndex = SONGS.findIndex(s => 
+          const inProgressSongIndex = ALL_SONGS.findIndex(s => 
             s.title === savedState.songTitle && s.artist === savedState.songArtist
           );
           if (inProgressSongIndex !== -1) {
@@ -3013,7 +3055,7 @@
         } else if (hasAnyInProgressGame) {
           // Different song selected but there's an in-progress game
           // Don't allow starting a new song - redirect to the in-progress one
-          const inProgressSongIndex = SONGS.findIndex(s => 
+          const inProgressSongIndex = ALL_SONGS.findIndex(s => 
             s.title === savedState.songTitle && s.artist === savedState.songArtist
           );
           if (inProgressSongIndex !== -1) {
@@ -3204,10 +3246,14 @@
           return dp[m][n];
         };
 
-        // Check if two strings are similar enough (allow ~1 error per 10 characters, minimum 2)
+        // Check if two strings are similar enough (allow ~1 error per 8 characters, minimum 1).
+        // Minimum of 1 (not 2) so short titles like "Yellow" don't match "Hello".
+        // First characters must match: typos rarely hit the first letter, but
+        // different words often differ only there ("Mellow"/"Fellow" vs "Yellow").
         const isSimilarEnough = (str1, str2) => {
+          if (!str1.length || !str2.length || str1[0] !== str2[0]) return false;
           const distance = levenshteinDistance(str1, str2);
-          const maxAllowedDistance = Math.max(2, Math.floor(Math.max(str1.length, str2.length) / 10));
+          const maxAllowedDistance = Math.max(1, Math.floor(Math.max(str1.length, str2.length) / 8));
           return distance <= maxAllowedDistance;
         };
 
@@ -3241,10 +3287,23 @@
                                        isSimilarEnough(normalizedGuess, `${normalizedTitle} ${normalizedArtist}`) ||
                                        isSimilarEnough(normalizedGuess, `${normalizedArtist} ${normalizedTitle}`);
 
+        // Guess contains the title plus extra words: only accept if the extras are
+        // artist words or harmless filler. Prevents e.g. "Yellow Submarine - The Beatles"
+        // from matching "Yellow" by Coldplay.
+        const FILLER_WORDS = ['by', 'song', 'track', 'tune', 'from'];
+        const titleWordSet = strippedTitle.split(/\s+/);
+        const allArtistWords = normalizedArtist.split(/\s+/);
+        const extraGuessWords = strippedGuess.split(/\s+/).filter(w =>
+          !titleWordSet.includes(w) && !FILLER_WORDS.includes(w)
+        );
+        const titleContainedSafely = strippedGuess.includes(strippedTitle) &&
+                                     strippedTitle.length >= 4 &&
+                                     extraGuessWords.every(w => allArtistWords.includes(w));
+
         const isCorrect = titleMatches || 
                           titleWithArtistMatches ||
                           (normalizedGuess.includes(normalizedTitle) && artistInGuess) ||
-                          (strippedGuess.includes(strippedTitle) && strippedTitle.length >= 4) ||
+                          titleContainedSafely ||
                           (isSimilarEnough(normalizedGuess, normalizedTitle) && artistInGuess);
 
         // Check if artist was guessed correctly (but not the song)
@@ -3296,7 +3355,6 @@
         setGuess('');
         setSuggestions([]);
         setShowSuggestions(false);
-        setViewingGuessIndex(null); // Reset to current view
       };
 
       const handleSkip = async () => {
@@ -3709,6 +3767,18 @@
         );
       };
 
+      // Read saved game state once per render (the archive grid reuses this
+      // for every tile instead of hitting localStorage 100+ times)
+      const renderSavedState = loadGameState();
+
+      // Day number of the first slot in the rolling archive window.
+      const archiveStartDay = Math.max(1, getUnlockedGameCount() - SONGS.length + 1);
+
+      // Display number for a given day: cycles back to 1 when the library
+      // loops around, so a song's label always matches its position in the
+      // original library (Yellow is always #1, whether it's day 1 or day 129).
+      const dayToDisplayNumber = (day) => ((day - 1) % ALL_SONGS.length) + 1;
+
       return (
         <div id="game-top" ref={topRef} className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4 sm:p-3">
           <div className="max-w-2xl mx-auto">
@@ -3734,23 +3804,13 @@
                     How To Play
                   </button>
                   
-                  <div className="flex gap-3">
-                    <button
-                      onClick={startTodaysSong}
-                      className="flex-1 px-4 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 font-semibold transition-all flex items-center justify-center gap-2 text-base"
-                    >
-                      <Calendar className="w-5 h-5" />
-                      Today's Song
-                    </button>
-
-                    <button
-                      onClick={startNewGame}
-                      className="flex-1 px-4 py-4 bg-gradient-to-l from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 font-semibold transition-all flex items-center justify-center gap-2 text-base"
-                    >
-                      <RotateCcw className="w-5 h-5" />
-                      Random Song
-                    </button>
-                  </div>
+                  <button
+                    onClick={startTodaysSong}
+                    className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 font-semibold transition-all flex items-center justify-center gap-3 text-lg"
+                  >
+                    <Calendar className="w-6 h-6" />
+                    Today's Song
+                  </button>
                   
                   <button
                     onClick={() => { scrollToTop(); setGameMode('archive'); }}
@@ -3770,15 +3830,10 @@
                 </div>
                 
                 <div className="mt-6 text-center text-gray-500 text-sm">
-                  <p>{SONGS.length} {SONGS.length === 1 ? 'song' : 'songs'} available</p>
-                  {SONGS.length < ALL_SONGS.length && (
-                    <>
-                      <p className="text-xs mt-1">New song unlocks daily!</p>
-                      <p className="text-2xl mt-2 font-mono text-purple-600 font-bold tracking-wide">
-                        ⏳ Next song in: {countdown}
-                      </p>
-                    </>
-                  )}
+                  <p className="text-xs mt-1">New song unlocks daily!</p>
+                  <p className="text-2xl mt-2 font-mono text-purple-600 font-bold tracking-wide">
+                    ⏳ Next song in: {countdown}
+                  </p>
                 </div>
               </div>
             )}
@@ -3795,7 +3850,19 @@
                     ← Back
                   </button>
                 </div>
-                
+
+                <button
+                  onClick={startNewGame}
+                  className="w-full mb-4 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 font-semibold transition-all flex items-center justify-center gap-2 text-base"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                  Random Song
+                </button>
+
+                <p className="text-xs text-gray-500 italic font-bold text-center mb-3">
+                  Only the {ARCHIVE_WINDOW} most recent songs show in the archive.
+                </p>
+
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                   {SONGS.map((song, idx) => {
                     const songKey = `${song.title} - ${song.artist}`;
@@ -3807,7 +3874,7 @@
                     const gradeColors = grade ? getGradeColors(grade) : null;
                     
                     // Check if this song has an in-progress game
-                    const savedState = loadGameState();
+                    const savedState = renderSavedState;
                     const isInProgress = savedState && 
                       savedState.songTitle === song.title && 
                       savedState.songArtist === song.artist &&
@@ -3830,7 +3897,7 @@
                       >
                         <p className={`font-bold text-2xl mb-1 ${
                           isInProgress ? 'text-yellow-700' : completed ? gradeColors.text : failed ? 'text-red-700' : 'text-gray-800'
-                        }`}>#{idx + 1}</p>
+                        }`}>#{dayToDisplayNumber(archiveStartDay + idx)}</p>
                         {(completed || failed) && (
                           <p className="text-xs text-black font-bold mb-1 leading-tight">{song.title} - {song.artist}</p>
                         )}
@@ -3966,10 +4033,10 @@
                 {/* Song Completion */}
                 <div>
                   <h3 className="font-semibold text-gray-700 mb-3">
-                    Songs Completed: {Object.values(stats.songStats).filter(s => s.completed).length} / {SONGS.length}
+                    Songs Completed: {ALL_SONGS.filter(s => stats.songStats[`${s.title} - ${s.artist}`]?.completed).length} / {ALL_SONGS.length}
                   </h3>
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                    {SONGS.map((song, idx) => {
+                    {ALL_SONGS.map((song, idx) => {
                       const songKey = `${song.title} - ${song.artist}`;
                       const songStat = stats.songStats[songKey];
                       const completed = songStat?.completed;
@@ -4014,7 +4081,7 @@
                     ← Menu
                   </button>
                   <span className="px-3 py-1 rounded-lg text-sm font-bold bg-gray-100 text-gray-700">
-                    Game #{SONGS.findIndex(s => s.title === currentSong.title && s.artist === currentSong.artist) + 1}
+                    Game #{ALL_SONGS.findIndex(s => s.title === currentSong.title && s.artist === currentSong.artist) + 1}
                   </span>
                   <span className={`px-3 py-1 rounded-lg text-sm font-bold ${
                     currentSong.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
@@ -4322,7 +4389,7 @@
                         type="text"
                         value={guess}
                         onChange={handleInputChange}
-                        onKeyPress={(e) => {
+                        onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             handleGuess();
                             setShowSuggestions(false);
@@ -4400,12 +4467,17 @@
             <div className="text-center text-purple-200 text-xs space-y-0.5">
               <p>After {GUESSES_BEFORE_AUDIO} guesses, unlock audio hint!</p>
               <p className="text-xs">Video unlocks after {GUESSES_BEFORE_VIDEO} guess</p>
-              {playedSongs.length > 0 && (
-                <p className="text-xs mt-1">
-                  Songs played: {playedSongs.length}/{SONGS.length}
-                  {playedSongs.length === SONGS.length && " - Starting fresh next round!"}
-                </p>
-              )}
+              {playedSongs.length > 0 && (() => {
+                const playedInWindow = SONGS.filter(s =>
+                  playedSongs.some(p => p.title === s.title && p.artist === s.artist)
+                ).length;
+                return (
+                  <p className="text-xs mt-1">
+                    Songs played: {playedInWindow}/{SONGS.length}
+                    {playedInWindow === SONGS.length && " - Starting fresh next round!"}
+                  </p>
+                );
+              })()}
             </div>
             )}
 
