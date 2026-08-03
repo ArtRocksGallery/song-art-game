@@ -209,6 +209,33 @@
     const DISCOUNT_PERCENT = 15;                // Discount percentage
     const DISCOUNT_MAX_GUESSES = 2;             // Must guess in this many tries or fewer
     const ARCHIVE_WINDOW = 10;                  // Rolling archive: last N days of songs shown
+
+    // ============================================
+    // ADMOB CONFIGURATION
+    // ============================================
+    // TOGGLE TO false BEFORE PRODUCTION SUBMISSION.
+    // Test ads always come from Google's test unit IDs (never bill real advertisers,
+    // never generate revenue). Real ads use your production ad units. Shipping a
+    // production build with AD_TEST_MODE=true means no revenue; shipping test-mode
+    // code with real IDs during development can violate AdMob policy. Both matter.
+    const AD_TEST_MODE = true;
+
+    const AD_UNITS = {
+      ios: {
+        real: 'ca-app-pub-6964151704840882/9336470518',
+        test: 'ca-app-pub-3940256099942544/2934735716',
+      },
+      android: {
+        real: 'ca-app-pub-6964151704840882/8023388849',
+        test: 'ca-app-pub-3940256099942544/6300978111',
+      },
+    };
+
+    const getAdUnitId = () => {
+      const platform = window.Capacitor?.getPlatform?.();
+      if (platform !== 'ios' && platform !== 'android') return null;
+      return AD_TEST_MODE ? AD_UNITS[platform].test : AD_UNITS[platform].real;
+    };
     
     // Calculate how many games are unlocked based on current date
     const getUnlockedGameCount = () => {
@@ -3212,6 +3239,69 @@
 
         return () => { if (backHandler && backHandler.remove) backHandler.remove(); };
       }, [gameMode, showHowToPlay, showPictureOverVideo, showMagnifier]);
+
+      // AdMob initialization — runs once on app mount.
+      // No-op on web (AdMob plugin doesn't exist there).
+      // On iOS, prompts for App Tracking Transparency permission if not yet answered.
+      // On both platforms, handles GDPR consent form if applicable.
+      // Failures are logged and swallowed — the app still works, just without ads.
+      useEffect(() => {
+        const AdMob = window.Capacitor?.Plugins?.AdMob;
+        if (!AdMob) return;
+
+        (async () => {
+          try {
+            await AdMob.initialize();
+
+            // iOS App Tracking Transparency
+            if (window.Capacitor?.getPlatform?.() === 'ios') {
+              const trackingInfo = await AdMob.trackingAuthorizationStatus();
+              if (trackingInfo && trackingInfo.status === 'notDetermined') {
+                await AdMob.requestTrackingAuthorization();
+              }
+            }
+
+            // GDPR consent (Google's User Messaging Platform)
+            const consentInfo = await AdMob.requestConsentInfo();
+            if (consentInfo && consentInfo.isConsentFormAvailable && consentInfo.status === 'required') {
+              await AdMob.showConsentForm();
+            }
+          } catch (err) {
+            console.warn('AdMob initialization failed:', err);
+          }
+        })();
+      }, []);
+
+      // Banner ad visibility: shown on menu / archive / stats / game-end screens.
+      // Hidden during active gameplay to preserve the artistic focus.
+      // No-op on web.
+      useEffect(() => {
+        const AdMob = window.Capacitor?.Plugins?.AdMob;
+        if (!AdMob) return;
+
+        const adUnitId = getAdUnitId();
+        if (!adUnitId) return;
+
+        const shouldShow = gameMode !== 'play' || gameWon || gameLost;
+
+        (async () => {
+          try {
+            if (shouldShow) {
+              await AdMob.showBanner({
+                adId: adUnitId,
+                adSize: 'ADAPTIVE_BANNER',
+                position: 'BOTTOM_CENTER',
+                margin: 0,
+                isTesting: AD_TEST_MODE,
+              });
+            } else {
+              await AdMob.hideBanner();
+            }
+          } catch (err) {
+            console.warn('AdMob banner error:', err);
+          }
+        })();
+      }, [gameMode, gameWon, gameLost]);
 
       const handleGuess = async () => {
         if (!guess.trim() || gameWon || gameLost) return;
