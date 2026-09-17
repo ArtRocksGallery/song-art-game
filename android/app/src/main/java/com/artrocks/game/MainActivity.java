@@ -13,5 +13,6 @@ public class MainActivity extends BridgeActivity {
         settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(true);
         settings.setDisplayZoomControls(false);
+		WebView.setWebContentsDebuggingEnabled(true);
     }
 }
