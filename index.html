@@ -11,6 +11,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <!-- Firebase Analytics (web only; native apps use the Capacitor plugin). PINNED - never unpin CDN versions. -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
   <style>
     /* Mobile iframe scroll fixes */
     html {
@@ -214,7 +217,7 @@
     const DISCOUNT_CODE = "ZJZ7BZ7";        // 15% discount code
     const DISCOUNT_PERCENT = 15;                // Discount percentage
     const DISCOUNT_MAX_GUESSES = 2;             // Must guess in this many tries or fewer
-    const ARCHIVE_WINDOW = 10;                 // ⚠️ TESTING: revert to 10 before deploying. Set high to expose all songs in archive for QA.
+    const ARCHIVE_WINDOW = 10;                  // Rolling archive: last N days of songs shown
 
     // Bump this on every release. Displayed in the menu footer so you can
     // visually confirm the emulator/device is running the newly-synced build
@@ -247,6 +250,51 @@
       if (platform !== 'ios' && platform !== 'android') return null;
       return AD_TEST_MODE ? AD_UNITS[platform].test : AD_UNITS[platform].real;
     };
+
+    // ============================================
+    // FIREBASE ANALYTICS
+    // ============================================
+    // Native (iOS/Android): Capacitor plugin, configured by GoogleService-Info.plist
+    // and google-services.json. Web: compat SDK from the CDN with this config.
+    // The web SDK is never initialized inside the native apps (no double counting).
+    const FIREBASE_WEB_CONFIG = {
+      apiKey: "AIzaSyClW9ZCS1zisrr1C3CjfkSZoMGtY4o_w6g",
+      authDomain: "song-inspired-art.firebaseapp.com",
+      projectId: "song-inspired-art",
+      storageBucket: "song-inspired-art.firebasestorage.app",
+      messagingSenderId: "598521840379",
+      appId: "1:598521840379:web:c17992a5efe2c5c830e65e",
+      measurementId: "G-XP4JC9G636"
+    };
+
+    const isNativeApp = () => !!window.Capacitor?.isNativePlatform?.();
+
+    let webAnalytics = null;
+    if (!isNativeApp() && window.firebase) {
+      try {
+        window.firebase.initializeApp(FIREBASE_WEB_CONFIG);
+        webAnalytics = window.firebase.analytics();
+      } catch (err) {
+        console.warn('Firebase web init failed:', err);
+      }
+    }
+
+    // Log a custom event. Never throws - analytics must not break gameplay.
+    const trackEvent = (name, params = {}) => {
+      try {
+        const nativePlugin = window.Capacitor?.Plugins?.FirebaseAnalytics;
+        if (isNativeApp() && nativePlugin) {
+          nativePlugin.logEvent({ name, params }).catch(err => console.warn('Analytics event failed:', err));
+        } else if (webAnalytics) {
+          webAnalytics.logEvent(name, params);
+        }
+      } catch (err) {
+        console.warn('Analytics event failed:', err);
+      }
+    };
+
+    // Canonical song number (1-based position in ALL_SONGS) for event params
+    const songNumberOf = (song) => song ? ALL_SONGS.findIndex(s => s.title === song.title && s.artist === song.artist) + 1 : 0;
     
     // Calculate how many games are unlocked based on current date
     const getUnlockedGameCount = () => {
@@ -2898,6 +2946,12 @@
       const gameModeRef = useRef(gameMode);
       useEffect(() => { gameModeRef.current = gameMode; }, [gameMode]);
 
+      // Screen-view events for archive and stats
+      useEffect(() => {
+        if (gameMode === 'archive') trackEvent('archive_opened');
+        else if (gameMode === 'stats') trackEvent('stats_opened');
+      }, [gameMode]);
+
       // Capture the day number at initial mount. If the day advances while the
       // app is open (common in the wrapped mobile apps), reload to pick up the
       // new day's rolling window. Only reload from the menu, so we never
@@ -3235,7 +3289,7 @@
         
         setPlayedSongs(prev => [...prev, { title: randomSong.title, artist: randomSong.artist }]);
         
-        resetGameState(randomSong);
+        resetGameState(randomSong, 'random');
         setGameMode('play');
       };
 
@@ -3267,7 +3321,7 @@
             : [...prev, { title: todaysSong.title, artist: todaysSong.artist }]
         );
 
-        resetGameState(todaysSong);
+        resetGameState(todaysSong, 'today');
         setGameMode('play');
       };
 
@@ -3284,6 +3338,8 @@
           s.title === savedState.songTitle && s.artist === savedState.songArtist
         );
         if (!song) return;
+
+        trackEvent('song_started', { song_number: songNumberOf(song), source: 'resume' });
 
         setCurrentSong(song);
         setGuesses(savedState.guesses || []);
@@ -3320,7 +3376,7 @@
         
         setPlayedSongs(prev => [...prev, { title: nextSong.title, artist: nextSong.artist }]);
         
-        resetGameState(nextSong);
+        resetGameState(nextSong, 'next');
         setGameMode('play');
       };
 
@@ -3349,7 +3405,7 @@
         
         setPlayedSongs(prev => [...prev, { title: prevSong.title, artist: prevSong.artist }]);
         
-        resetGameState(prevSong);
+        resetGameState(prevSong, 'previous');
         setGameMode('play');
       };
 
@@ -3413,12 +3469,12 @@
           } else {
             // In-progress song not found in SONGS array (shouldn't happen), clear it
             clearGameState();
-            resetGameState(song);
+            resetGameState(song, 'archive');
             setGameMode('play');
           }
         } else {
           // No in-progress game, start fresh
-          resetGameState(song);
+          resetGameState(song, 'archive');
           setGameMode('play');
         }
       };
@@ -3484,7 +3540,8 @@
       }, []);
 
       // Reset all game state for a new song
-      const resetGameState = (song) => {
+      const resetGameState = (song, source = 'unknown') => {
+        trackEvent('song_started', { song_number: songNumberOf(song), source });
         scrollToTop();
         setCurrentSong(song);
         setGuess('');
@@ -3742,6 +3799,10 @@
         if (isCorrect) {
           setGameWon(true);
           setIsFirstAttempt(!alreadyPlayed);
+          trackEvent('song_won', { song_number: songNumberOf(currentSong), guesses: newGuesses.length, first_attempt: !alreadyPlayed });
+          if (!alreadyPlayed && currentSong.storeUrl && newGuesses.length <= DISCOUNT_MAX_GUESSES) {
+            trackEvent('discount_earned', { song_number: songNumberOf(currentSong) });
+          }
           stopAllAudio();
           clearGameState(); // Clear saved game state on win
           if (!alreadyPlayed) {
@@ -3757,6 +3818,7 @@
         } else if (newGuesses.length >= MAX_GUESSES) {
           setGameLost(true);
           stopAllAudio();
+          trackEvent('song_lost', { song_number: songNumberOf(currentSong), first_attempt: !alreadyPlayed });
           clearGameState(); // Clear saved game state on loss
           if (!alreadyPlayed) {
             recordLoss(currentSong);
@@ -3771,6 +3833,7 @@
           });
           
           if (newGuesses.length >= GUESSES_BEFORE_AUDIO) {
+            if (!audioUnlocked) trackEvent('audio_hint_unlocked', { song_number: songNumberOf(currentSong) });
             setAudioUnlocked(true);
           }
         }
@@ -3793,6 +3856,7 @@
         if (newGuesses.length >= MAX_GUESSES) {
           setGameLost(true);
           stopAllAudio();
+          trackEvent('song_lost', { song_number: songNumberOf(currentSong), first_attempt: !alreadyPlayed });
           clearGameState(); // Clear saved game state on loss
           if (!alreadyPlayed) {
             recordLoss(currentSong);
@@ -3807,6 +3871,7 @@
           });
           
           if (newGuesses.length >= GUESSES_BEFORE_AUDIO) {
+            if (!audioUnlocked) trackEvent('audio_hint_unlocked', { song_number: songNumberOf(currentSong) });
             setAudioUnlocked(true);
           }
         }
@@ -4716,6 +4781,7 @@
                     {currentSong.storeUrl && (
                       <a
                         href={currentSong.storeUrl}
+                        onClick={() => trackEvent('shop_art_tapped', { song_number: songNumberOf(currentSong) })}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex-1 max-w-[150px] px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors flex items-center justify-center gap-2"
@@ -4777,6 +4843,7 @@
                     {currentSong.storeUrl && (
                       <a
                         href={currentSong.storeUrl}
+                        onClick={() => trackEvent('shop_art_tapped', { song_number: songNumberOf(currentSong) })}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex-1 max-w-[150px] px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors flex items-center justify-center gap-2"
